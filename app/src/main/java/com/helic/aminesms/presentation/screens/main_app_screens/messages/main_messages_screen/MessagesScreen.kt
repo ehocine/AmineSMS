@@ -49,11 +49,11 @@ fun Messages(
     Scaffold(
         scaffoldState = scaffoldState,
         topBar = {
-            MessagesTopAppBar(navController = navController, openDrawer = {
+            MessagesTopAppBar {
                 scope.launch {
                     scaffoldState.drawerState.open()
                 }
-            })
+            }
         },
         floatingActionButton = {
             ExtendedFloatingActionButton(
@@ -97,7 +97,7 @@ fun Messages(
 }
 
 @Composable
-fun MessagesTopAppBar(navController: NavController, openDrawer: () -> Unit) {
+fun MessagesTopAppBar(openDrawer: () -> Unit) {
     TopAppBar(
         navigationIcon = {
             IconButton(onClick = { openDrawer() }) {
@@ -111,14 +111,4 @@ fun MessagesTopAppBar(navController: NavController, openDrawer: () -> Unit) {
         },
         backgroundColor = MaterialTheme.colors.topAppBarBackgroundColor
     )
-}
-
-@Composable
-fun ExpandedMenuButtons(
-    onItemClicked: (String) -> Unit
-) {
-    var expanded by remember { mutableStateOf(false) }
-    val list = listOf("Buy a temp number", "Rent a number")
-
-
 }

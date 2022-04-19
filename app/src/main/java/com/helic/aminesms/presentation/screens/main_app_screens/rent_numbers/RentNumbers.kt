@@ -128,6 +128,7 @@ fun Content(
             Text(text = "Single Service")
         }
         if (selectedOption == RentalNumberOption.SINGLE_SERVICE) {
+            mainViewModel.searchTextState.value = "" // To re-initialize the value on switching
             DropDownMenu(
                 label = "Search Service State",
                 optionsList = serviceStateList,

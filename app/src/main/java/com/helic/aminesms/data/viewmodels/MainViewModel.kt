@@ -22,8 +22,6 @@ import com.helic.aminesms.data.models.cancel_number.CancelNumberResponse
 import com.helic.aminesms.data.models.messages.Sms
 import com.helic.aminesms.data.models.order_number.ListOfOrderedNumber
 import com.helic.aminesms.data.models.order_number.OrderedNumberData
-import com.helic.aminesms.data.models.rent_number.RentNumberServiceState
-import com.helic.aminesms.data.models.rent_number.options.RentalOptionsData
 import com.helic.aminesms.data.models.service_state.ServiceState
 import com.helic.aminesms.data.repository.Repository
 import com.helic.aminesms.presentation.navigation.MainAppScreens
@@ -99,9 +97,6 @@ class MainViewModel @Inject constructor(
     var registration: ListenerRegistration? = null
 
     val serviceStateListResponse: MutableState<List<ServiceState>> =
-        mutableStateOf(listOf())
-
-    val rentalServiceStateListResponse: MutableState<List<RentNumberServiceState>> =
         mutableStateOf(listOf())
 
     private val _isRefreshing = MutableStateFlow(false)
@@ -193,7 +188,7 @@ class MainViewModel @Inject constructor(
         }
     }
 
-    var gettingListOfNumbersloadingState = MutableStateFlow(LoadingState.IDLE)
+    var gettingListOfNumbersLoadingState = MutableStateFlow(LoadingState.IDLE)
     fun getListOfNumbersFromFirebase(
         context: Context,
         snackbar: (String, SnackbarDuration) -> Unit
@@ -205,7 +200,7 @@ class MainViewModel @Inject constructor(
             if (currentUser != null) {
                 CoroutineScope(Dispatchers.IO).launch {
                     try {
-                        gettingListOfNumbersloadingState.emit(LoadingState.LOADING)
+                        gettingListOfNumbersLoadingState.emit(LoadingState.LOADING)
                         registration = data?.addSnapshotListener { value, error ->
                             if (error != null) {
                                 snackbar("Error occurred: $error", SnackbarDuration.Short)
@@ -222,12 +217,12 @@ class MainViewModel @Inject constructor(
                                 )
                             }
                         }
-                        gettingListOfNumbersloadingState.emit(LoadingState.LOADED)
+                        gettingListOfNumbersLoadingState.emit(LoadingState.LOADED)
                     } catch (e: Exception) {
 
                         //Cancel the database request if there is an error
                         registration?.remove()
-                        gettingListOfNumbersloadingState.emit(LoadingState.ERROR)
+                        gettingListOfNumbersLoadingState.emit(LoadingState.ERROR)
                         withContext(Dispatchers.Main) {
                             snackbar(e.message!!, SnackbarDuration.Short)
                         }
@@ -513,103 +508,6 @@ class MainViewModel @Inject constructor(
                 }
             } else {
                 checkingSuperUserBalanceLoadingState.emit(LoadingState.ERROR)
-                snackbar(
-                    getApplication<Application>().getString(R.string.device_not_connected),
-                    SnackbarDuration.Short
-                )
-            }
-        }
-    }
-
-
-    var rentalServiceLoadingStateOfViewModel = MutableStateFlow(LoadingState.IDLE)
-
-    fun getRentalServiceStateList(snackbar: (String, SnackbarDuration) -> Unit) {
-        viewModelScope.launch {
-            if (hasInternetConnection(getApplication<Application>())) {
-                try {
-                    withTimeoutOrNull(TIMEOUT_IN_MILLIS) {
-                        rentalServiceLoadingStateOfViewModel.emit(LoadingState.LOADING)
-                        val response = repository.remote.getRentNumberServiceStateList()
-                        if (response.isSuccessful) {
-                            rentalServiceStateListResponse.value =
-                                response.body()!!.rentalServiceStateList
-                            rentalServiceLoadingStateOfViewModel.emit(LoadingState.LOADED)
-                        } else {
-                            rentalServiceLoadingStateOfViewModel.emit(LoadingState.ERROR)
-                            snackbar(
-                                getApplication<Application>().getString(R.string.an_error_occurred),
-                                SnackbarDuration.Short
-                            )
-                        }
-
-                    } ?: withContext(Dispatchers.Main) {
-                        rentalServiceLoadingStateOfViewModel.emit(LoadingState.ERROR)
-                        snackbar(
-                            getApplication<Application>().getString(R.string.time_out),
-                            SnackbarDuration.Short
-                        )
-                    }
-                } catch (e: Exception) {
-                    rentalServiceLoadingStateOfViewModel.emit(LoadingState.ERROR)
-                    snackbar(e.message!!, SnackbarDuration.Short)
-                }
-            } else {
-                rentalServiceLoadingStateOfViewModel.emit(LoadingState.ERROR)
-                snackbar(
-                    getApplication<Application>().getString(R.string.device_not_connected),
-                    SnackbarDuration.Short
-                )
-            }
-        }
-    }
-
-    fun refreshRentalServiceStateList(snackbar: (String, SnackbarDuration) -> Unit) {
-        viewModelScope.launch {
-            _isRefreshing.emit(true)
-            getRentalServiceStateList(snackbar = snackbar)
-            _isRefreshing.emit(false)
-        }
-    }
-
-    val availableRentalOptions: MutableState<List<RentalOptionsData>> =
-        mutableStateOf(listOf())
-
-    fun getRentalNumberOptions(snackbar: (String, SnackbarDuration) -> Unit) {
-        viewModelScope.launch {
-            if (hasInternetConnection(getApplication<Application>())) {
-                try {
-                    withTimeoutOrNull(TIMEOUT_IN_MILLIS) {
-                        rentalServiceLoadingStateOfViewModel.emit(LoadingState.LOADING)
-                        val response = repository.remote.getRentalOptions()
-                        if (response.isSuccessful) {
-                            availableRentalOptions.value =
-                                response.body()!!.rentalOptionsData
-                            rentalServiceLoadingStateOfViewModel.emit(LoadingState.LOADED)
-                            availableRentalOptions.value.forEach {
-                                Log.d("Option", "${it.rentalType} + ${it.duration.minutes}")
-                            }
-                        } else {
-                            rentalServiceLoadingStateOfViewModel.emit(LoadingState.ERROR)
-                            snackbar(
-                                getApplication<Application>().getString(R.string.an_error_occurred),
-                                SnackbarDuration.Short
-                            )
-                        }
-
-                    } ?: withContext(Dispatchers.Main) {
-                        rentalServiceLoadingStateOfViewModel.emit(LoadingState.ERROR)
-                        snackbar(
-                            getApplication<Application>().getString(R.string.time_out),
-                            SnackbarDuration.Short
-                        )
-                    }
-                } catch (e: Exception) {
-                    rentalServiceLoadingStateOfViewModel.emit(LoadingState.ERROR)
-                    snackbar(e.message!!, SnackbarDuration.Short)
-                }
-            } else {
-                rentalServiceLoadingStateOfViewModel.emit(LoadingState.ERROR)
                 snackbar(
                     getApplication<Application>().getString(R.string.device_not_connected),
                     SnackbarDuration.Short

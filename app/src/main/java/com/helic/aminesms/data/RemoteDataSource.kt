@@ -5,8 +5,6 @@ import com.helic.aminesms.data.models.UserBalanceResponse
 import com.helic.aminesms.data.models.cancel_number.CancelNumberResponse
 import com.helic.aminesms.data.models.messages.MessageResponse
 import com.helic.aminesms.data.models.order_number.OrderNumberResponse
-import com.helic.aminesms.data.models.rent_number.RentNumberServiceStateList
-import com.helic.aminesms.data.models.rent_number.options.RentalOptionsResponse
 import com.helic.aminesms.data.models.service_state.ServiceStateListResponse
 import retrofit2.Response
 import javax.inject.Inject
@@ -38,13 +36,5 @@ class RemoteDataSource @Inject constructor(private val smsServiceApi: SMSService
 
     suspend fun getSuperUserBalance(): Response<UserBalanceResponse> {
         return smsServiceApi.getSuperUserBalance()
-    }
-
-    suspend fun getRentNumberServiceStateList(): Response<RentNumberServiceStateList> {
-        return smsServiceApi.getRentalServiceStateList()
-    }
-
-    suspend fun getRentalOptions(): Response<RentalOptionsResponse> {
-        return smsServiceApi.getRentalOptions()
     }
 }

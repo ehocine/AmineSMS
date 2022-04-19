@@ -5,26 +5,22 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.toSize
 import androidx.navigation.NavController
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
-import com.helic.aminesms.R
 import com.helic.aminesms.data.viewmodels.MainViewModel
 import com.helic.aminesms.presentation.navigation.MainAppScreens
-import com.helic.aminesms.presentation.ui.theme.TOP_APP_BAR_HEIGHT
 import com.helic.aminesms.presentation.ui.theme.topAppBarBackgroundColor
 import com.helic.aminesms.presentation.ui.theme.topAppBarContentColor
 import com.helic.aminesms.utils.ErrorLoadingResults
@@ -140,10 +136,7 @@ fun Content(
                 mainViewModel = mainViewModel
             )
         }
-        
         Text(text = "Cost")
-
-
     }
 }
 
@@ -176,7 +169,7 @@ fun DropDownMenu(
         Icons.Filled.KeyboardArrowUp
     else
         Icons.Filled.KeyboardArrowDown
-    
+
     Column(Modifier.padding(20.dp)) {
         OutlinedTextField(
             value = selectedText,

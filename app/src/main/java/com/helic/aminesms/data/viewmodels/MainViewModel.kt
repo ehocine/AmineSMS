@@ -23,6 +23,7 @@ import com.helic.aminesms.data.models.messages.Sms
 import com.helic.aminesms.data.models.order_number.ListOfOrderedNumber
 import com.helic.aminesms.data.models.order_number.OrderedNumberData
 import com.helic.aminesms.data.models.rent_number.RentNumberServiceState
+import com.helic.aminesms.data.models.rent_number.options.RentalOptionsData
 import com.helic.aminesms.data.models.service_state.ServiceState
 import com.helic.aminesms.data.repository.Repository
 import com.helic.aminesms.presentation.navigation.MainAppScreens
@@ -568,6 +569,52 @@ class MainViewModel @Inject constructor(
             _isRefreshing.emit(true)
             getRentalServiceStateList(snackbar = snackbar)
             _isRefreshing.emit(false)
+        }
+    }
+
+    val availableRentalOptions: MutableState<List<RentalOptionsData>> =
+        mutableStateOf(listOf())
+
+    fun getRentalNumberOptions(snackbar: (String, SnackbarDuration) -> Unit) {
+        viewModelScope.launch {
+            if (hasInternetConnection(getApplication<Application>())) {
+                try {
+                    withTimeoutOrNull(TIMEOUT_IN_MILLIS) {
+                        rentalServiceLoadingStateOfViewModel.emit(LoadingState.LOADING)
+                        val response = repository.remote.getRentalOptions()
+                        if (response.isSuccessful) {
+                            availableRentalOptions.value =
+                                response.body()!!.rentalOptionsData
+                            rentalServiceLoadingStateOfViewModel.emit(LoadingState.LOADED)
+                            availableRentalOptions.value.forEach {
+                                Log.d("Option", "${it.rentalType} + ${it.duration.minutes}")
+                            }
+                        } else {
+                            rentalServiceLoadingStateOfViewModel.emit(LoadingState.ERROR)
+                            snackbar(
+                                getApplication<Application>().getString(R.string.an_error_occurred),
+                                SnackbarDuration.Short
+                            )
+                        }
+
+                    } ?: withContext(Dispatchers.Main) {
+                        rentalServiceLoadingStateOfViewModel.emit(LoadingState.ERROR)
+                        snackbar(
+                            getApplication<Application>().getString(R.string.time_out),
+                            SnackbarDuration.Short
+                        )
+                    }
+                } catch (e: Exception) {
+                    rentalServiceLoadingStateOfViewModel.emit(LoadingState.ERROR)
+                    snackbar(e.message!!, SnackbarDuration.Short)
+                }
+            } else {
+                rentalServiceLoadingStateOfViewModel.emit(LoadingState.ERROR)
+                snackbar(
+                    getApplication<Application>().getString(R.string.device_not_connected),
+                    SnackbarDuration.Short
+                )
+            }
         }
     }
 }

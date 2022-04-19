@@ -45,6 +45,7 @@ fun RentNumbers(
 
     LaunchedEffect(true) {
         mainViewModel.getRentalServiceStateList(snackbar = snackbar)
+        mainViewModel.getRentalNumberOptions(snackbar = snackbar)
     }
     val state by mainViewModel.rentalServiceLoadingStateOfViewModel.collectAsState()
 

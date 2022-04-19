@@ -5,25 +5,25 @@ import com.google.gson.annotations.SerializedName
 
 data class Duration(
     @SerializedName("days")
-    val days: Int,
+    val days: Int = 0,
     @SerializedName("hours")
-    val hours: Int,
+    val hours: Int = 0,
     @SerializedName("milliseconds")
-    val milliseconds: Int,
+    val milliseconds: Int = 0,
     @SerializedName("minutes")
-    val minutes: Int,
+    val minutes: Int = 0,
     @SerializedName("seconds")
-    val seconds: Int,
+    val seconds: Int = 0,
     @SerializedName("ticks")
-    val ticks: Int,
+    val ticks: Int = 0,
     @SerializedName("totalDays")
-    val totalDays: Int,
+    val totalDays: Int = 0,
     @SerializedName("totalHours")
-    val totalHours: Int,
+    val totalHours: Int = 0,
     @SerializedName("totalMilliseconds")
-    val totalMilliseconds: Int,
+    val totalMilliseconds: Int = 0,
     @SerializedName("totalMinutes")
-    val totalMinutes: Int,
+    val totalMinutes: Int = 0,
     @SerializedName("totalSeconds")
-    val totalSeconds: Int
+    val totalSeconds: Int = 0
 )

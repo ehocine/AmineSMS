@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "690902617502",
+    "project_id": "aminesms",
+    "storage_bucket": "aminesms.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:690902617502:android:8759533ca0e507a9309a8f",
+        "android_client_info": {
+          "package_name": "com.helic.aminesms"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "690902617502-12e3kkukmq6qffqnq5bcn3bd1vnas161.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCD7cPk6ZEECTu8PiAoC5DF57PHshqMN8o"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "690902617502-12e3kkukmq6qffqnq5bcn3bd1vnas161.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

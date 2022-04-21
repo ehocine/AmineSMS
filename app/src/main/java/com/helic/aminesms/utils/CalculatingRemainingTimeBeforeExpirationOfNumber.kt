@@ -1,7 +1,6 @@
 package com.helic.aminesms.utils
 
 import android.content.Context
-import android.util.Log
 import androidx.compose.material.SnackbarDuration
 import com.helic.aminesms.data.models.order_number.OrderedNumberData
 import java.time.LocalDate
@@ -40,7 +39,7 @@ fun calculatingRemainingTime(
             )
             difference = 0
         }
-    }else{
+    } else {
         difference = 0
     }
     return difference

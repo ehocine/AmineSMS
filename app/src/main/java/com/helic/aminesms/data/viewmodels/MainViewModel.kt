@@ -22,6 +22,8 @@ import com.helic.aminesms.data.models.cancel_number.CancelNumberResponse
 import com.helic.aminesms.data.models.messages.Sms
 import com.helic.aminesms.data.models.order_number.ListOfOrderedNumber
 import com.helic.aminesms.data.models.order_number.OrderedNumberData
+import com.helic.aminesms.data.models.reusable_numbers.ReusableNumbersData
+import com.helic.aminesms.data.models.reusable_numbers.reuse_number_details.ReuseNumberData
 import com.helic.aminesms.data.models.service_state.ServiceState
 import com.helic.aminesms.data.repository.Repository
 import com.helic.aminesms.presentation.navigation.MainAppScreens
@@ -127,6 +129,9 @@ class MainViewModel @Inject constructor(
 
     private var _superUserBalance = MutableStateFlow(0.0)
     var superUserBalance = _superUserBalance.asStateFlow()
+
+    var reusableNumbersList: MutableState<List<ReusableNumbersData>> = mutableStateOf(listOf())
+    var reuseNumberResponse: MutableState<ReuseNumberData> = mutableStateOf(ReuseNumberData())
 
     fun proceedToBuy(
         chosenOption: Int,
@@ -513,6 +518,138 @@ class MainViewModel @Inject constructor(
                     SnackbarDuration.Short
                 )
             }
+        }
+    }
+
+    fun getReusableNumbers(
+        snackbar: (String, SnackbarDuration) -> Unit
+    ) {
+        viewModelScope.launch {
+            if (hasInternetConnection(getApplication<Application>())) {
+                try {
+                    withTimeoutOrNull(TIMEOUT_IN_MILLIS) {
+                        buyingLoadingStateOfViewModel.emit(LoadingState.LOADING)
+                        val response = repository.remote.getReusableNumbers()
+                        if (response.isSuccessful) {
+                            reusableNumbersList.value = response.body()!!.reusableNumbersListData
+                            buyingLoadingStateOfViewModel.emit(LoadingState.LOADED)
+                            reusableNumbersList.value.forEach {
+                                Log.d(
+                                    "Tag",
+                                    "Service name : ${it.serviceName}\n Number : ${it.number}\n Price : ${it.price}\n ID: ${it.reusableId}"
+                                )
+                            }
+                        }
+
+                    } ?: withContext(Dispatchers.Main) {
+                        buyingLoadingStateOfViewModel.emit(LoadingState.ERROR)
+                        snackbar(
+                            getApplication<Application>().getString(R.string.time_out),
+                            SnackbarDuration.Short
+                        )
+                    }
+                } catch (e: Exception) {
+                    buyingLoadingStateOfViewModel.emit(LoadingState.ERROR)
+                    snackbar(e.message!!, SnackbarDuration.Short)
+                }
+
+            } else {
+                buyingLoadingStateOfViewModel.emit(LoadingState.ERROR)
+                snackbar(
+                    getApplication<Application>().getString(R.string.device_not_connected),
+                    SnackbarDuration.Short
+                )
+            }
+
+        }
+    }
+
+    fun reuseNumber(
+        temporaryNumberId: String,
+        snackbar: (String, SnackbarDuration) -> Unit
+    ) {
+        viewModelScope.launch {
+            if (hasInternetConnection(getApplication<Application>())) {
+                try {
+                    withTimeoutOrNull(TIMEOUT_IN_MILLIS) {
+                        buyingLoadingStateOfViewModel.emit(LoadingState.LOADING)
+                        val response =
+                            repository.remote.reuseNumber(temporaryNumberId = temporaryNumberId)
+                        if (response.isSuccessful) {
+                            reuseNumberResponse.value = response.body()!!.reuseNumberData
+                            buyingLoadingStateOfViewModel.emit(LoadingState.LOADED)
+                            Log.d("Tag", "Old: $temporaryNumberId")
+                            Log.d("Tag", "New: ${reuseNumberResponse.value.temporaryNumberId}")
+                            checkForMessages(
+                                context = getApplication<Application>(),
+                                temporaryNumberId = reuseNumberResponse.value.temporaryNumberId,
+                                snackbar = snackbar
+                            )
+                            Log.d("Tag", "Msg: ${message?.value?.content}")
+
+                        }
+
+                    } ?: withContext(Dispatchers.Main) {
+                        buyingLoadingStateOfViewModel.emit(LoadingState.ERROR)
+                        snackbar(
+                            getApplication<Application>().getString(R.string.time_out),
+                            SnackbarDuration.Short
+                        )
+                    }
+                } catch (e: Exception) {
+                    buyingLoadingStateOfViewModel.emit(LoadingState.ERROR)
+                    snackbar(e.message!!, SnackbarDuration.Short)
+                }
+
+            } else {
+                buyingLoadingStateOfViewModel.emit(LoadingState.ERROR)
+                snackbar(
+                    getApplication<Application>().getString(R.string.device_not_connected),
+                    SnackbarDuration.Short
+                )
+            }
+
+        }
+    }
+
+    fun checkMessageReuseNumber(
+        temporaryNumberId: String,
+        snackbar: (String, SnackbarDuration) -> Unit
+    ) {
+        viewModelScope.launch {
+            if (hasInternetConnection(getApplication<Application>())) {
+                try {
+                    withTimeoutOrNull(TIMEOUT_IN_MILLIS) {
+                        buyingLoadingStateOfViewModel.emit(LoadingState.LOADING)
+                        val response =
+                            repository.remote.reuseNumber(temporaryNumberId = temporaryNumberId)
+                        if (response.isSuccessful) {
+                            reuseNumberResponse.value = response.body()!!.reuseNumberData
+                            buyingLoadingStateOfViewModel.emit(LoadingState.LOADED)
+                            Log.d("MSG", "Message: ${reuseNumberResponse.value.sms.content}")
+                        }
+
+                    } ?: withContext(Dispatchers.Main) {
+                        buyingLoadingStateOfViewModel.emit(LoadingState.ERROR)
+                        snackbar(
+                            getApplication<Application>().getString(R.string.time_out),
+                            SnackbarDuration.Short
+                        )
+                    }
+                } catch (e: Exception) {
+                    buyingLoadingStateOfViewModel.emit(LoadingState.ERROR)
+                    snackbar(e.message!!, SnackbarDuration.Short)
+                    Log.d("MSG", e.message!!)
+                }
+
+            } else {
+                buyingLoadingStateOfViewModel.emit(LoadingState.ERROR)
+                snackbar(
+                    getApplication<Application>().getString(R.string.device_not_connected),
+                    SnackbarDuration.Short
+                )
+            }
+
         }
     }
 }

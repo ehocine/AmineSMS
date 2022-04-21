@@ -2,17 +2,20 @@ package com.helic.aminesms.presentation.screens.main_app_screens.messages.messag
 
 import android.annotation.SuppressLint
 import android.content.Context
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Recycling
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -28,6 +31,7 @@ import com.helic.aminesms.presentation.ui.theme.phoneMessagesTextColor
 import com.helic.aminesms.presentation.ui.theme.topAppBarBackgroundColor
 import com.helic.aminesms.presentation.ui.theme.topAppBarContentColor
 import com.helic.aminesms.utils.*
+import com.helic.aminesms.utils.Constants.REUSE_DISCOUNT
 import kotlinx.coroutines.delay
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
@@ -38,9 +42,7 @@ fun MessageDetails(
     mainViewModel: MainViewModel
 ) {
     val context = LocalContext.current
-    LaunchedEffect(key1 = true) {
-        mainViewModel.getBalance(context, showSnackbar)
-    }
+
     val isRefreshing by mainViewModel.isRefreshing.collectAsState()
     val sms = mainViewModel.message?.value
     val temporaryNumber = mainViewModel.selectedNumber.value
@@ -50,6 +52,7 @@ fun MessageDetails(
 
     LaunchedEffect(key1 = true) {
         mainViewModel.getBalance(context = context, snackbar = showSnackbar)
+        mainViewModel.getReusableNumbers(snackbar = showSnackbar)
     }
 
     val userBalance = mainViewModel.userBalance.collectAsState().value
@@ -74,6 +77,8 @@ fun MessageDetails(
         )
 
     }
+
+    val numberState by remember { mutableStateOf(temporaryNumber.state) }
 
     Scaffold(topBar = {
         MessageDetailsTopAppBar(
@@ -120,6 +125,18 @@ fun MessageDetails(
 
                     }
                 }
+                when (numberState) {
+                    NumberState.Completed.toString() -> {
+                        if (mainViewModel.reusableNumbersList.value.find { it.reusableId == temporaryNumber.temporaryNumberId } != null) {
+                            ReuseNumber(
+                                mainViewModel = mainViewModel,
+                                temporaryNumber = temporaryNumber,
+                                showSnackbar = showSnackbar
+                            )
+                        }
+                    }
+                    else -> Unit
+                }
             }
         }
     }
@@ -134,7 +151,6 @@ fun MessageDetailsTopAppBar(
     temporaryNumberId: String,
     showSnackbar: (String, SnackbarDuration) -> Unit,
 ) {
-    var openDialog by remember { mutableStateOf(false) }
     val orderedNumber =
         mainViewModel.orderedNumbersList.value.find { it.temporaryNumberId == temporaryNumberId }
     TopAppBar(
@@ -160,7 +176,6 @@ fun MessageDetailsTopAppBar(
                 navController = navController,
                 orderedNumber = orderedNumber,
                 mainViewModel = mainViewModel,
-                temporaryNumberId = temporaryNumberId,
                 showSnackbar = showSnackbar
             )
         },
@@ -169,12 +184,79 @@ fun MessageDetailsTopAppBar(
 }
 
 @Composable
+fun ReuseNumber(
+    mainViewModel: MainViewModel,
+    temporaryNumber: OrderedNumberData,
+    showSnackbar: (String, SnackbarDuration) -> Unit
+) {
+    var openDialog by remember { mutableStateOf(false) }
+    ReuseButton(number = temporaryNumber,onClick = { openDialog = true })
+
+    DisplayAlertDialog(
+        title = "Reuse Number ${temporaryNumber.number}",
+        message = "You can reuse this number for ${
+            dollarToCreditForPurchasingNumbers(
+                temporaryNumber.price
+            ) * REUSE_DISCOUNT
+        } credits, Are you sure you want to continue?",
+        openDialog = openDialog,
+        closeDialog = { openDialog = false },
+        onYesClicked = {
+            mainViewModel.reuseNumber(
+                temporaryNumberId = temporaryNumber.temporaryNumberId,
+                snackbar = showSnackbar
+            )
+        }
+    )
+}
+
+@Composable
+fun ReuseButton(number: OrderedNumberData, onClick: () -> Unit) {
+    Card(
+        modifier = Modifier
+            .border(
+                width = 1.dp,
+                color = MaterialTheme.colors.primary,
+                shape = RoundedCornerShape(5.dp)
+            )
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(5.dp))
+            .clickable {
+                onClick()
+            }
+    ) {
+        Row(
+            modifier = Modifier.padding(start = 5.dp, top = 15.dp, bottom = 15.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Icon(
+                imageVector = Icons.Default.Recycling,
+                contentDescription = "",
+                tint = MaterialTheme.colors.primary
+            )
+            Spacer(modifier = Modifier.padding(10.dp))
+            Text(
+                text = "Reuse Number for ${
+                    dollarToCreditForPurchasingNumbers(
+                        number.price
+                    ) * REUSE_DISCOUNT
+                }",
+                color = MaterialTheme.colors.primary,
+                fontWeight = FontWeight.Bold
+            )
+        }
+
+    }
+
+}
+
+@Composable
 fun ExistingTaskAppBarActions(
     context: Context,
     navController: NavController,
     orderedNumber: OrderedNumberData?,
     mainViewModel: MainViewModel,
-    temporaryNumberId: String,
     showSnackbar: (String, SnackbarDuration) -> Unit
 ) {
     var openDialog by remember { mutableStateOf(false) }
@@ -189,7 +271,7 @@ fun ExistingTaskAppBarActions(
                 if (orderedNumber.state == NumberState.Pending.toString()) {
                     mainViewModel.cancelTempNumber(
                         context = context,
-                        temporaryNumberId = temporaryNumberId,
+                        temporaryNumberId = orderedNumber.temporaryNumberId,
                         snackbar = showSnackbar,
                         navController = navController
                     )
@@ -206,11 +288,17 @@ fun ExistingTaskAppBarActions(
 
     CancelAction(onDeleteClicked = { openDialog = true })
     RefreshAction(onRefreshClicked = {
-        mainViewModel.refreshMessageCheck(
-            context = context,
-            temporaryNumberId = temporaryNumberId,
-            snackbar = showSnackbar
-        )
+        if (orderedNumber != null) {
+            mainViewModel.refreshMessageCheck(
+                context = context,
+                temporaryNumberId = orderedNumber.temporaryNumberId,
+                snackbar = showSnackbar
+            )
+            mainViewModel.checkMessageReuseNumber(
+                temporaryNumberId = orderedNumber.temporaryNumberId,
+                snackbar = showSnackbar
+            )
+        }
     })
 }
 

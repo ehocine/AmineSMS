@@ -57,6 +57,7 @@ fun ErrorLoadingResults() {
         )
     }
 }
+
 @Composable
 fun NoResults() {
     Column(

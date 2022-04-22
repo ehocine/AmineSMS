@@ -11,7 +11,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Logout
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -31,15 +30,10 @@ import com.helic.aminesms.data.models.User
 import com.helic.aminesms.data.viewmodels.MainViewModel
 import com.helic.aminesms.presentation.navigation.MainAppScreens
 import com.helic.aminesms.presentation.ui.theme.Red
-import com.helic.aminesms.presentation.ui.theme.topAppBarBackgroundColor
-import com.helic.aminesms.presentation.ui.theme.topAppBarContentColor
 import com.helic.aminesms.utils.Constants.AUTHENTICATION_ROUTE
 import com.helic.aminesms.utils.Constants.auth
-import com.helic.aminesms.utils.Constants.loadingState
 import com.helic.aminesms.utils.CustomDivider
 import com.helic.aminesms.utils.DisplayAlertDialog
-import com.helic.aminesms.utils.LoadingState
-import kotlinx.coroutines.flow.MutableStateFlow
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
@@ -51,9 +45,6 @@ fun Profile(
 ) {
     val context = LocalContext.current
     val loggedInUser = Firebase.auth.currentUser
-
-    loadingState = MutableStateFlow(LoadingState.IDLE)
-    val state by loadingState.collectAsState()
 
     LaunchedEffect(key1 = true) {
         mainViewModel.getBalance(context = context, snackbar = showSnackbar)
@@ -77,30 +68,6 @@ fun Profile(
         )
     }
 
-}
-
-@Composable
-fun ProfileTopAppBar(navController: NavController) {
-    TopAppBar(
-        navigationIcon = {
-            IconButton(onClick = {
-                navController.navigate(MainAppScreens.Messages.route) {
-                    popUpTo(navController.graph.findStartDestination().id)
-                    launchSingleTop = true
-                }
-
-            }) {
-                Icon(
-                    imageVector = Icons.Default.ArrowBack,
-                    contentDescription = "Back Arrow",
-                    tint = MaterialTheme.colors.topAppBarContentColor
-                )
-            }
-        },
-        title = {
-            Text(text = stringResource(R.string.profile))
-        }, backgroundColor = MaterialTheme.colors.topAppBarBackgroundColor
-    )
 }
 
 @Composable

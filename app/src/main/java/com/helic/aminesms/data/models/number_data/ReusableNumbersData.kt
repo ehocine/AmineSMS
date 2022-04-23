@@ -1,4 +1,4 @@
-package com.helic.aminesms.data.models.reusable_numbers
+package com.helic.aminesms.data.models.number_data
 
 
 import com.google.gson.annotations.SerializedName

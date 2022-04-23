@@ -4,7 +4,7 @@ import com.helic.aminesms.data.api.SMSServiceApi
 import com.helic.aminesms.data.models.UserBalanceResponse
 import com.helic.aminesms.data.models.cancel_number.CancelNumberResponse
 import com.helic.aminesms.data.models.messages.MessageResponse
-import com.helic.aminesms.data.models.order_number.OrderNumberResponse
+import com.helic.aminesms.data.models.order_temp_number.OrderNumberResponse
 import com.helic.aminesms.data.models.reusable_numbers.ReusableNumbersResponse
 import com.helic.aminesms.data.models.reusable_numbers.reuse_number_details.ReuseNumberResponse
 import com.helic.aminesms.data.models.service_state.ServiceStateListResponse

@@ -2,7 +2,7 @@ package com.helic.aminesms.utils
 
 import android.content.Context
 import androidx.compose.material.SnackbarDuration
-import com.helic.aminesms.data.models.order_number.OrderedNumberData
+import com.helic.aminesms.data.models.number_data.NumberData
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
@@ -10,7 +10,7 @@ import java.time.ZoneId
 
 fun calculatingRemainingExpirationTime(
     context: Context,
-    orderedNumberData: OrderedNumberData,
+    numberData: NumberData,
     snackbar: (String, SnackbarDuration) -> Unit,
     userBalance: Double
 ): Int {
@@ -19,15 +19,15 @@ fun calculatingRemainingExpirationTime(
     val startOfDay: LocalDateTime = localDate.atTime(LocalTime.now())
     val timestamp = startOfDay.atZone(ZoneId.systemDefault()).toInstant().epochSecond
 
-    var difference = orderedNumberData.expiresAt - timestamp.toInt()
+    var difference = numberData.expiresAt - timestamp.toInt()
 
-    if (orderedNumberData.state == NumberState.Pending.toString()) {
+    if (numberData.state == NumberState.Pending.toString()) {
 
         if (difference <= 0) {
             updateNumberState(
                 context = context,
                 snackbar = snackbar,
-                numberToBeUpdated = orderedNumberData,
+                numberToBeUpdated = numberData,
                 NumberState.Expired
             )
             handleOrderedNumberState(
@@ -35,7 +35,7 @@ fun calculatingRemainingExpirationTime(
                 snackbar,
                 NumberState.Expired,
                 userBalance,
-                orderedNumberData.price
+                numberData.price
             )
             difference = 0
         }
@@ -46,13 +46,13 @@ fun calculatingRemainingExpirationTime(
 }
 
 fun calculatingRemainingTime(
-    orderedNumberData: OrderedNumberData
+    numberData: NumberData
 ): Int {
     val localDate = LocalDate.now()
     val startOfDay: LocalDateTime = localDate.atTime(LocalTime.now())
     val timestamp = startOfDay.atZone(ZoneId.systemDefault()).toInstant().epochSecond
 
-    var difference = orderedNumberData.expiresAt - timestamp.toInt()
+    var difference = numberData.expiresAt - timestamp.toInt()
 
     if (difference <= 0) difference = 0
     return difference

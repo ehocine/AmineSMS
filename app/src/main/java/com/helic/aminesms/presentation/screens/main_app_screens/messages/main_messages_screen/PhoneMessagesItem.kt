@@ -16,7 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.helic.aminesms.data.models.order_number.OrderedNumberData
+import com.helic.aminesms.data.models.number_data.NumberData
 import com.helic.aminesms.data.viewmodels.MainViewModel
 import com.helic.aminesms.presentation.navigation.MainAppScreens
 import com.helic.aminesms.presentation.ui.theme.Green
@@ -32,7 +32,7 @@ fun PhoneMessageItem(
     context: Context,
     navController: NavController,
     mainViewModel: MainViewModel,
-    listOfPhoneNumbers: List<OrderedNumberData>,
+    listOfPhoneNumbers: List<NumberData>,
     showSnackbar: (String, SnackbarDuration) -> Unit
 ) {
     if (listOfPhoneNumbers.isEmpty()) {
@@ -53,7 +53,7 @@ fun DisplayNumbers(
     context: Context,
     navController: NavController,
     mainViewModel: MainViewModel,
-    listOfPhoneNumbersData: List<OrderedNumberData>,
+    listOfPhoneNumbersData: List<NumberData>,
     showSnackbar: (String, SnackbarDuration) -> Unit
 ) {
     LazyColumn(modifier = Modifier.fillMaxWidth()) {
@@ -75,7 +75,7 @@ fun Content(
     context: Context,
     navController: NavController,
     mainViewModel: MainViewModel,
-    phoneNumberData: OrderedNumberData,
+    phoneNumberData: NumberData,
     showSnackbar: (String, SnackbarDuration) -> Unit
 ) {
     Card(
@@ -116,7 +116,7 @@ fun Content(
                 )
                 Spacer(modifier = Modifier.padding(5.dp))
                 Text(
-                    text = phoneNumberData.state.toString(),
+                    text = phoneNumberData.state,
                     color = MediumGray,
                     fontSize = MaterialTheme.typography.subtitle1.fontSize,
                     maxLines = 1

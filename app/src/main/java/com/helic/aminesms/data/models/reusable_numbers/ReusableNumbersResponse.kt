@@ -2,6 +2,7 @@ package com.helic.aminesms.data.models.reusable_numbers
 
 
 import com.google.gson.annotations.SerializedName
+import com.helic.aminesms.data.models.number_data.ReusableNumbersData
 
 data class ReusableNumbersResponse(
     @SerializedName("data")

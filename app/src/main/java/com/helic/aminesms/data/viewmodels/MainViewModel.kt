@@ -20,10 +20,9 @@ import com.google.firebase.ktx.Firebase
 import com.helic.aminesms.R
 import com.helic.aminesms.data.models.cancel_number.CancelNumberResponse
 import com.helic.aminesms.data.models.messages.Sms
-import com.helic.aminesms.data.models.order_number.ListOfOrderedNumber
-import com.helic.aminesms.data.models.order_number.OrderedNumberData
-import com.helic.aminesms.data.models.reusable_numbers.ReusableNumbersData
-import com.helic.aminesms.data.models.reusable_numbers.reuse_number_details.ReuseNumberData
+import com.helic.aminesms.data.models.order_temp_number.ListOfOrderedNumber
+import com.helic.aminesms.data.models.number_data.NumberData
+import com.helic.aminesms.data.models.number_data.ReusableNumbersData
 import com.helic.aminesms.data.models.service_state.ServiceState
 import com.helic.aminesms.data.repository.Repository
 import com.helic.aminesms.presentation.navigation.MainAppScreens
@@ -111,19 +110,18 @@ class MainViewModel @Inject constructor(
 
     val selectedAreaCode: MutableState<String> = mutableStateOf("")
 
-    private val orderedNumberData: MutableState<OrderedNumberData> =
-        mutableStateOf(OrderedNumberData())
+    private val numberData: MutableState<NumberData> =
+        mutableStateOf(NumberData())
 
     @SuppressLint("MutableCollectionMutableState")
-    private var _orderedNumbersList: MutableStateFlow<MutableList<OrderedNumberData>> =
+    private var _NumbersList: MutableStateFlow<MutableList<NumberData>> =
         MutableStateFlow(mutableListOf())
-    var orderedNumbersList = _orderedNumbersList.asStateFlow()
+    var orderedNumbersList = _NumbersList.asStateFlow()
 
-    val selectedNumber: MutableState<OrderedNumberData> =
-        mutableStateOf(OrderedNumberData())
+    val selectedNumber: MutableState<NumberData> =
+        mutableStateOf(NumberData())
 
     val message: MutableState<Sms>? = mutableStateOf(Sms())
-    val messageList: MutableState<List<Sms>>? = mutableStateOf(listOf())
 
     private val cancelTempNumber: MutableState<CancelNumberResponse> =
         mutableStateOf(CancelNumberResponse())
@@ -132,7 +130,8 @@ class MainViewModel @Inject constructor(
     var superUserBalance = _superUserBalance.asStateFlow()
 
     var reusableNumbersList: MutableState<List<ReusableNumbersData>> = mutableStateOf(listOf())
-    var reuseNumberResponse: MutableState<ReuseNumberData> = mutableStateOf(ReuseNumberData())
+
+    var reuseNumberResponse: MutableState<NumberData> = mutableStateOf(NumberData())
 
     fun proceedToBuy(
         chosenOption: Int,
@@ -214,7 +213,7 @@ class MainViewModel @Inject constructor(
                                 return@addSnapshotListener
                             }
                             if (value != null && value.exists()) {
-                                _orderedNumbersList.value =
+                                _NumbersList.value =
                                     value.toObject(ListOfOrderedNumber::class.java)?.listOfNumbers
                                         ?: mutableListOf()
                             } else {
@@ -309,28 +308,19 @@ class MainViewModel @Inject constructor(
                             areaCode = areaCode
                         )
                         if (response.isSuccessful) {
-                            orderedNumberData.value = response.body()!!.orderedNumberData
+                            numberData.value = response.body()!!.numberData
                             buyingLoadingStateOfViewModel.emit(LoadingState.LOADED)
-
-//                            orderedNumberDataToFirebase.value.apply {
-//                                expiresAt = orderedNumberData.value.expiresAt
-//                                number = orderedNumberData.value.number
-//                                price = orderedNumberData.value.price
-//                                reuseableUntil = orderedNumberData.value.reuseableUntil
-//                                state = orderedNumberData.value.state
-//                                temporaryNumberId.add(orderedNumberData.value.temporaryNumberId)
-//                            }
                             reduceBalance(
                                 context = getApplication<Application>(),
                                 snackbar = snackbar,
                                 currentBalance = _userBalance.value,
-                                amount = dollarToCreditForPurchasingNumbers(orderedNumberData.value.price)
+                                amount = dollarToCreditForPurchasingNumbers(numberData.value.price)
                             )
                             addOrRemoveNumberFromFirebase(
                                 context = getApplication<Application>(),
                                 snackbar = snackbar,
                                 AddOrRemoveNumberAction.ADD,
-                                orderedNumberData = orderedNumberData.value
+                                numberData = numberData.value
                             )
                             navController.navigate(MainAppScreens.Messages.route) {
                                 popUpTo(navController.graph.findStartDestination().id) {
@@ -531,7 +521,7 @@ class MainViewModel @Inject constructor(
         }
     }
 
-    fun getReusableNumbers(
+    fun getReusableNumbersList(
         snackbar: (String, SnackbarDuration) -> Unit
     ) {
         viewModelScope.launch {
@@ -569,6 +559,7 @@ class MainViewModel @Inject constructor(
     }
 
     fun reuseNumber(
+        navController: NavController,
         temporaryNumberId: String,
         snackbar: (String, SnackbarDuration) -> Unit
     ) {
@@ -582,6 +573,24 @@ class MainViewModel @Inject constructor(
                         if (response.isSuccessful) {
                             reuseNumberResponse.value = response.body()!!.reuseNumberData
                             buyingLoadingStateOfViewModel.emit(LoadingState.LOADED)
+                            reduceBalance(
+                                context = getApplication<Application>(),
+                                snackbar = snackbar,
+                                currentBalance = _userBalance.value,
+                                amount = dollarToCreditForPurchasingNumbers(reuseNumberResponse.value.price)
+                            )
+                            addOrRemoveNumberFromFirebase(
+                                context = getApplication<Application>(),
+                                snackbar = snackbar,
+                                AddOrRemoveNumberAction.ADD,
+                                numberData = reuseNumberResponse.value
+                            )
+                            navController.navigate(MainAppScreens.Messages.route) {
+                                popUpTo(navController.graph.findStartDestination().id) {
+                                    inclusive = true
+                                }
+                                launchSingleTop = true
+                            }
                         }
 
                     } ?: withContext(Dispatchers.Main) {
@@ -621,7 +630,6 @@ class MainViewModel @Inject constructor(
                         if (response.isSuccessful) {
                             reuseNumberResponse.value = response.body()!!.reuseNumberData
                             buyingLoadingStateOfViewModel.emit(LoadingState.LOADED)
-                            Log.d("MSG", "Message: ${reuseNumberResponse.value.sms.content}")
                         }
 
                     } ?: withContext(Dispatchers.Main) {

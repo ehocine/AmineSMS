@@ -2,7 +2,6 @@ package com.helic.aminesms.presentation.screens.main_app_screens.shop
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -40,16 +39,6 @@ fun Shop(
 
     LaunchedEffect(key1 = true) {
         mainViewModel.getSuperUserBalance(snackbar = showSnackbar)
-
-        mainViewModel.checkForMessages(
-            context = context,
-            mainViewModel.reuseNumberResponse.value.temporaryNumberId,
-            showSnackbar
-        )
-
-        Log.d("Tag", "Old ID: ${mainViewModel.selectedNumber.value.temporaryNumberId}")
-        Log.d("Tag", "New ID: ${mainViewModel.reuseNumberResponse.value.temporaryNumberId}")
-        Log.d("Tag", "New Msg: ${mainViewModel.message?.value?.content}")
     }
     val state by mainViewModel.checkingSuperUserBalanceLoadingState.collectAsState()
 

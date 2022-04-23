@@ -25,7 +25,7 @@ import com.helic.aminesms.utils.LoadingList
 import com.helic.aminesms.utils.LoadingState
 import com.helic.aminesms.utils.dollarToCreditForPurchasingNumbers
 
-@SuppressLint("UnusedMaterialScaffoldPaddingParameter")
+@SuppressLint("UnusedMaterialScaffoldPaddingParameter", "StateFlowValueCalledInComposition")
 @Composable
 fun OrderNumberOptions(
     navController: NavController,
@@ -35,9 +35,12 @@ fun OrderNumberOptions(
     val context = LocalContext.current
     LaunchedEffect(key1 = true) {
         mainViewModel.getBalance(context = context, snackbar = showSnackbar)
+        mainViewModel.getSuperUserBalance(snackbar = showSnackbar)
     }
     val selectedServiceState = mainViewModel.selectedServiceState.value
     val balance = mainViewModel.userBalance.collectAsState().value
+    val superUserBalanceState by mainViewModel.checkingSuperUserBalanceLoadingState.collectAsState()
+    val superUserBalance = mainViewModel.superUserBalance.value
 
     mainViewModel.selectedAreaCode.value = ""
 
@@ -61,7 +64,9 @@ fun OrderNumberOptions(
                     mainViewModel = mainViewModel,
                     buyingState = buyingState,
                     snackbar = showSnackbar,
-                    userBalance = balance
+                    userBalance = balance,
+                    superUserBalance = superUserBalance,
+                    superUserState = superUserBalanceState
                 )
             }
         }
@@ -75,7 +80,9 @@ fun DisplayOptions(
     mainViewModel: MainViewModel,
     buyingState: LoadingState,
     snackbar: (String, SnackbarDuration) -> Unit,
-    userBalance: Double
+    userBalance: Double,
+    superUserBalance: Double,
+    superUserState: LoadingState
 ) {
     var areaCodeValue by remember { mutableStateOf("") }
     var invalidAreaCode by remember { mutableStateOf(false) }
@@ -129,26 +136,33 @@ fun DisplayOptions(
                 Spacer(modifier = Modifier.padding(20.dp))
                 Button(
                     onClick = {
-                        if (userBalance >= dollarToCreditForPurchasingNumbers(
-                                mainViewModel.selectedServiceState.value.price
-                            )
-                        ) {
-                            if (!invalidAreaCode) {
-                                mainViewModel.orderNumber(
-                                    navController = navController,
-                                    serviceID = mainViewModel.selectedServiceState.value.serviceId,
-                                    areaCode = mainViewModel.selectedAreaCode.value,
-                                    snackbar = snackbar
+                        if (superUserBalance > mainViewModel.selectedServiceState.value.price) {
+                            if (userBalance >= dollarToCreditForPurchasingNumbers(
+                                    mainViewModel.selectedServiceState.value.price
+                                )
+                            ) {
+                                if (!invalidAreaCode) {
+                                    mainViewModel.orderNumber(
+                                        navController = navController,
+                                        serviceID = mainViewModel.selectedServiceState.value.serviceId,
+                                        areaCode = mainViewModel.selectedAreaCode.value,
+                                        snackbar = snackbar
+                                    )
+                                }
+                            } else {
+                                snackbar(
+                                    context.getString(R.string.not_enough_balance),
+                                    SnackbarDuration.Short
                                 )
                             }
                         } else {
                             snackbar(
-                                context.getString(R.string.not_enough_balance),
+                                context.getString(R.string.cant_purchase),
                                 SnackbarDuration.Short
                             )
                         }
                     },
-                    enabled = buyingState != LoadingState.LOADING,
+                    enabled = buyingState != LoadingState.LOADING && superUserState != LoadingState.ERROR && superUserState != LoadingState.LOADING,
                     modifier = Modifier
                         .fillMaxWidth(0.8f)
                         .height(50.dp),

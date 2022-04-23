@@ -24,7 +24,7 @@ import androidx.navigation.NavGraph.Companion.findStartDestination
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.helic.aminesms.R
-import com.helic.aminesms.data.models.order_number.OrderedNumberData
+import com.helic.aminesms.data.models.number_data.NumberData
 import com.helic.aminesms.data.viewmodels.MainViewModel
 import com.helic.aminesms.presentation.navigation.MainAppScreens
 import com.helic.aminesms.presentation.ui.theme.Red
@@ -56,7 +56,7 @@ fun MessageDetails(
     }
 
     LaunchedEffect(key1 = state) {
-        mainViewModel.getReusableNumbers(snackbar = showSnackbar)
+        mainViewModel.getReusableNumbersList(snackbar = showSnackbar)
     }
 
     val userBalance = mainViewModel.userBalance.collectAsState().value
@@ -65,7 +65,7 @@ fun MessageDetails(
         mutableStateOf(
             calculatingRemainingExpirationTime(
                 context = context,
-                orderedNumberData = temporaryNumber,
+                numberData = temporaryNumber,
                 snackbar = showSnackbar,
                 userBalance = userBalance
             )
@@ -74,7 +74,7 @@ fun MessageDetails(
     var remainingReuseTime by remember {
         mutableStateOf(
             calculatingRemainingTime(
-                orderedNumberData = temporaryNumber
+                numberData = temporaryNumber
             )
         )
     }
@@ -83,7 +83,7 @@ fun MessageDetails(
         delay(1000L)
         remainingExpirationTime = calculatingRemainingExpirationTime(
             context = context,
-            orderedNumberData = temporaryNumber,
+            numberData = temporaryNumber,
             snackbar = showSnackbar,
             userBalance = userBalance
         )
@@ -92,7 +92,7 @@ fun MessageDetails(
     LaunchedEffect(key1 = remainingReuseTime) {
         delay(1000L)
         remainingReuseTime = calculatingRemainingTime(
-            orderedNumberData = temporaryNumber
+            numberData = temporaryNumber
         )
     }
 
@@ -168,7 +168,8 @@ fun MessageDetails(
                                         ReuseNumber(
                                             mainViewModel = mainViewModel,
                                             temporaryNumber = temporaryNumber,
-                                            showSnackbar = showSnackbar
+                                            showSnackbar = showSnackbar,
+                                            navController = navController
                                         )
                                     }
                                     else -> {
@@ -222,7 +223,7 @@ fun MessageDetailsTopAppBar(
             ExistingTaskAppBarActions(
                 context = context,
                 navController = navController,
-                orderedNumber = orderedNumber,
+                number = orderedNumber,
                 mainViewModel = mainViewModel,
                 showSnackbar = showSnackbar
             )
@@ -234,8 +235,9 @@ fun MessageDetailsTopAppBar(
 @Composable
 fun ReuseNumber(
     mainViewModel: MainViewModel,
-    temporaryNumber: OrderedNumberData,
-    showSnackbar: (String, SnackbarDuration) -> Unit
+    temporaryNumber: NumberData,
+    showSnackbar: (String, SnackbarDuration) -> Unit,
+    navController: NavController
 ) {
     var openDialog by remember { mutableStateOf(false) }
     ReuseButton(number = temporaryNumber, onClick = { openDialog = true })
@@ -252,14 +254,15 @@ fun ReuseNumber(
         onYesClicked = {
             mainViewModel.reuseNumber(
                 temporaryNumberId = temporaryNumber.temporaryNumberId,
-                snackbar = showSnackbar
+                snackbar = showSnackbar,
+                navController = navController
             )
         }
     )
 }
 
 @Composable
-fun ReuseButton(number: OrderedNumberData, onClick: () -> Unit) {
+fun ReuseButton(number: NumberData, onClick: () -> Unit) {
     Card(
         modifier = Modifier
             .border(
@@ -303,23 +306,23 @@ fun ReuseButton(number: OrderedNumberData, onClick: () -> Unit) {
 fun ExistingTaskAppBarActions(
     context: Context,
     navController: NavController,
-    orderedNumber: OrderedNumberData?,
+    number: NumberData?,
     mainViewModel: MainViewModel,
     showSnackbar: (String, SnackbarDuration) -> Unit
 ) {
     var openDialog by remember { mutableStateOf(false) }
 
     DisplayAlertDialog(
-        title = "Cancel ${orderedNumber?.number}",
+        title = "Cancel ${number?.number}",
         message = "Are you sure you want to cancel this number?",
         openDialog = openDialog,
         closeDialog = { openDialog = false },
         onYesClicked = {
-            if (orderedNumber != null) {
-                if (orderedNumber.state == NumberState.Pending.toString()) {
+            if (number != null) {
+                if (number.state == NumberState.Pending.toString()) {
                     mainViewModel.cancelTempNumber(
                         context = context,
-                        temporaryNumberId = orderedNumber.temporaryNumberId,
+                        temporaryNumberId = number.temporaryNumberId,
                         snackbar = showSnackbar,
                         navController = navController
                     )
@@ -336,10 +339,10 @@ fun ExistingTaskAppBarActions(
 
     CancelAction(onDeleteClicked = { openDialog = true })
     RefreshAction(onRefreshClicked = {
-        if (orderedNumber != null) {
+        if (number != null) {
             mainViewModel.refreshMessageCheck(
                 context = context,
-                temporaryNumberId = orderedNumber.temporaryNumberId,
+                temporaryNumberId = number.temporaryNumberId,
                 snackbar = showSnackbar
             )
 //            mainViewModel.checkMessageReuseNumber(

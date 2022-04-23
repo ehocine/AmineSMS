@@ -13,7 +13,7 @@ import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.helic.aminesms.R
 import com.helic.aminesms.data.models.User
-import com.helic.aminesms.data.models.order_number.OrderedNumberData
+import com.helic.aminesms.data.models.number_data.NumberData
 import com.helic.aminesms.presentation.navigation.AuthenticationScreens
 import com.helic.aminesms.utils.Constants.FIRESTORE_DATABASE
 import com.helic.aminesms.utils.Constants.LIST_OF_NUMBERS
@@ -313,7 +313,7 @@ fun addOrRemoveNumberFromFirebase(
     context: Context,
     snackbar: (String, SnackbarDuration) -> Unit,
     action: AddOrRemoveNumberAction,
-    orderedNumberData: OrderedNumberData?
+    numberData: NumberData?
 ) {
 
     val db = Firebase.firestore
@@ -326,7 +326,7 @@ fun addOrRemoveNumberFromFirebase(
                     loadingState.emit(LoadingState.LOADING)
                     when (action) {
                         AddOrRemoveNumberAction.ADD -> {
-                            data?.update(LIST_OF_NUMBERS, FieldValue.arrayUnion(orderedNumberData))
+                            data?.update(LIST_OF_NUMBERS, FieldValue.arrayUnion(numberData))
                                 ?.addOnSuccessListener {
 
                                 }?.addOnFailureListener {
@@ -335,7 +335,7 @@ fun addOrRemoveNumberFromFirebase(
                             loadingState.emit(LoadingState.LOADED)
                         }
                         AddOrRemoveNumberAction.REMOVE -> {
-                            data?.update(LIST_OF_NUMBERS, FieldValue.arrayRemove(orderedNumberData))
+                            data?.update(LIST_OF_NUMBERS, FieldValue.arrayRemove(numberData))
                                 ?.addOnSuccessListener {
                                 }?.addOnFailureListener {
                                     snackbar("Something went wrong: $it", SnackbarDuration.Short)
@@ -361,7 +361,7 @@ fun addOrRemoveNumberFromFirebase(
 fun updateNumberState(
     context: Context,
     snackbar: (String, SnackbarDuration) -> Unit,
-    numberToBeUpdated: OrderedNumberData?,
+    numberToBeUpdated: NumberData?,
     newState: NumberState
 ) {
 

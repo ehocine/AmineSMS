@@ -396,7 +396,6 @@ fun updateNumberState(
     } else {
         snackbar(context.getString(R.string.device_not_connected), SnackbarDuration.Short)
     }
-
 }
 
 // Function to check is the user is not null and has email verified

@@ -23,7 +23,7 @@ interface SMSServiceApi {
     ): Response<OrderNumberResponse>
 
     @GET("/api/v2/temporary/{temporaryNumberId}")
-    suspend fun checkForMessages(@Path("temporaryNumberId") temporaryNumberId: String): Response<MessageResponse>
+    suspend fun getTempNumberInfo(@Path("temporaryNumberId") temporaryNumberId: String): Response<MessageResponse>
 
     @POST("/api/v2/temporary/{temporaryNumberId}/cancel")
     suspend fun cancelTempNumber(@Path("temporaryNumberId") temporaryNumberId: String): Response<CancelNumberResponse>

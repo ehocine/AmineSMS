@@ -27,6 +27,7 @@ import com.helic.aminesms.R
 import com.helic.aminesms.data.models.order_number.OrderedNumberData
 import com.helic.aminesms.data.viewmodels.MainViewModel
 import com.helic.aminesms.presentation.navigation.MainAppScreens
+import com.helic.aminesms.presentation.ui.theme.Red
 import com.helic.aminesms.presentation.ui.theme.phoneMessagesTextColor
 import com.helic.aminesms.presentation.ui.theme.topAppBarBackgroundColor
 import com.helic.aminesms.presentation.ui.theme.topAppBarContentColor
@@ -52,13 +53,17 @@ fun MessageDetails(
 
     LaunchedEffect(key1 = true) {
         mainViewModel.getBalance(context = context, snackbar = showSnackbar)
+    }
+
+    LaunchedEffect(key1 = state) {
         mainViewModel.getReusableNumbers(snackbar = showSnackbar)
     }
 
     val userBalance = mainViewModel.userBalance.collectAsState().value
-    var remainingTime by remember {
+
+    var remainingExpirationTime by remember {
         mutableStateOf(
-            calculatingRemainingTime(
+            calculatingRemainingExpirationTime(
                 context = context,
                 orderedNumberData = temporaryNumber,
                 snackbar = showSnackbar,
@@ -66,19 +71,30 @@ fun MessageDetails(
             )
         )
     }
+    var remainingReuseTime by remember {
+        mutableStateOf(
+            calculatingRemainingTime(
+                orderedNumberData = temporaryNumber
+            )
+        )
+    }
 
-    LaunchedEffect(key1 = remainingTime) {
+    LaunchedEffect(key1 = remainingExpirationTime) {
         delay(1000L)
-        remainingTime = calculatingRemainingTime(
+        remainingExpirationTime = calculatingRemainingExpirationTime(
             context = context,
             orderedNumberData = temporaryNumber,
             snackbar = showSnackbar,
             userBalance = userBalance
         )
-
     }
 
-    val numberState by remember { mutableStateOf(temporaryNumber.state) }
+    LaunchedEffect(key1 = remainingReuseTime) {
+        delay(1000L)
+        remainingReuseTime = calculatingRemainingTime(
+            orderedNumberData = temporaryNumber
+        )
+    }
 
     Scaffold(topBar = {
         MessageDetailsTopAppBar(
@@ -100,13 +116,18 @@ fun MessageDetails(
             }
         ) {
             Column(
-                modifier = Modifier.padding(20.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
+                modifier = Modifier.padding(top = 20.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
                     text =
                     when {
-                        remainingTime > 0 -> "Expires in $remainingTime second(s)"
+                        remainingExpirationTime > 0 -> "Expires in ${
+                            convertSeconds(
+                                remainingExpirationTime
+                            )
+                        }"
                         else -> temporaryNumber.state
                     },
                     fontWeight = FontWeight.Bold,
@@ -122,20 +143,47 @@ fun MessageDetails(
                         } else {
                             NoResults()
                         }
-
                     }
                 }
-                when (numberState) {
-                    NumberState.Completed.toString() -> {
-                        if (mainViewModel.reusableNumbersList.value.find { it.reusableId == temporaryNumber.temporaryNumberId } != null) {
-                            ReuseNumber(
-                                mainViewModel = mainViewModel,
-                                temporaryNumber = temporaryNumber,
-                                showSnackbar = showSnackbar
-                            )
+
+                Column(
+                    modifier = Modifier.padding(10.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Bottom
+                ) {
+                    when (temporaryNumber.state) {
+                        NumberState.Completed.toString() -> {
+                            if (mainViewModel.reusableNumbersList.value.find
+                                { it.reusableId == temporaryNumber.temporaryNumberId } != null
+                            ) {
+                                when {
+                                    remainingReuseTime > 0 -> {
+                                        Text(
+                                            text = "Number can be reused within ${
+                                                convertSeconds(remainingReuseTime)
+                                            }",
+                                            fontWeight = FontWeight.Medium,
+                                            color = MaterialTheme.colors.phoneMessagesTextColor
+                                        )
+                                        ReuseNumber(
+                                            mainViewModel = mainViewModel,
+                                            temporaryNumber = temporaryNumber,
+                                            showSnackbar = showSnackbar
+                                        )
+                                    }
+                                    else -> {
+                                        Text(
+                                            text = "Time expired, number can no longer be reused",
+                                            fontWeight = FontWeight.Medium,
+                                            color = Red
+                                        )
+                                    }
+                                }
+
+                            }
                         }
+                        else -> Unit
                     }
-                    else -> Unit
                 }
             }
         }
@@ -190,7 +238,7 @@ fun ReuseNumber(
     showSnackbar: (String, SnackbarDuration) -> Unit
 ) {
     var openDialog by remember { mutableStateOf(false) }
-    ReuseButton(number = temporaryNumber,onClick = { openDialog = true })
+    ReuseButton(number = temporaryNumber, onClick = { openDialog = true })
 
     DisplayAlertDialog(
         title = "Reuse Number ${temporaryNumber.number}",
@@ -294,10 +342,10 @@ fun ExistingTaskAppBarActions(
                 temporaryNumberId = orderedNumber.temporaryNumberId,
                 snackbar = showSnackbar
             )
-            mainViewModel.checkMessageReuseNumber(
-                temporaryNumberId = orderedNumber.temporaryNumberId,
-                snackbar = showSnackbar
-            )
+//            mainViewModel.checkMessageReuseNumber(
+//                temporaryNumberId = orderedNumber.temporaryNumberId,
+//                snackbar = showSnackbar
+//            )
         }
     })
 }

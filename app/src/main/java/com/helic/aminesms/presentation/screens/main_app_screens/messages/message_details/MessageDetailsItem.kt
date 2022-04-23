@@ -17,12 +17,12 @@ import com.helic.aminesms.presentation.ui.theme.MediumGray
 import com.helic.aminesms.presentation.ui.theme.phoneMessagesTextColor
 
 @Composable
-fun MessageDetailItem(listOfMessages: MutableList<Sms?>) {
+fun MessageDetailItem(listOfMessages: List<Sms?>) {
     DisplayMessage(listOfMessages = listOfMessages)
 }
 
 @Composable
-fun DisplayMessage(listOfMessages: MutableList<Sms?>) {
+fun DisplayMessage(listOfMessages: List<Sms?>) {
 
     LazyColumn(modifier = Modifier.fillMaxWidth()) {
         items(listOfMessages) { message ->

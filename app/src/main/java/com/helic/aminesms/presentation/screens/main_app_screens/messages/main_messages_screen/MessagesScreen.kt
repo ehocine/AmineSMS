@@ -37,7 +37,7 @@ fun Messages(
 
     LaunchedEffect(key1 = listOfOrderedNumbers) {
         mainViewModel.getListOfNumbersFromFirebase(context = context, snackbar = snackbar)
-        mainViewModel.getReusableNumbers(snackbar = snackbar)
+//        mainViewModel.getReusableNumbers(snackbar = snackbar)
     }
     LaunchedEffect(key1 = true) {
         mainViewModel.getBalance(context = context, snackbar = snackbar)

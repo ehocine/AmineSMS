@@ -7,5 +7,5 @@ data class User(
     val userName: String = "",
     val userEmail: String = "",
     val userBalance: Double = 0.0,
-    val listOfNumbers: List<OrderedNumberData> = listOf<OrderedNumberData>()
+    val listOfNumbers: List<OrderedNumberData> = listOf()
 )

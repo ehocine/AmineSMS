@@ -27,8 +27,8 @@ class RemoteDataSource @Inject constructor(private val smsServiceApi: SMSService
         )
     }
 
-    suspend fun checkForMessages(temporaryNumberId: String): Response<MessageResponse> {
-        return smsServiceApi.checkForMessages(temporaryNumberId = temporaryNumberId)
+    suspend fun getTempNumberInfo(temporaryNumberId: String): Response<MessageResponse> {
+        return smsServiceApi.getTempNumberInfo(temporaryNumberId = temporaryNumberId)
     }
 
 

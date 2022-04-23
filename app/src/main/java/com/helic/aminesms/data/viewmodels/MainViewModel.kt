@@ -123,6 +123,7 @@ class MainViewModel @Inject constructor(
         mutableStateOf(OrderedNumberData())
 
     val message: MutableState<Sms>? = mutableStateOf(Sms())
+    val messageList: MutableState<List<Sms>>? = mutableStateOf(listOf())
 
     private val cancelTempNumber: MutableState<CancelNumberResponse> =
         mutableStateOf(CancelNumberResponse())
@@ -194,6 +195,7 @@ class MainViewModel @Inject constructor(
     }
 
     var gettingListOfNumbersLoadingState = MutableStateFlow(LoadingState.IDLE)
+
     fun getListOfNumbersFromFirebase(
         context: Context,
         snackbar: (String, SnackbarDuration) -> Unit
@@ -310,6 +312,14 @@ class MainViewModel @Inject constructor(
                             orderedNumberData.value = response.body()!!.orderedNumberData
                             buyingLoadingStateOfViewModel.emit(LoadingState.LOADED)
 
+//                            orderedNumberDataToFirebase.value.apply {
+//                                expiresAt = orderedNumberData.value.expiresAt
+//                                number = orderedNumberData.value.number
+//                                price = orderedNumberData.value.price
+//                                reuseableUntil = orderedNumberData.value.reuseableUntil
+//                                state = orderedNumberData.value.state
+//                                temporaryNumberId.add(orderedNumberData.value.temporaryNumberId)
+//                            }
                             reduceBalance(
                                 context = getApplication<Application>(),
                                 snackbar = snackbar,
@@ -366,7 +376,7 @@ class MainViewModel @Inject constructor(
                 try {
                     withTimeoutOrNull(TIMEOUT_IN_MILLIS) {
                         checkingMessagesLoadingStateOfViewModel.emit(LoadingState.LOADING)
-                        val response = repository.remote.checkForMessages(
+                        val response = repository.remote.getTempNumberInfo(
                             temporaryNumberId = temporaryNumberId
                         )
                         if (response.isSuccessful) {
@@ -378,7 +388,7 @@ class MainViewModel @Inject constructor(
                                     context = context,
                                     snackbar = snackbar,
                                     numberToBeUpdated = orderedNumberInList,
-                                    NumberState.Completed
+                                    newState = NumberState.Completed
                                 )
                             }
                             checkingMessagesLoadingStateOfViewModel.emit(LoadingState.LOADED)
@@ -533,12 +543,6 @@ class MainViewModel @Inject constructor(
                         if (response.isSuccessful) {
                             reusableNumbersList.value = response.body()!!.reusableNumbersListData
                             buyingLoadingStateOfViewModel.emit(LoadingState.LOADED)
-                            reusableNumbersList.value.forEach {
-                                Log.d(
-                                    "Tag",
-                                    "Service name : ${it.serviceName}\n Number : ${it.number}\n Price : ${it.price}\n ID: ${it.reusableId}"
-                                )
-                            }
                         }
 
                     } ?: withContext(Dispatchers.Main) {
@@ -578,15 +582,6 @@ class MainViewModel @Inject constructor(
                         if (response.isSuccessful) {
                             reuseNumberResponse.value = response.body()!!.reuseNumberData
                             buyingLoadingStateOfViewModel.emit(LoadingState.LOADED)
-                            Log.d("Tag", "Old: $temporaryNumberId")
-                            Log.d("Tag", "New: ${reuseNumberResponse.value.temporaryNumberId}")
-                            checkForMessages(
-                                context = getApplication<Application>(),
-                                temporaryNumberId = reuseNumberResponse.value.temporaryNumberId,
-                                snackbar = snackbar
-                            )
-                            Log.d("Tag", "Msg: ${message?.value?.content}")
-
                         }
 
                     } ?: withContext(Dispatchers.Main) {

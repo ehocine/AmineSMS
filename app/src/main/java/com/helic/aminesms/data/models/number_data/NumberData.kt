@@ -11,7 +11,7 @@ data class NumberData(
     @SerializedName("price")
     val price: Double = 0.0,
     @SerializedName("reuseableUntil")
-    val reuseableUntil: Int = 0,
+    var reuseableUntil: Int = 0,
     @SerializedName("state")
     var state: String = "",
     @SerializedName("temporaryNumberId")

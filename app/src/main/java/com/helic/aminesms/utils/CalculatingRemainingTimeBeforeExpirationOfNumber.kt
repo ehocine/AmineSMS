@@ -45,14 +45,14 @@ fun calculatingRemainingExpirationTime(
     return difference
 }
 
-fun calculatingRemainingTime(
+fun calculatingRemainingReuseTime(
     numberData: NumberData
 ): Int {
     val localDate = LocalDate.now()
     val startOfDay: LocalDateTime = localDate.atTime(LocalTime.now())
     val timestamp = startOfDay.atZone(ZoneId.systemDefault()).toInstant().epochSecond
 
-    var difference = numberData.expiresAt - timestamp.toInt()
+    var difference = numberData.reuseableUntil - timestamp.toInt()
 
     if (difference <= 0) difference = 0
     return difference

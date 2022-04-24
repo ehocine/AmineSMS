@@ -2,6 +2,7 @@ package com.helic.aminesms.presentation.screens.main_app_screens.messages.messag
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.util.Log
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -27,7 +28,6 @@ import com.helic.aminesms.R
 import com.helic.aminesms.data.models.number_data.NumberData
 import com.helic.aminesms.data.viewmodels.MainViewModel
 import com.helic.aminesms.presentation.navigation.MainAppScreens
-import com.helic.aminesms.presentation.ui.theme.Red
 import com.helic.aminesms.presentation.ui.theme.phoneMessagesTextColor
 import com.helic.aminesms.presentation.ui.theme.topAppBarBackgroundColor
 import com.helic.aminesms.presentation.ui.theme.topAppBarContentColor
@@ -57,6 +57,14 @@ fun MessageDetails(
 
     LaunchedEffect(key1 = state) {
         mainViewModel.getReusableNumbersList(snackbar = showSnackbar)
+//        val reusableNumber =
+//            mainViewModel.reusableNumbersList.value.find { it.reusableId == temporaryNumber.temporaryNumberId }
+//        if (reusableNumber != null) {
+//            temporaryNumber.apply {
+//                reuseableUntil = reusableNumber.reuseableUntil
+//            }
+//            Log.d("Tag", "NumberID: ${temporaryNumber.temporaryNumberId} reusable ${temporaryNumber.reuseableUntil}")
+//        }
     }
 
     val userBalance = mainViewModel.userBalance.collectAsState().value
@@ -73,7 +81,7 @@ fun MessageDetails(
     }
     var remainingReuseTime by remember {
         mutableStateOf(
-            calculatingRemainingTime(
+            calculatingRemainingReuseTime(
                 numberData = temporaryNumber
             )
         )
@@ -91,7 +99,7 @@ fun MessageDetails(
 
     LaunchedEffect(key1 = remainingReuseTime) {
         delay(1000L)
-        remainingReuseTime = calculatingRemainingTime(
+        remainingReuseTime = calculatingRemainingReuseTime(
             numberData = temporaryNumber
         )
     }
@@ -172,13 +180,14 @@ fun MessageDetails(
                                             navController = navController
                                         )
                                     }
-                                    else -> {
-                                        Text(
-                                            text = "Time expired, number can no longer be reused",
-                                            fontWeight = FontWeight.Medium,
-                                            color = Red
-                                        )
-                                    }
+                                    else -> Unit
+//                                    {
+//                                        Text(
+//                                            text = "Time expired, number can no longer be reused",
+//                                            fontWeight = FontWeight.Medium,
+//                                            color = Red
+//                                        )
+//                                    }
                                 }
 
                             }

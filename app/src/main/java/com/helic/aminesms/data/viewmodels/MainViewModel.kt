@@ -20,9 +20,9 @@ import com.google.firebase.ktx.Firebase
 import com.helic.aminesms.R
 import com.helic.aminesms.data.models.cancel_number.CancelNumberResponse
 import com.helic.aminesms.data.models.messages.Sms
-import com.helic.aminesms.data.models.order_temp_number.ListOfOrderedNumber
 import com.helic.aminesms.data.models.number_data.NumberData
 import com.helic.aminesms.data.models.number_data.ReusableNumbersData
+import com.helic.aminesms.data.models.order_temp_number.ListOfOrderedNumber
 import com.helic.aminesms.data.models.service_state.ServiceState
 import com.helic.aminesms.data.repository.Repository
 import com.helic.aminesms.presentation.navigation.MainAppScreens
@@ -310,6 +310,7 @@ class MainViewModel @Inject constructor(
                         if (response.isSuccessful) {
                             numberData.value = response.body()!!.numberData
                             buyingLoadingStateOfViewModel.emit(LoadingState.LOADED)
+                            Log.d("Tag", "Number: ${numberData.value.reuseableUntil}")
                             reduceBalance(
                                 context = getApplication<Application>(),
                                 snackbar = snackbar,
@@ -351,7 +352,6 @@ class MainViewModel @Inject constructor(
             }
 
         }
-
     }
 
     var checkingMessagesLoadingStateOfViewModel = MutableStateFlow(LoadingState.IDLE)
@@ -486,7 +486,6 @@ class MainViewModel @Inject constructor(
             }
         }
     }
-
     var checkingSuperUserBalanceLoadingState = MutableStateFlow(LoadingState.IDLE)
 
     fun getSuperUserBalance(snackbar: (String, SnackbarDuration) -> Unit) {
@@ -521,6 +520,7 @@ class MainViewModel @Inject constructor(
         }
     }
 
+    //TODO it seems there is an issue with the reusableUntil value from the test API, it's always zero when getting the number ordered. Check with the production API
     fun getReusableNumbersList(
         snackbar: (String, SnackbarDuration) -> Unit
     ) {
@@ -573,6 +573,11 @@ class MainViewModel @Inject constructor(
                         if (response.isSuccessful) {
                             reuseNumberResponse.value = response.body()!!.reuseNumberData
                             buyingLoadingStateOfViewModel.emit(LoadingState.LOADED)
+
+//                            // Added so the user cannot reuse the reused number again (rule by the api)
+//                            reuseNumberResponse.value.apply {
+//                                reuseableUntil = 0
+//                            }
                             reduceBalance(
                                 context = getApplication<Application>(),
                                 snackbar = snackbar,
@@ -592,7 +597,6 @@ class MainViewModel @Inject constructor(
                                 launchSingleTop = true
                             }
                         }
-
                     } ?: withContext(Dispatchers.Main) {
                         buyingLoadingStateOfViewModel.emit(LoadingState.ERROR)
                         snackbar(
@@ -604,47 +608,6 @@ class MainViewModel @Inject constructor(
                     buyingLoadingStateOfViewModel.emit(LoadingState.ERROR)
                     snackbar(e.message!!, SnackbarDuration.Short)
                 }
-
-            } else {
-                buyingLoadingStateOfViewModel.emit(LoadingState.ERROR)
-                snackbar(
-                    getApplication<Application>().getString(R.string.device_not_connected),
-                    SnackbarDuration.Short
-                )
-            }
-
-        }
-    }
-
-    fun checkMessageReuseNumber(
-        temporaryNumberId: String,
-        snackbar: (String, SnackbarDuration) -> Unit
-    ) {
-        viewModelScope.launch {
-            if (hasInternetConnection(getApplication<Application>())) {
-                try {
-                    withTimeoutOrNull(TIMEOUT_IN_MILLIS) {
-                        buyingLoadingStateOfViewModel.emit(LoadingState.LOADING)
-                        val response =
-                            repository.remote.reuseNumber(temporaryNumberId = temporaryNumberId)
-                        if (response.isSuccessful) {
-                            reuseNumberResponse.value = response.body()!!.reuseNumberData
-                            buyingLoadingStateOfViewModel.emit(LoadingState.LOADED)
-                        }
-
-                    } ?: withContext(Dispatchers.Main) {
-                        buyingLoadingStateOfViewModel.emit(LoadingState.ERROR)
-                        snackbar(
-                            getApplication<Application>().getString(R.string.time_out),
-                            SnackbarDuration.Short
-                        )
-                    }
-                } catch (e: Exception) {
-                    buyingLoadingStateOfViewModel.emit(LoadingState.ERROR)
-                    snackbar(e.message!!, SnackbarDuration.Short)
-                    Log.d("MSG", e.message!!)
-                }
-
             } else {
                 buyingLoadingStateOfViewModel.emit(LoadingState.ERROR)
                 snackbar(

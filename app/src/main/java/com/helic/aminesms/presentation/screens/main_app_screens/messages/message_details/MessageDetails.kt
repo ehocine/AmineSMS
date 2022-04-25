@@ -2,7 +2,6 @@ package com.helic.aminesms.presentation.screens.main_app_screens.messages.messag
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.util.Log
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -11,7 +10,7 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Recycling
+import androidx.compose.material.icons.filled.Redo
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -25,14 +24,16 @@ import androidx.navigation.NavGraph.Companion.findStartDestination
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.helic.aminesms.R
+import com.helic.aminesms.data.models.messages.Sms
 import com.helic.aminesms.data.models.number_data.NumberData
 import com.helic.aminesms.data.viewmodels.MainViewModel
 import com.helic.aminesms.presentation.navigation.MainAppScreens
+import com.helic.aminesms.presentation.ui.theme.Red
 import com.helic.aminesms.presentation.ui.theme.phoneMessagesTextColor
 import com.helic.aminesms.presentation.ui.theme.topAppBarBackgroundColor
 import com.helic.aminesms.presentation.ui.theme.topAppBarContentColor
 import com.helic.aminesms.utils.*
-import com.helic.aminesms.utils.Constants.REUSE_DISCOUNT
+import com.helic.aminesms.utils.Constants.REUSE_DISCOUNT_PERCENT
 import kotlinx.coroutines.delay
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
@@ -104,12 +105,31 @@ fun MessageDetails(
         )
     }
 
+    //This is added to autocheck the incoming messages every TIME_BETWEEN_AUTOREFRESH,
+    // we added the variable counter to autoupdate the LaunchedEffect
+    // we added the condition to reduce resources usage when there is a message
+
+    if (sms == null) {
+        var counter by remember { mutableStateOf(0) }
+        LaunchedEffect(key1 = counter) {
+            delay(1000L)
+            counter += 1
+            mainViewModel.autoCheckMessage(
+                context = context,
+                temporaryNumberId = temporaryNumber.temporaryNumberId,
+                snackbar = showSnackbar
+            )
+        }
+    }
+
+
     Scaffold(topBar = {
         MessageDetailsTopAppBar(
             context = context,
             navController = navController,
             mainViewModel = mainViewModel,
-            temporaryNumberId = temporaryNumber.temporaryNumberId,
+            temporaryNumber = temporaryNumber,
+            sms = sms,
             showSnackbar = showSnackbar
         )
     }) {
@@ -124,36 +144,39 @@ fun MessageDetails(
             }
         ) {
             Column(
-                modifier = Modifier.padding(top = 20.dp),
+                modifier = Modifier
+                    .padding(top = 20.dp)
+                    .fillMaxHeight(),
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.SpaceBetween
             ) {
-                Text(
-                    text =
-                    when {
-                        remainingExpirationTime > 0 -> "Expires in ${
-                            convertSeconds(
-                                remainingExpirationTime
-                            )
-                        }"
-                        else -> temporaryNumber.state
-                    },
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colors.phoneMessagesTextColor
-                )
-                Spacer(modifier = Modifier.padding(20.dp))
-                when (state) {
-                    LoadingState.LOADING -> LoadingList()
-                    LoadingState.ERROR -> ErrorLoadingResults()
-                    else -> {
-                        if (sms != null) {
-                            MessageDetailItem(listOfMessages = list)
-                        } else {
-                            NoResults()
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(
+                        text =
+                        when {
+                            remainingExpirationTime > 0 -> "Expires in ${
+                                convertSeconds(
+                                    remainingExpirationTime
+                                )
+                            }"
+                            else -> temporaryNumber.state
+                        },
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colors.phoneMessagesTextColor
+                    )
+                    Spacer(modifier = Modifier.padding(20.dp))
+                    when (state) {
+                        LoadingState.LOADING -> LoadingList()
+                        LoadingState.ERROR -> ErrorLoadingResults()
+                        else -> {
+                            if (sms != null) {
+                                MessageDetailItem(listOfMessages = list)
+                            } else {
+                                NoResults()
+                            }
                         }
                     }
                 }
-
                 Column(
                     modifier = Modifier.padding(10.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
@@ -166,13 +189,19 @@ fun MessageDetails(
                             ) {
                                 when {
                                     remainingReuseTime > 0 -> {
-                                        Text(
-                                            text = "Number can be reused within ${
-                                                convertSeconds(remainingReuseTime)
-                                            }",
-                                            fontWeight = FontWeight.Medium,
-                                            color = MaterialTheme.colors.phoneMessagesTextColor
-                                        )
+                                        Row {
+                                            Text(
+                                                text = "Number can be reused within ",
+                                                fontWeight = FontWeight.Medium,
+                                                color = MaterialTheme.colors.phoneMessagesTextColor
+                                            )
+                                            Text(
+                                                text = convertSeconds(remainingReuseTime),
+                                                fontWeight = FontWeight.Bold,
+                                                color = MaterialTheme.colors.phoneMessagesTextColor
+                                            )
+                                        }
+                                        Spacer(modifier = Modifier.padding(10.dp))
                                         ReuseNumber(
                                             mainViewModel = mainViewModel,
                                             temporaryNumber = temporaryNumber,
@@ -180,14 +209,9 @@ fun MessageDetails(
                                             navController = navController
                                         )
                                     }
-                                    else -> Unit
-//                                    {
-//                                        Text(
-//                                            text = "Time expired, number can no longer be reused",
-//                                            fontWeight = FontWeight.Medium,
-//                                            color = Red
-//                                        )
-//                                    }
+                                    else -> {
+                                        CantBeReusedDisplay()
+                                    }
                                 }
 
                             }
@@ -206,11 +230,10 @@ fun MessageDetailsTopAppBar(
     context: Context,
     navController: NavController,
     mainViewModel: MainViewModel,
-    temporaryNumberId: String,
+    temporaryNumber: NumberData,
+    sms: Sms?,
     showSnackbar: (String, SnackbarDuration) -> Unit,
 ) {
-    val orderedNumber =
-        mainViewModel.orderedNumbersList.value.find { it.temporaryNumberId == temporaryNumberId }
     TopAppBar(
         navigationIcon = {
             IconButton(onClick = {
@@ -232,7 +255,8 @@ fun MessageDetailsTopAppBar(
             ExistingTaskAppBarActions(
                 context = context,
                 navController = navController,
-                number = orderedNumber,
+                number = temporaryNumber,
+                sms = sms,
                 mainViewModel = mainViewModel,
                 showSnackbar = showSnackbar
             )
@@ -249,15 +273,11 @@ fun ReuseNumber(
     navController: NavController
 ) {
     var openDialog by remember { mutableStateOf(false) }
-    ReuseButton(number = temporaryNumber, onClick = { openDialog = true })
+    ReuseButton { openDialog = true }
 
     DisplayAlertDialog(
         title = "Reuse Number ${temporaryNumber.number}",
-        message = "You can reuse this number for ${
-            dollarToCreditForPurchasingNumbers(
-                temporaryNumber.price
-            ) * REUSE_DISCOUNT
-        } credits, Are you sure you want to continue?",
+        message = "You can reuse this number for a $REUSE_DISCOUNT_PERCENT% off, Are you sure you want to continue?",
         openDialog = openDialog,
         closeDialog = { openDialog = false },
         onYesClicked = {
@@ -271,7 +291,7 @@ fun ReuseNumber(
 }
 
 @Composable
-fun ReuseButton(number: NumberData, onClick: () -> Unit) {
+fun ReuseButton(onClick: () -> Unit) {
     Card(
         modifier = Modifier
             .border(
@@ -291,24 +311,45 @@ fun ReuseButton(number: NumberData, onClick: () -> Unit) {
             horizontalArrangement = Arrangement.Center
         ) {
             Icon(
-                imageVector = Icons.Default.Recycling,
+                imageVector = Icons.Default.Redo,
                 contentDescription = "",
                 tint = MaterialTheme.colors.primary
             )
             Spacer(modifier = Modifier.padding(10.dp))
             Text(
-                text = "Reuse Number for ${
-                    dollarToCreditForPurchasingNumbers(
-                        number.price
-                    ) * REUSE_DISCOUNT
-                }",
+                text = "Reuse number for a $REUSE_DISCOUNT_PERCENT% off",
                 color = MaterialTheme.colors.primary,
                 fontWeight = FontWeight.Bold
             )
         }
+    }
+}
+
+@Composable
+fun CantBeReusedDisplay() {
+    Card(
+        modifier = Modifier
+            .border(
+                width = 1.dp,
+                color = Red,
+                shape = RoundedCornerShape(5.dp)
+            )
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(5.dp))
+    ) {
+        Row(
+            modifier = Modifier.padding(start = 5.dp, top = 15.dp, bottom = 15.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Text(
+                text = "Number can no longer be reused",
+                fontWeight = FontWeight.Medium,
+                color = Red
+            )
+        }
 
     }
-
 }
 
 @Composable
@@ -316,11 +357,11 @@ fun ExistingTaskAppBarActions(
     context: Context,
     navController: NavController,
     number: NumberData?,
+    sms: Sms?,
     mainViewModel: MainViewModel,
     showSnackbar: (String, SnackbarDuration) -> Unit
 ) {
     var openDialog by remember { mutableStateOf(false) }
-
     DisplayAlertDialog(
         title = "Cancel ${number?.number}",
         message = "Are you sure you want to cancel this number?",
@@ -346,7 +387,7 @@ fun ExistingTaskAppBarActions(
         }
     )
 
-    CancelAction(onDeleteClicked = { openDialog = true })
+    CancelAction(onCancelClicked = { openDialog = true })
     RefreshAction(onRefreshClicked = {
         if (number != null) {
             mainViewModel.refreshMessageCheck(
@@ -354,19 +395,15 @@ fun ExistingTaskAppBarActions(
                 temporaryNumberId = number.temporaryNumberId,
                 snackbar = showSnackbar
             )
-//            mainViewModel.checkMessageReuseNumber(
-//                temporaryNumberId = orderedNumber.temporaryNumberId,
-//                snackbar = showSnackbar
-//            )
         }
     })
 }
 
 @Composable
 fun CancelAction(
-    onDeleteClicked: () -> Unit
+    onCancelClicked: () -> Unit
 ) {
-    IconButton(onClick = { onDeleteClicked() }) {
+    IconButton(onClick = { onCancelClicked() }) {
         Icon(
             imageVector = Icons.Default.Close, contentDescription = "Cancel Button",
             tint = MaterialTheme.colors.topAppBarContentColor

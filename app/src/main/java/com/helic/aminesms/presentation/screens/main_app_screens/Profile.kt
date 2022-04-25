@@ -5,9 +5,7 @@ import android.content.Context
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -59,32 +57,39 @@ fun Profile(
             balance
         )
     }
-    if (user != null) {
-        ProfileDetails(
-            mainViewModel = mainViewModel,
-            navController = navController,
-            showSnackbar = showSnackbar,
-            user = user
-        )
-    }
 
+    Scaffold() {
+        if (user != null) {
+            ProfileDetails(
+                context = context,
+                mainViewModel = mainViewModel,
+                navController = navController,
+                showSnackbar = showSnackbar,
+                user = user
+            )
+        }
+    }
 }
 
 @Composable
 fun ProfileDetails(
+    context: Context,
     mainViewModel: MainViewModel,
     navController: NavController,
     showSnackbar: (String, SnackbarDuration) -> Unit,
     user: User
 ) {
-    val context = LocalContext.current
     Column(
         modifier = Modifier
-            .verticalScroll(rememberScrollState())
             .padding(10.dp)
-            .fillMaxSize()
+            .fillMaxHeight(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.SpaceBetween
     ) {
-        Column(modifier = Modifier.padding(top = 20.dp)) {
+        Column(
+            modifier = Modifier
+                .padding(top = 20.dp)
+        ) {
             Text(
                 text = stringResource(R.string.welcome),
                 Modifier.padding(start = 8.dp, bottom = 15.dp),
@@ -183,11 +188,14 @@ fun ProfileDetails(
             }
         }
 
-        Spacer(modifier = Modifier.padding(10.dp))
-        CustomDivider()
-        Spacer(modifier = Modifier.padding(10.dp))
 
-        Column() {
+
+        Column(
+            verticalArrangement = Arrangement.Bottom
+        ) {
+//            Spacer(modifier = Modifier.padding(10.dp))
+//            CustomDivider()
+//            Spacer(modifier = Modifier.padding(10.dp))
             Text(
                 text = "Sign out",
                 fontSize = MaterialTheme.typography.body1.fontSize,
@@ -203,8 +211,6 @@ fun ProfileDetails(
                 showSnackbar = showSnackbar
             )
         }
-
-
     }
 }
 

@@ -53,6 +53,7 @@ fun calculatingRemainingReuseTime(
     val timestamp = startOfDay.atZone(ZoneId.systemDefault()).toInstant().epochSecond
 
     var difference = numberData.reuseableUntil - timestamp.toInt()
+//    var difference = numberData.expiresAt - timestamp.toInt() // For testing
 
     if (difference <= 0) difference = 0
     return difference

@@ -18,8 +18,10 @@ object Constants {
     const val LIST_OF_NUMBERS = "listOfNumbers"
 
     val SHOP_LIST = listOf(1, 5, 10, 25)
-    val SKU_LIST = listOf<String>("one", "five", "ten", "twenty_five")
-    const val REUSE_DISCOUNT = 0.5
+    val SKU_LIST = listOf("one", "five", "ten", "twenty_five")
+    const val REUSE_DISCOUNT_PERCENT = 50
+
+    const val TIME_BETWEEN_AUTOREFRESH = 3000L
 
     const val PROJECT_KEY_QONVERSION = "2F3kQuqIZg7Fd3fWhcAYNigWcSWjXPfp"
 

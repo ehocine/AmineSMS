@@ -405,6 +405,57 @@ class MainViewModel @Inject constructor(
         }
     }
 
+    // This function will be launched later with a LaunchedEffect in the MassageDetails screen
+    var autoCheckingMessagesLoadingStateOfViewModel = MutableStateFlow(LoadingState.IDLE)
+    fun autoCheckMessage(
+        context: Context,
+        temporaryNumberId: String,
+        snackbar: (String, SnackbarDuration) -> Unit
+    ) {
+        viewModelScope.launch {
+            if (hasInternetConnection(getApplication<Application>())) {
+                try {
+                    withTimeoutOrNull(TIMEOUT_IN_MILLIS) {
+                        autoCheckingMessagesLoadingStateOfViewModel.emit(LoadingState.LOADING)
+                        val response = repository.remote.getTempNumberInfo(
+                            temporaryNumberId = temporaryNumberId
+                        )
+                        if (response.isSuccessful) {
+                            message?.value = response.body()!!.data.sms
+                            if (message?.value != null) {
+                                val orderedNumberInList =
+                                    orderedNumbersList.value.find { it.temporaryNumberId == temporaryNumberId }
+                                updateNumberState(
+                                    context = context,
+                                    snackbar = snackbar,
+                                    numberToBeUpdated = orderedNumberInList,
+                                    newState = NumberState.Completed
+                                )
+                            }
+                            autoCheckingMessagesLoadingStateOfViewModel.emit(LoadingState.LOADED)
+                        }
+                    } ?: withContext(Dispatchers.Main) {
+                        autoCheckingMessagesLoadingStateOfViewModel.emit(LoadingState.ERROR)
+                        snackbar(
+                            getApplication<Application>().getString(R.string.time_out),
+                            SnackbarDuration.Short
+                        )
+                    }
+                } catch (e: Exception) {
+                    autoCheckingMessagesLoadingStateOfViewModel.emit(LoadingState.ERROR)
+                    snackbar(e.message!!, SnackbarDuration.Short)
+                }
+
+            } else {
+                autoCheckingMessagesLoadingStateOfViewModel.emit(LoadingState.ERROR)
+                snackbar(
+                    getApplication<Application>().getString(R.string.device_not_connected),
+                    SnackbarDuration.Short
+                )
+            }
+        }
+    }
+
     fun refreshMessageCheck(
         context: Context,
         temporaryNumberId: String,
@@ -463,7 +514,6 @@ class MainViewModel @Inject constructor(
                                 }
                                 launchSingleTop = true
                             }
-
                         }
                     } ?: withContext(Dispatchers.Main) {
 //                        checkingMessagesLoadingStateOfViewModel.emit(LoadingState.ERROR)
@@ -486,6 +536,7 @@ class MainViewModel @Inject constructor(
             }
         }
     }
+
     var checkingSuperUserBalanceLoadingState = MutableStateFlow(LoadingState.IDLE)
 
     fun getSuperUserBalance(snackbar: (String, SnackbarDuration) -> Unit) {
@@ -532,6 +583,10 @@ class MainViewModel @Inject constructor(
                         val response = repository.remote.getReusableNumbers()
                         if (response.isSuccessful) {
                             reusableNumbersList.value = response.body()!!.reusableNumbersListData
+
+                            reusableNumbersList.value.forEach {
+                                Log.d("Tag", "Service: ${it.serviceName}, price: ${it.price} ")
+                            }
                             buyingLoadingStateOfViewModel.emit(LoadingState.LOADED)
                         }
 
@@ -554,7 +609,6 @@ class MainViewModel @Inject constructor(
                     SnackbarDuration.Short
                 )
             }
-
         }
     }
 
@@ -574,10 +628,6 @@ class MainViewModel @Inject constructor(
                             reuseNumberResponse.value = response.body()!!.reuseNumberData
                             buyingLoadingStateOfViewModel.emit(LoadingState.LOADED)
 
-//                            // Added so the user cannot reuse the reused number again (rule by the api)
-//                            reuseNumberResponse.value.apply {
-//                                reuseableUntil = 0
-//                            }
                             reduceBalance(
                                 context = getApplication<Application>(),
                                 snackbar = snackbar,
@@ -587,7 +637,7 @@ class MainViewModel @Inject constructor(
                             addOrRemoveNumberFromFirebase(
                                 context = getApplication<Application>(),
                                 snackbar = snackbar,
-                                AddOrRemoveNumberAction.ADD,
+                                action = AddOrRemoveNumberAction.ADD,
                                 numberData = reuseNumberResponse.value
                             )
                             navController.navigate(MainAppScreens.Messages.route) {

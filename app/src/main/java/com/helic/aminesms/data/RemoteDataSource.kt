@@ -5,6 +5,8 @@ import com.helic.aminesms.data.models.UserBalanceResponse
 import com.helic.aminesms.data.models.cancel_number.CancelNumberResponse
 import com.helic.aminesms.data.models.messages.MessageResponse
 import com.helic.aminesms.data.models.order_temp_number.OrderNumberResponse
+import com.helic.aminesms.data.models.rental_numbers.RentNumberServiceStateList
+import com.helic.aminesms.data.models.rental_numbers.rental_options.RentalOptionsResponse
 import com.helic.aminesms.data.models.reusable_numbers.ReusableNumbersResponse
 import com.helic.aminesms.data.models.reusable_numbers.reuse_number_details.ReuseNumberResponse
 import com.helic.aminesms.data.models.service_state.ServiceStateListResponse
@@ -46,5 +48,13 @@ class RemoteDataSource @Inject constructor(private val smsServiceApi: SMSService
 
     suspend fun reuseNumber(temporaryNumberId: String): Response<ReuseNumberResponse> {
         return smsServiceApi.reuseNumber(temporaryNumberId = temporaryNumberId)
+    }
+
+    suspend fun getRentNumberServiceStateList(): Response<RentNumberServiceStateList> {
+        return smsServiceApi.getRentalServiceStateList()
+    }
+
+    suspend fun getRentalOptions(): Response<RentalOptionsResponse> {
+        return smsServiceApi.getRentalOptions()
     }
 }

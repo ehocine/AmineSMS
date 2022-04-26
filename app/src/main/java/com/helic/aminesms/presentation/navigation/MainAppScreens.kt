@@ -27,4 +27,12 @@ sealed class MainAppScreens(
     object OrderNumberOptions : MainAppScreens(
         route = "order_number_options"
     )
+
+    object RentalNumbers : MainAppScreens(
+        route = "rental_number"
+    )
+
+    object RentalNumbersOptions : MainAppScreens(
+        route = "rental_number_options"
+    )
 }

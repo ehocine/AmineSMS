@@ -57,22 +57,20 @@ fun Messages(
             }
         },
         floatingActionButton = {
-            ExtendedFloatingActionButton(
-                onClick = {
-                    navController.navigate(MainAppScreens.OrderNumbers.route) {
-                        launchSingleTop = true
+            ExpandedMenuButtons(onItemClicked = {
+                when (it) {
+                    "Buy a temp number" -> {
+                        navController.navigate(MainAppScreens.OrderNumbers.route) {
+                            launchSingleTop = true
+                        }
                     }
-                },
-                backgroundColor = MaterialTheme.colors.ButtonColor,
-                icon = {
-                    Icon(
-                        imageVector = Icons.Default.Add,
-                        contentDescription = "Add Button",
-                        tint = Color.White
-                    )
-                },
-                text = { Text(text = stringResource(R.string.add_number), color = Color.White) }
-            )
+                    else -> {
+                        navController.navigate(MainAppScreens.RentalNumbers.route) {
+                            launchSingleTop = true
+                        }
+                    }
+                }
+            })
         },
         drawerContent = {
             Profile(
@@ -111,5 +109,43 @@ fun MessagesTopAppBar(openDrawer: () -> Unit) {
             Text(text = stringResource(R.string.messages))
         },
         backgroundColor = MaterialTheme.colors.topAppBarBackgroundColor
+    )
+}
+
+@Composable
+fun ExpandedMenuButtons(
+    onItemClicked: (String) -> Unit
+) {
+    var expanded by remember { mutableStateOf(false) }
+    val list = listOf("Buy a temp number", "Rent a number")
+
+    ExtendedFloatingActionButton(
+        onClick = {
+            expanded = true
+        },
+        backgroundColor = MaterialTheme.colors.ButtonColor,
+        icon = {
+            Icon(
+                imageVector = Icons.Default.Add,
+                contentDescription = "Add Button",
+                tint = Color.White
+            )
+            DropdownMenu(
+                expanded = expanded,
+                onDismissRequest = { expanded = false }
+            ) {
+                list.forEach { item ->
+                    DropdownMenuItem(
+                        onClick = {
+                            expanded = false
+                            onItemClicked(item)
+                        }
+                    ) {
+                        Text(text = item)
+                    }
+                }
+            }
+        },
+        text = { Text(text = stringResource(R.string.add_number), color = Color.White) }
     )
 }

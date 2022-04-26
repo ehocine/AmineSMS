@@ -21,7 +21,7 @@ object Constants {
     val SKU_LIST = listOf("one", "five", "ten", "twenty_five")
     const val REUSE_DISCOUNT_PERCENT = 50
 
-    const val TIME_BETWEEN_AUTOREFRESH = 3000L
+    const val TIME_BETWEEN_AUTO_REFRESH = 1000L
 
     const val PROJECT_KEY_QONVERSION = "2F3kQuqIZg7Fd3fWhcAYNigWcSWjXPfp"
 

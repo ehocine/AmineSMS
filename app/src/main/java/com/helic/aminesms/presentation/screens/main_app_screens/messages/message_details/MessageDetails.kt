@@ -24,7 +24,6 @@ import androidx.navigation.NavGraph.Companion.findStartDestination
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.helic.aminesms.R
-import com.helic.aminesms.data.models.messages.Sms
 import com.helic.aminesms.data.models.number_data.NumberData
 import com.helic.aminesms.data.viewmodels.MainViewModel
 import com.helic.aminesms.presentation.navigation.MainAppScreens
@@ -34,6 +33,7 @@ import com.helic.aminesms.presentation.ui.theme.topAppBarBackgroundColor
 import com.helic.aminesms.presentation.ui.theme.topAppBarContentColor
 import com.helic.aminesms.utils.*
 import com.helic.aminesms.utils.Constants.REUSE_DISCOUNT_PERCENT
+import com.helic.aminesms.utils.Constants.TIME_BETWEEN_AUTO_REFRESH
 import kotlinx.coroutines.delay
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
@@ -105,14 +105,14 @@ fun MessageDetails(
         )
     }
 
-    //This is added to autocheck the incoming messages every TIME_BETWEEN_AUTOREFRESH,
+    //This is added to auto-check the incoming messages every TIME_BETWEEN_AUTO_REFRESH,
     // we added the variable counter to autoupdate the LaunchedEffect
     // we added the condition to reduce resources usage when there is a message
 
-    if (sms == null) {
+    if (sms == null && hasInternetConnection(context = context)) {
         var counter by remember { mutableStateOf(0) }
         LaunchedEffect(key1 = counter) {
-            delay(1000L)
+            delay(timeMillis = TIME_BETWEEN_AUTO_REFRESH)
             counter += 1
             mainViewModel.autoCheckMessage(
                 context = context,
@@ -122,14 +122,12 @@ fun MessageDetails(
         }
     }
 
-
     Scaffold(topBar = {
         MessageDetailsTopAppBar(
             context = context,
             navController = navController,
             mainViewModel = mainViewModel,
             temporaryNumber = temporaryNumber,
-            sms = sms,
             showSnackbar = showSnackbar
         )
     }) {
@@ -231,7 +229,6 @@ fun MessageDetailsTopAppBar(
     navController: NavController,
     mainViewModel: MainViewModel,
     temporaryNumber: NumberData,
-    sms: Sms?,
     showSnackbar: (String, SnackbarDuration) -> Unit,
 ) {
     TopAppBar(
@@ -256,7 +253,6 @@ fun MessageDetailsTopAppBar(
                 context = context,
                 navController = navController,
                 number = temporaryNumber,
-                sms = sms,
                 mainViewModel = mainViewModel,
                 showSnackbar = showSnackbar
             )
@@ -357,7 +353,6 @@ fun ExistingTaskAppBarActions(
     context: Context,
     navController: NavController,
     number: NumberData?,
-    sms: Sms?,
     mainViewModel: MainViewModel,
     showSnackbar: (String, SnackbarDuration) -> Unit
 ) {

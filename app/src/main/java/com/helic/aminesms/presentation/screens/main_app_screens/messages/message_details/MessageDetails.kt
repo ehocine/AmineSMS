@@ -24,7 +24,7 @@ import androidx.navigation.NavGraph.Companion.findStartDestination
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.helic.aminesms.R
-import com.helic.aminesms.data.models.number_data.NumberData
+import com.helic.aminesms.data.models.number_data.TempNumberData
 import com.helic.aminesms.data.viewmodels.MainViewModel
 import com.helic.aminesms.presentation.navigation.MainAppScreens
 import com.helic.aminesms.presentation.ui.theme.Red
@@ -47,7 +47,7 @@ fun MessageDetails(
 
     val isRefreshing by mainViewModel.isRefreshing.collectAsState()
     val sms = mainViewModel.message?.value
-    val temporaryNumber = mainViewModel.selectedNumber.value
+    val temporaryNumber = mainViewModel.selectedTempNumber.value
     val state by mainViewModel.checkingMessagesLoadingStateOfViewModel.collectAsState()
 
     val list = mutableListOf(sms)
@@ -74,7 +74,7 @@ fun MessageDetails(
         mutableStateOf(
             calculatingRemainingExpirationTime(
                 context = context,
-                numberData = temporaryNumber,
+                tempNumberData = temporaryNumber,
                 snackbar = showSnackbar,
                 userBalance = userBalance
             )
@@ -83,7 +83,7 @@ fun MessageDetails(
     var remainingReuseTime by remember {
         mutableStateOf(
             calculatingRemainingReuseTime(
-                numberData = temporaryNumber
+                tempNumberData = temporaryNumber
             )
         )
     }
@@ -92,7 +92,7 @@ fun MessageDetails(
         delay(1000L)
         remainingExpirationTime = calculatingRemainingExpirationTime(
             context = context,
-            numberData = temporaryNumber,
+            tempNumberData = temporaryNumber,
             snackbar = showSnackbar,
             userBalance = userBalance
         )
@@ -101,7 +101,7 @@ fun MessageDetails(
     LaunchedEffect(key1 = remainingReuseTime) {
         delay(1000L)
         remainingReuseTime = calculatingRemainingReuseTime(
-            numberData = temporaryNumber
+            tempNumberData = temporaryNumber
         )
     }
 
@@ -127,7 +127,7 @@ fun MessageDetails(
             context = context,
             navController = navController,
             mainViewModel = mainViewModel,
-            temporaryNumber = temporaryNumber,
+            temporaryTempNumber = temporaryNumber,
             showSnackbar = showSnackbar
         )
     }) {
@@ -202,7 +202,7 @@ fun MessageDetails(
                                         Spacer(modifier = Modifier.padding(10.dp))
                                         ReuseNumber(
                                             mainViewModel = mainViewModel,
-                                            temporaryNumber = temporaryNumber,
+                                            temporaryTempNumber = temporaryNumber,
                                             showSnackbar = showSnackbar,
                                             navController = navController
                                         )
@@ -228,7 +228,7 @@ fun MessageDetailsTopAppBar(
     context: Context,
     navController: NavController,
     mainViewModel: MainViewModel,
-    temporaryNumber: NumberData,
+    temporaryTempNumber: TempNumberData,
     showSnackbar: (String, SnackbarDuration) -> Unit,
 ) {
     TopAppBar(
@@ -247,12 +247,12 @@ fun MessageDetailsTopAppBar(
                 )
             }
         },
-        title = { Text(text = mainViewModel.selectedNumber.value.number) },
+        title = { Text(text = mainViewModel.selectedTempNumber.value.number) },
         actions = {
             ExistingTaskAppBarActions(
                 context = context,
                 navController = navController,
-                number = temporaryNumber,
+                tempNumber = temporaryTempNumber,
                 mainViewModel = mainViewModel,
                 showSnackbar = showSnackbar
             )
@@ -264,7 +264,7 @@ fun MessageDetailsTopAppBar(
 @Composable
 fun ReuseNumber(
     mainViewModel: MainViewModel,
-    temporaryNumber: NumberData,
+    temporaryTempNumber: TempNumberData,
     showSnackbar: (String, SnackbarDuration) -> Unit,
     navController: NavController
 ) {
@@ -272,13 +272,13 @@ fun ReuseNumber(
     ReuseButton { openDialog = true }
 
     DisplayAlertDialog(
-        title = "Reuse Number ${temporaryNumber.number}",
+        title = "Reuse Number ${temporaryTempNumber.number}",
         message = "You can reuse this number for a $REUSE_DISCOUNT_PERCENT% off, Are you sure you want to continue?",
         openDialog = openDialog,
         closeDialog = { openDialog = false },
         onYesClicked = {
             mainViewModel.reuseNumber(
-                temporaryNumberId = temporaryNumber.temporaryNumberId,
+                temporaryNumberId = temporaryTempNumber.temporaryNumberId,
                 snackbar = showSnackbar,
                 navController = navController
             )
@@ -352,22 +352,22 @@ fun CantBeReusedDisplay() {
 fun ExistingTaskAppBarActions(
     context: Context,
     navController: NavController,
-    number: NumberData?,
+    tempNumber: TempNumberData?,
     mainViewModel: MainViewModel,
     showSnackbar: (String, SnackbarDuration) -> Unit
 ) {
     var openDialog by remember { mutableStateOf(false) }
     DisplayAlertDialog(
-        title = "Cancel ${number?.number}",
+        title = "Cancel ${tempNumber?.number}",
         message = "Are you sure you want to cancel this number?",
         openDialog = openDialog,
         closeDialog = { openDialog = false },
         onYesClicked = {
-            if (number != null) {
-                if (number.state == NumberState.Pending.toString()) {
+            if (tempNumber != null) {
+                if (tempNumber.state == NumberState.Pending.toString()) {
                     mainViewModel.cancelTempNumber(
                         context = context,
-                        temporaryNumberId = number.temporaryNumberId,
+                        temporaryNumberId = tempNumber.temporaryNumberId,
                         snackbar = showSnackbar,
                         navController = navController
                     )
@@ -384,10 +384,10 @@ fun ExistingTaskAppBarActions(
 
     CancelAction(onCancelClicked = { openDialog = true })
     RefreshAction(onRefreshClicked = {
-        if (number != null) {
+        if (tempNumber != null) {
             mainViewModel.refreshMessageCheck(
                 context = context,
-                temporaryNumberId = number.temporaryNumberId,
+                temporaryNumberId = tempNumber.temporaryNumberId,
                 snackbar = showSnackbar
             )
         }

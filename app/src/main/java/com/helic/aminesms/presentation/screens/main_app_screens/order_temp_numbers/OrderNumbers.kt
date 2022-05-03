@@ -116,7 +116,7 @@ fun OrderNumberTopAppBar(
             }
         },
         title = {
-            Text(text = "Order a Number")
+            Text(text = "Order a temporary number")
         },
         actions = {
             IconButton(onClick = { onSearchClicked() }) {

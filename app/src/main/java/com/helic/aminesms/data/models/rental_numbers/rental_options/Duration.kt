@@ -16,13 +16,13 @@ data class Duration(
     @SerializedName("ticks")
     val ticks: Int = 0,
     @SerializedName("totalDays")
-    val totalDays: Int = 0,
+    val totalDays: Double = 0.0,
     @SerializedName("totalHours")
-    val totalHours: Int = 0,
+    val totalHours: Double = 0.0,
     @SerializedName("totalMilliseconds")
-    val totalMilliseconds: Int = 0,
+    val totalMilliseconds: Double = 0.0,
     @SerializedName("totalMinutes")
-    val totalMinutes: Int = 0,
+    val totalMinutes: Double = 0.0,
     @SerializedName("totalSeconds")
-    val totalSeconds: Int = 0
+    val totalSeconds: Double = 0.0
 )

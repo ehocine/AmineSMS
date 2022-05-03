@@ -16,7 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.helic.aminesms.data.models.number_data.NumberData
+import com.helic.aminesms.data.models.number_data.TempNumberData
 import com.helic.aminesms.data.viewmodels.MainViewModel
 import com.helic.aminesms.presentation.navigation.MainAppScreens
 import com.helic.aminesms.presentation.ui.theme.Green
@@ -25,24 +25,24 @@ import com.helic.aminesms.presentation.ui.theme.Red
 import com.helic.aminesms.presentation.ui.theme.phoneMessagesTextColor
 import com.helic.aminesms.utils.AddOrRemoveNumberAction
 import com.helic.aminesms.utils.NumberState
-import com.helic.aminesms.utils.addOrRemoveNumberFromFirebase
+import com.helic.aminesms.utils.addOrRemoveTempNumberFromFirebase
 
 @Composable
 fun PhoneMessageItem(
     context: Context,
     navController: NavController,
     mainViewModel: MainViewModel,
-    listOfPhoneNumbers: List<NumberData>,
+    listOfPhoneTempNumbers: List<TempNumberData>,
     showSnackbar: (String, SnackbarDuration) -> Unit
 ) {
-    if (listOfPhoneNumbers.isEmpty()) {
+    if (listOfPhoneTempNumbers.isEmpty()) {
         NoNumbersFound()
     } else {
         DisplayNumbers(
             context = context,
             navController = navController,
             mainViewModel = mainViewModel,
-            listOfPhoneNumbersData = listOfPhoneNumbers,
+            listOfPhoneNumbersData = listOfPhoneTempNumbers,
             showSnackbar = showSnackbar
         )
     }
@@ -53,7 +53,7 @@ fun DisplayNumbers(
     context: Context,
     navController: NavController,
     mainViewModel: MainViewModel,
-    listOfPhoneNumbersData: List<NumberData>,
+    listOfPhoneNumbersData: List<TempNumberData>,
     showSnackbar: (String, SnackbarDuration) -> Unit
 ) {
     LazyColumn(modifier = Modifier.fillMaxWidth()) {
@@ -62,7 +62,7 @@ fun DisplayNumbers(
                 context = context,
                 navController = navController,
                 mainViewModel = mainViewModel,
-                phoneNumberData = phoneNumber,
+                phoneTempNumberData = phoneNumber,
                 showSnackbar = showSnackbar
             )
         }
@@ -75,7 +75,7 @@ fun Content(
     context: Context,
     navController: NavController,
     mainViewModel: MainViewModel,
-    phoneNumberData: NumberData,
+    phoneTempNumberData: TempNumberData,
     showSnackbar: (String, SnackbarDuration) -> Unit
 ) {
     Card(
@@ -83,13 +83,13 @@ fun Content(
             .fillMaxWidth()
             .padding(top = 5.dp, end = 10.dp, start = 10.dp, bottom = 5.dp)
             .clickable {
-                if (phoneNumberData.state != NumberState.Expired.toString()
-                    && phoneNumberData.state != NumberState.Canceled.toString()
+                if (phoneTempNumberData.state != NumberState.Expired.toString()
+                    && phoneTempNumberData.state != NumberState.Canceled.toString()
                 ) {
-                    mainViewModel.selectedNumber.value = phoneNumberData
+                    mainViewModel.selectedTempNumber.value = phoneTempNumberData
                     mainViewModel.checkForMessages(
                         context = context,
-                        temporaryNumberId = phoneNumberData.temporaryNumberId,
+                        temporaryNumberId = phoneTempNumberData.temporaryNumberId,
                         snackbar = showSnackbar
                     )
                     navController.navigate(MainAppScreens.MessageDetails.route) {
@@ -108,7 +108,7 @@ fun Content(
         ) {
             Column {
                 Text(
-                    text = phoneNumberData.number,
+                    text = phoneTempNumberData.number,
                     color = MaterialTheme.colors.phoneMessagesTextColor,
                     fontSize = MaterialTheme.typography.h6.fontSize,
                     fontWeight = FontWeight.Bold,
@@ -116,14 +116,14 @@ fun Content(
                 )
                 Spacer(modifier = Modifier.padding(5.dp))
                 Text(
-                    text = phoneNumberData.state,
+                    text = phoneTempNumberData.state,
                     color = MediumGray,
                     fontSize = MaterialTheme.typography.subtitle1.fontSize,
                     maxLines = 1
                 )
             }
             Row(verticalAlignment = Alignment.CenterVertically) {
-                when (phoneNumberData.state) {
+                when (phoneTempNumberData.state) {
                     NumberState.Pending.toString() -> {
                         Canvas(modifier = Modifier.size(15.dp)) {
                             drawCircle(color = Green)
@@ -140,7 +140,7 @@ fun Content(
                         }
                     }
                 }
-                when (phoneNumberData.state) {
+                when (phoneTempNumberData.state) {
                     NumberState.Pending.toString() -> {
                         Icon(
                             imageVector = Icons.Default.KeyboardArrowRight,
@@ -149,11 +149,11 @@ fun Content(
                     }
                     else -> {
                         IconButton(onClick = {
-                            addOrRemoveNumberFromFirebase(
+                            addOrRemoveTempNumberFromFirebase(
                                 context = context,
                                 snackbar = showSnackbar,
                                 AddOrRemoveNumberAction.REMOVE,
-                                phoneNumberData
+                                phoneTempNumberData
                             )
                         }) {
                             Icon(

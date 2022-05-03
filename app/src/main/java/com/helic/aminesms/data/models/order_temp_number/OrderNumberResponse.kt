@@ -2,11 +2,11 @@ package com.helic.aminesms.data.models.order_temp_number
 
 
 import com.google.gson.annotations.SerializedName
-import com.helic.aminesms.data.models.number_data.NumberData
+import com.helic.aminesms.data.models.number_data.TempNumberData
 
 data class OrderNumberResponse(
     @SerializedName("data")
-    val numberData: NumberData,
+    val tempNumberData: TempNumberData,
     @SerializedName("errors")
     val errors: Any,
     @SerializedName("msg")

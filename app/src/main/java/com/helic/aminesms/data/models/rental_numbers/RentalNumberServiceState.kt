@@ -2,11 +2,11 @@ package com.helic.aminesms.data.models.rental_numbers
 
 import com.google.gson.annotations.SerializedName
 
-data class RentNumberServiceState(
+data class RentalNumberServiceState(
     @SerializedName("isAvailable")
-    val isAvailable: Boolean,
+    val isAvailable: Boolean = false,
     @SerializedName("name")
-    val name: String,
+    val name: String = "",
     @SerializedName("serviceId")
-    val serviceId: String
+    val serviceId: String = ""
 )

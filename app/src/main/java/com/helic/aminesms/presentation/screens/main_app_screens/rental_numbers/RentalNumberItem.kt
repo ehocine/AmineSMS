@@ -15,7 +15,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.helic.aminesms.data.models.rental_numbers.RentNumberServiceState
+import com.helic.aminesms.data.models.rental_numbers.RentalNumberServiceState
 import com.helic.aminesms.data.viewmodels.MainViewModel
 import com.helic.aminesms.presentation.navigation.MainAppScreens
 import com.helic.aminesms.presentation.ui.theme.Green
@@ -24,12 +24,12 @@ import com.helic.aminesms.presentation.ui.theme.phoneMessagesTextColor
 @Composable
 fun DisplayServiceStateList(
     navController: NavController,
-    listOfRentalServiceState: List<RentNumberServiceState>,
+    listOfRentalServiceState: List<RentalNumberServiceState>,
     mainViewModel: MainViewModel,
     snackbar: (String, SnackbarDuration) -> Unit
 ) {
     val searchText = mainViewModel.searchTextState.value
-    val filteredList: List<RentNumberServiceState> = if (searchText.isEmpty()) {
+    val filteredList: List<RentalNumberServiceState> = if (searchText.isEmpty()) {
         listOfRentalServiceState
     } else {
         listOfRentalServiceState.filter { serviceState ->
@@ -52,7 +52,7 @@ fun DisplayServiceStateList(
 @Composable
 fun Content(
     navController: NavController,
-    serviceState: RentNumberServiceState,
+    serviceState: RentalNumberServiceState,
     mainViewModel: MainViewModel,
     snackbar: (String, SnackbarDuration) -> Unit
 ) {

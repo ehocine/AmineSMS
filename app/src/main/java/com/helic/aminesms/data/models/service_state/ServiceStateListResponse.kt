@@ -1,6 +1,5 @@
 package com.helic.aminesms.data.models.service_state
 
-
 import com.google.gson.annotations.SerializedName
 
 data class ServiceStateListResponse(

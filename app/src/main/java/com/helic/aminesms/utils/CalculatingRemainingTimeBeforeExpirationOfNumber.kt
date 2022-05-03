@@ -2,7 +2,7 @@ package com.helic.aminesms.utils
 
 import android.content.Context
 import androidx.compose.material.SnackbarDuration
-import com.helic.aminesms.data.models.number_data.NumberData
+import com.helic.aminesms.data.models.number_data.TempNumberData
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
@@ -10,7 +10,7 @@ import java.time.ZoneId
 
 fun calculatingRemainingExpirationTime(
     context: Context,
-    numberData: NumberData,
+    tempNumberData: TempNumberData,
     snackbar: (String, SnackbarDuration) -> Unit,
     userBalance: Double
 ): Int {
@@ -19,15 +19,15 @@ fun calculatingRemainingExpirationTime(
     val startOfDay: LocalDateTime = localDate.atTime(LocalTime.now())
     val timestamp = startOfDay.atZone(ZoneId.systemDefault()).toInstant().epochSecond
 
-    var difference = numberData.expiresAt - timestamp.toInt()
+    var difference = tempNumberData.expiresAt - timestamp.toInt()
 
-    if (numberData.state == NumberState.Pending.toString()) {
+    if (tempNumberData.state == NumberState.Pending.toString()) {
 
         if (difference <= 0) {
             updateNumberState(
                 context = context,
                 snackbar = snackbar,
-                numberToBeUpdated = numberData,
+                tempNumberToBeUpdated = tempNumberData,
                 NumberState.Expired
             )
             handleOrderedNumberState(
@@ -35,7 +35,7 @@ fun calculatingRemainingExpirationTime(
                 snackbar,
                 NumberState.Expired,
                 userBalance,
-                numberData.price
+                tempNumberData.price
             )
             difference = 0
         }
@@ -46,13 +46,13 @@ fun calculatingRemainingExpirationTime(
 }
 
 fun calculatingRemainingReuseTime(
-    numberData: NumberData
+    tempNumberData: TempNumberData
 ): Int {
     val localDate = LocalDate.now()
     val startOfDay: LocalDateTime = localDate.atTime(LocalTime.now())
     val timestamp = startOfDay.atZone(ZoneId.systemDefault()).toInstant().epochSecond
 
-    var difference = numberData.reuseableUntil - timestamp.toInt()
+    var difference = tempNumberData.reuseableUntil - timestamp.toInt()
 //    var difference = numberData.expiresAt - timestamp.toInt() // For testing
 
     if (difference <= 0) difference = 0

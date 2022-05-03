@@ -1,12 +1,10 @@
-package com.helic.aminesms.data.models.reusable_numbers.reuse_number_details
-
+package com.helic.aminesms.data.models.rental_numbers.rental_service_price
 
 import com.google.gson.annotations.SerializedName
-import com.helic.aminesms.data.models.number_data.TempNumberData
 
-data class ReuseNumberResponse(
+data class RentalServicePrice(
     @SerializedName("data")
-    val reuseTempNumberData: TempNumberData,
+    val price: Double = 0.0,
     @SerializedName("errors")
     val errors: Any,
     @SerializedName("msg")

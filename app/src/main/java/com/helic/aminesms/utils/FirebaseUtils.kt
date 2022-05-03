@@ -13,10 +13,10 @@ import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.helic.aminesms.R
 import com.helic.aminesms.data.models.User
-import com.helic.aminesms.data.models.number_data.NumberData
+import com.helic.aminesms.data.models.number_data.TempNumberData
 import com.helic.aminesms.presentation.navigation.AuthenticationScreens
 import com.helic.aminesms.utils.Constants.FIRESTORE_DATABASE
-import com.helic.aminesms.utils.Constants.LIST_OF_NUMBERS
+import com.helic.aminesms.utils.Constants.LIST_OF_TEMP_NUMBERS
 import com.helic.aminesms.utils.Constants.TIMEOUT_IN_MILLIS
 import com.helic.aminesms.utils.Constants.USER_BALANCE_DATABASE
 import com.helic.aminesms.utils.Constants.auth
@@ -188,7 +188,7 @@ fun createUserWithBalance(user: FirebaseUser?) {
             it.displayName.toString(),
             it.email.toString(),
             userBalance = 0.0,
-            listOfNumbers = listOf()
+            listOfTempNumbers = listOf()
         )
     }
     if (newUser != null) {
@@ -309,11 +309,11 @@ fun handleOrderedNumberState(
 }
 
 
-fun addOrRemoveNumberFromFirebase(
+fun addOrRemoveTempNumberFromFirebase(
     context: Context,
     snackbar: (String, SnackbarDuration) -> Unit,
     action: AddOrRemoveNumberAction,
-    numberData: NumberData?
+    tempNumberData: TempNumberData?
 ) {
 
     val db = Firebase.firestore
@@ -326,7 +326,10 @@ fun addOrRemoveNumberFromFirebase(
                     loadingState.emit(LoadingState.LOADING)
                     when (action) {
                         AddOrRemoveNumberAction.ADD -> {
-                            data?.update(LIST_OF_NUMBERS, FieldValue.arrayUnion(numberData))
+                            data?.update(
+                                LIST_OF_TEMP_NUMBERS,
+                                FieldValue.arrayUnion(tempNumberData)
+                            )
                                 ?.addOnSuccessListener {
 
                                 }?.addOnFailureListener {
@@ -335,7 +338,10 @@ fun addOrRemoveNumberFromFirebase(
                             loadingState.emit(LoadingState.LOADED)
                         }
                         AddOrRemoveNumberAction.REMOVE -> {
-                            data?.update(LIST_OF_NUMBERS, FieldValue.arrayRemove(numberData))
+                            data?.update(
+                                LIST_OF_TEMP_NUMBERS,
+                                FieldValue.arrayRemove(tempNumberData)
+                            )
                                 ?.addOnSuccessListener {
                                 }?.addOnFailureListener {
                                     snackbar("Something went wrong: $it", SnackbarDuration.Short)
@@ -361,7 +367,7 @@ fun addOrRemoveNumberFromFirebase(
 fun updateNumberState(
     context: Context,
     snackbar: (String, SnackbarDuration) -> Unit,
-    numberToBeUpdated: NumberData?,
+    tempNumberToBeUpdated: TempNumberData?,
     newState: NumberState
 ) {
 
@@ -373,12 +379,18 @@ fun updateNumberState(
             CoroutineScope(Dispatchers.IO).launch {
                 try {
                     loadingState.emit(LoadingState.LOADING)
-                    data?.update(LIST_OF_NUMBERS, FieldValue.arrayRemove(numberToBeUpdated))
+                    data?.update(
+                        LIST_OF_TEMP_NUMBERS,
+                        FieldValue.arrayRemove(tempNumberToBeUpdated)
+                    )
                         ?.addOnSuccessListener {
-                            if (numberToBeUpdated != null) {
-                                numberToBeUpdated.state = newState.toString()
+                            if (tempNumberToBeUpdated != null) {
+                                tempNumberToBeUpdated.state = newState.toString()
                             }
-                            data.update(LIST_OF_NUMBERS, FieldValue.arrayUnion(numberToBeUpdated))
+                            data.update(
+                                LIST_OF_TEMP_NUMBERS,
+                                FieldValue.arrayUnion(tempNumberToBeUpdated)
+                            )
                         }?.addOnFailureListener {
                             snackbar("Something went wrong: $it", SnackbarDuration.Short)
                         }

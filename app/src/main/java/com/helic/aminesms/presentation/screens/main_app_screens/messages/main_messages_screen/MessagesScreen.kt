@@ -1,14 +1,19 @@
 package com.helic.aminesms.presentation.screens.main_app_screens.messages.main_messages_screen
 
 import android.annotation.SuppressLint
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.runtime.*
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.helic.aminesms.R
 import com.helic.aminesms.data.viewmodels.MainViewModel
@@ -59,7 +64,7 @@ fun Messages(
         floatingActionButton = {
             ExpandedMenuButtons(onItemClicked = {
                 when (it) {
-                    "Buy a temp number" -> {
+                    "Order a temporary number" -> {
                         navController.navigate(MainAppScreens.OrderNumbers.route) {
                             launchSingleTop = true
                         }
@@ -87,7 +92,7 @@ fun Messages(
                     context = context,
                     navController = navController,
                     mainViewModel = mainViewModel,
-                    listOfPhoneNumbers = listOfOrderedNumbers,
+                    listOfPhoneTempNumbers = listOfOrderedNumbers,
                     showSnackbar = snackbar
                 )
             }
@@ -117,7 +122,7 @@ fun ExpandedMenuButtons(
     onItemClicked: (String) -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
-    val list = listOf("Buy a temp number", "Rent a number")
+    val list = listOf("Order a temporary number", "Rent a number")
 
     ExtendedFloatingActionButton(
         onClick = {
@@ -141,7 +146,10 @@ fun ExpandedMenuButtons(
                             onItemClicked(item)
                         }
                     ) {
-                        Text(text = item)
+                        Row(modifier = Modifier.padding(5.dp)) {
+//                            Icon(imageVector = Icons.Default.Ph, contentDescription = "icon")
+                            Text(text = item, fontWeight = FontWeight.Medium)
+                        }
                     }
                 }
             }

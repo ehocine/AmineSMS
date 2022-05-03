@@ -4,8 +4,9 @@ import com.helic.aminesms.data.models.UserBalanceResponse
 import com.helic.aminesms.data.models.cancel_number.CancelNumberResponse
 import com.helic.aminesms.data.models.messages.MessageResponse
 import com.helic.aminesms.data.models.order_temp_number.OrderNumberResponse
-import com.helic.aminesms.data.models.rental_numbers.RentNumberServiceStateList
+import com.helic.aminesms.data.models.rental_numbers.RentalNumberServiceStateListResponse
 import com.helic.aminesms.data.models.rental_numbers.rental_options.RentalOptionsResponse
+import com.helic.aminesms.data.models.rental_numbers.rental_service_price.RentalServicePrice
 import com.helic.aminesms.data.models.reusable_numbers.ReusableNumbersResponse
 import com.helic.aminesms.data.models.reusable_numbers.reuse_number_details.ReuseNumberResponse
 import com.helic.aminesms.data.models.service_state.ServiceStateListResponse
@@ -40,9 +41,15 @@ interface SMSServiceApi {
     suspend fun reuseNumber(@Path("temporaryNumberId") temporaryNumberId: String): Response<ReuseNumberResponse>
 
     @GET("/api/v2/rentals/services")
-    suspend fun getRentalServiceStateList(): Response<RentNumberServiceStateList>
+    suspend fun getRentalServiceStateList(): Response<RentalNumberServiceStateListResponse>
 
     @GET("/api/v2/rentals/options")
     suspend fun getRentalOptions(): Response<RentalOptionsResponse>
+
+    @GET("/api/v2/rentals/price")
+    suspend fun getRentalServicePrice(
+        @Query("durationInHours") durationInHours: Int,
+        @Query("serviceId") serviceId: String
+    ): Response<RentalServicePrice>
 
 }

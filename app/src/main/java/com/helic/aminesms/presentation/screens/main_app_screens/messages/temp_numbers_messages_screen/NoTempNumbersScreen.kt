@@ -1,4 +1,4 @@
-package com.helic.aminesms.presentation.screens.main_app_screens.messages.main_messages_screen
+package com.helic.aminesms.presentation.screens.main_app_screens.messages.temp_numbers_messages_screen
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement

@@ -24,7 +24,7 @@ fun calculatingRemainingExpirationTime(
     if (tempNumberData.state == NumberState.Pending.toString()) {
 
         if (difference <= 0) {
-            updateNumberState(
+            updateTempNumberState(
                 context = context,
                 snackbar = snackbar,
                 tempNumberToBeUpdated = tempNumberData,

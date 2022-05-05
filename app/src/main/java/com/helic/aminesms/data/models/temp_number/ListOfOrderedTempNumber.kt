@@ -1,7 +1,7 @@
-package com.helic.aminesms.data.models.order_temp_number
+package com.helic.aminesms.data.models.temp_number
 
 import com.helic.aminesms.data.models.number_data.TempNumberData
 
-class ListOfOrderedNumber {
+class ListOfOrderedTempNumber {
     var listOfTempNumbers: MutableList<TempNumberData>? = null
 }

@@ -62,7 +62,7 @@ fun ShopTopAppBar(navController: NavController) {
     TopAppBar(
         navigationIcon = {
             IconButton(onClick = {
-                navController.navigate(MainAppScreens.Messages.route) {
+                navController.navigate(MainAppScreens.TempNumberMessages.route) {
                     popUpTo(navController.graph.findStartDestination().id)
                     launchSingleTop = true
                 }

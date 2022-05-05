@@ -1,4 +1,4 @@
-package com.helic.aminesms.presentation.screens.main_app_screens.rental_numbers
+package com.helic.aminesms.presentation.screens.main_app_screens.order_rental_numbers
 
 
 import android.annotation.SuppressLint

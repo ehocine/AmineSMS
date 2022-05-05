@@ -1,4 +1,4 @@
-package com.helic.aminesms.presentation.screens.main_app_screens.messages.main_messages_screen
+package com.helic.aminesms.presentation.screens.main_app_screens.messages.temp_numbers_messages_screen
 
 import android.content.Context
 import androidx.compose.foundation.Canvas
@@ -22,13 +22,13 @@ import com.helic.aminesms.presentation.navigation.MainAppScreens
 import com.helic.aminesms.presentation.ui.theme.Green
 import com.helic.aminesms.presentation.ui.theme.MediumGray
 import com.helic.aminesms.presentation.ui.theme.Red
-import com.helic.aminesms.presentation.ui.theme.phoneMessagesTextColor
+import com.helic.aminesms.presentation.ui.theme.TextColor
 import com.helic.aminesms.utils.AddOrRemoveNumberAction
 import com.helic.aminesms.utils.NumberState
 import com.helic.aminesms.utils.addOrRemoveTempNumberFromFirebase
 
 @Composable
-fun PhoneMessageItem(
+fun TempNumberMessageItem(
     context: Context,
     navController: NavController,
     mainViewModel: MainViewModel,
@@ -69,7 +69,6 @@ fun DisplayNumbers(
     }
 }
 
-
 @Composable
 fun Content(
     context: Context,
@@ -109,7 +108,7 @@ fun Content(
             Column {
                 Text(
                     text = phoneTempNumberData.number,
-                    color = MaterialTheme.colors.phoneMessagesTextColor,
+                    color = MaterialTheme.colors.TextColor,
                     fontSize = MaterialTheme.typography.h6.fontSize,
                     fontWeight = FontWeight.Bold,
                     maxLines = 1

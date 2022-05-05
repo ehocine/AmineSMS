@@ -4,13 +4,14 @@ import com.helic.aminesms.data.api.SMSServiceApi
 import com.helic.aminesms.data.models.UserBalanceResponse
 import com.helic.aminesms.data.models.cancel_number.CancelNumberResponse
 import com.helic.aminesms.data.models.messages.MessageResponse
-import com.helic.aminesms.data.models.order_temp_number.OrderNumberResponse
+import com.helic.aminesms.data.models.temp_number.OrderNumberResponse
 import com.helic.aminesms.data.models.rental_numbers.RentalNumberServiceStateListResponse
+import com.helic.aminesms.data.models.rental_numbers.order_rental_number.OrderRentalNumberResponse
 import com.helic.aminesms.data.models.rental_numbers.rental_options.RentalOptionsResponse
 import com.helic.aminesms.data.models.rental_numbers.rental_service_price.RentalServicePrice
-import com.helic.aminesms.data.models.reusable_numbers.ReusableNumbersResponse
-import com.helic.aminesms.data.models.reusable_numbers.reuse_number_details.ReuseNumberResponse
-import com.helic.aminesms.data.models.service_state.ServiceStateListResponse
+import com.helic.aminesms.data.models.temp_number.reusable_numbers.ReusableNumbersResponse
+import com.helic.aminesms.data.models.temp_number.reusable_numbers.reuse_number_details.ReuseNumberResponse
+import com.helic.aminesms.data.models.temp_number.service_state.ServiceStateListResponse
 import retrofit2.Response
 import javax.inject.Inject
 
@@ -66,6 +67,16 @@ class RemoteDataSource @Inject constructor(private val smsServiceApi: SMSService
         return smsServiceApi.getRentalServicePrice(
             durationInHours = durationInHours,
             serviceId = serviceId
+        )
+    }
+
+    suspend fun orderRentalNumber(
+        serviceId: String,
+        durationInHours: Int
+    ): Response<OrderRentalNumberResponse> {
+        return smsServiceApi.orderRentalNumber(
+            serviceId = serviceId,
+            durationInHours = durationInHours
         )
     }
 }

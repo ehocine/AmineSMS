@@ -3,13 +3,14 @@ package com.helic.aminesms.data.api
 import com.helic.aminesms.data.models.UserBalanceResponse
 import com.helic.aminesms.data.models.cancel_number.CancelNumberResponse
 import com.helic.aminesms.data.models.messages.MessageResponse
-import com.helic.aminesms.data.models.order_temp_number.OrderNumberResponse
 import com.helic.aminesms.data.models.rental_numbers.RentalNumberServiceStateListResponse
+import com.helic.aminesms.data.models.rental_numbers.order_rental_number.OrderRentalNumberResponse
 import com.helic.aminesms.data.models.rental_numbers.rental_options.RentalOptionsResponse
 import com.helic.aminesms.data.models.rental_numbers.rental_service_price.RentalServicePrice
-import com.helic.aminesms.data.models.reusable_numbers.ReusableNumbersResponse
-import com.helic.aminesms.data.models.reusable_numbers.reuse_number_details.ReuseNumberResponse
-import com.helic.aminesms.data.models.service_state.ServiceStateListResponse
+import com.helic.aminesms.data.models.temp_number.OrderNumberResponse
+import com.helic.aminesms.data.models.temp_number.reusable_numbers.ReusableNumbersResponse
+import com.helic.aminesms.data.models.temp_number.reusable_numbers.reuse_number_details.ReuseNumberResponse
+import com.helic.aminesms.data.models.temp_number.service_state.ServiceStateListResponse
 import retrofit2.Response
 import retrofit2.http.*
 
@@ -51,5 +52,13 @@ interface SMSServiceApi {
         @Query("durationInHours") durationInHours: Int,
         @Query("serviceId") serviceId: String
     ): Response<RentalServicePrice>
+
+    @FormUrlEncoded
+    @POST("/api/v2/rentals")
+    suspend fun orderRentalNumber(
+        @Field("serviceId") serviceId: String,
+        @Field("durationInHours") durationInHours: Int,
+    ): Response<OrderRentalNumberResponse>
+
 
 }

@@ -28,7 +28,7 @@ import com.helic.aminesms.data.models.number_data.TempNumberData
 import com.helic.aminesms.data.viewmodels.MainViewModel
 import com.helic.aminesms.presentation.navigation.MainAppScreens
 import com.helic.aminesms.presentation.ui.theme.Red
-import com.helic.aminesms.presentation.ui.theme.phoneMessagesTextColor
+import com.helic.aminesms.presentation.ui.theme.TextColor
 import com.helic.aminesms.presentation.ui.theme.topAppBarBackgroundColor
 import com.helic.aminesms.presentation.ui.theme.topAppBarContentColor
 import com.helic.aminesms.utils.*
@@ -160,7 +160,7 @@ fun MessageDetails(
                             else -> temporaryNumber.state
                         },
                         fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colors.phoneMessagesTextColor
+                        color = MaterialTheme.colors.TextColor
                     )
                     Spacer(modifier = Modifier.padding(20.dp))
                     when (state) {
@@ -191,12 +191,12 @@ fun MessageDetails(
                                             Text(
                                                 text = "Number can be reused within ",
                                                 fontWeight = FontWeight.Medium,
-                                                color = MaterialTheme.colors.phoneMessagesTextColor
+                                                color = MaterialTheme.colors.TextColor
                                             )
                                             Text(
                                                 text = convertSeconds(remainingReuseTime),
                                                 fontWeight = FontWeight.Bold,
-                                                color = MaterialTheme.colors.phoneMessagesTextColor
+                                                color = MaterialTheme.colors.TextColor
                                             )
                                         }
                                         Spacer(modifier = Modifier.padding(10.dp))
@@ -234,7 +234,7 @@ fun MessageDetailsTopAppBar(
     TopAppBar(
         navigationIcon = {
             IconButton(onClick = {
-                navController.navigate(MainAppScreens.Messages.route) {
+                navController.navigate(MainAppScreens.TempNumberMessages.route) {
                     popUpTo(navController.graph.findStartDestination().id)
                     launchSingleTop = true
                 }

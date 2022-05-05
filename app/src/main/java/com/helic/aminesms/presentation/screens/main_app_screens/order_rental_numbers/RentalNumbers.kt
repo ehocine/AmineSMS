@@ -1,10 +1,13 @@
-package com.helic.aminesms.presentation.screens.main_app_screens.rental_numbers
+package com.helic.aminesms.presentation.screens.main_app_screens.order_rental_numbers
 
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.util.Log
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -13,6 +16,7 @@ import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
@@ -32,10 +36,7 @@ import com.helic.aminesms.data.models.rental_numbers.RentalNumberServiceState
 import com.helic.aminesms.data.models.rental_numbers.rental_options.RentalOptionsData
 import com.helic.aminesms.data.viewmodels.MainViewModel
 import com.helic.aminesms.presentation.navigation.MainAppScreens
-import com.helic.aminesms.presentation.ui.theme.ButtonColor
-import com.helic.aminesms.presentation.ui.theme.Red
-import com.helic.aminesms.presentation.ui.theme.topAppBarBackgroundColor
-import com.helic.aminesms.presentation.ui.theme.topAppBarContentColor
+import com.helic.aminesms.presentation.ui.theme.*
 import com.helic.aminesms.utils.*
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter", "StateFlowValueCalledInComposition")
@@ -47,24 +48,30 @@ fun RentalNumbers(
 ) {
     val context = LocalContext.current
 
-    LaunchedEffect(true) {
+    LaunchedEffect(key1 = true) {
         mainViewModel.getSuperUserBalance(snackbar = snackbar)
+        mainViewModel.getBalance(context = context, snackbar = snackbar)
         mainViewModel.getRentalServiceStateList(snackbar = snackbar)
         mainViewModel.getRentalNumberOptions(snackbar = snackbar)
     }
     val superUserCheckingBalanceState by mainViewModel.checkingSuperUserBalanceLoadingState.collectAsState()
     val superUserBalance = mainViewModel.superUserBalance.value
-    mainViewModel.price.value = 0.0
+
+    mainViewModel.rentalPrice.value = 0.0
 
     val listOfRentalServices by mainViewModel.rentalServiceStateList
     val optionsList by mainViewModel.availableRentalOptions
 
     val isRefreshing by mainViewModel.isRefreshing.collectAsState()
 
-    val price by mainViewModel.price
+    val price by mainViewModel.rentalPrice
 
     var selectedOption by remember { mutableStateOf(RentalNumberOption.WHOLE_LINE) }
     var serviceId by remember { mutableStateOf("") }
+
+    val balance = mainViewModel.userBalance.collectAsState().value
+
+    val state by mainViewModel.rentalServiceLoadingStateOfViewModel.collectAsState()
 
     Scaffold(topBar = {
         RentalNumberTopAppBar(navController = navController)
@@ -73,7 +80,7 @@ fun RentalNumbers(
             state = rememberSwipeRefreshState(isRefreshing),
             onRefresh = { mainViewModel.refreshRentalServiceStateList(snackbar = snackbar) }
         ) {
-            when (superUserCheckingBalanceState) {
+            when (state) {
                 LoadingState.LOADING -> LoadingList()
                 LoadingState.ERROR -> ErrorLoadingResults()
                 else -> {
@@ -104,12 +111,22 @@ fun RentalNumbers(
                                 serviceId = serviceId,
                                 snackbar = snackbar
                             )
-                        }, onRentalNumberOptionChosen = {
+                        },
+                        onRentalNumberOptionChosen = {
                             selectedOption = it
                         },
-                        price = dollarToCreditForPurchasingNumbers(price),
+                        priceInCredits = dollarToCreditForPurchasingNumbers(price),
                         superUserBalance = superUserBalance,
                         superUserCheckingBalanceState = superUserCheckingBalanceState,
+                        userBalance = balance,
+                        proceedBuying = {
+                            mainViewModel.orderRentalNumber(
+                                serviceId = serviceId,
+                                durationInHours = mainViewModel.rentalPeriodOption.value,
+                                navController = navController,
+                                snackbar = snackbar
+                            )
+                        },
                         snackbar = snackbar
                     )
                 }
@@ -125,7 +142,7 @@ fun RentalNumberTopAppBar(
     TopAppBar(
         navigationIcon = {
             IconButton(onClick = {
-                navController.navigate(MainAppScreens.Messages.route) {
+                navController.navigate(MainAppScreens.RentalNumbersMessages.route) {
                     popUpTo(navController.graph.findStartDestination().id)
                     launchSingleTop = true
                 }
@@ -154,13 +171,17 @@ fun Content(
     onTextChange: (String) -> Unit,
     onRentalOptionSelected: (RentalOptionsData) -> Unit,
     onRentalNumberOptionChosen: (RentalNumberOption) -> Unit,
-    price: Double,
+    priceInCredits: Double,
     superUserBalance: Double,
     superUserCheckingBalanceState: LoadingState,
+    userBalance: Double,
+    proceedBuying: () -> Unit,
     snackbar: (String, SnackbarDuration) -> Unit,
 ) {
     var selectedOption by remember { mutableStateOf(RentalNumberOption.WHOLE_LINE) }
     var userSelectedOption by remember { mutableStateOf(false) }
+
+    val loadingPrice by mainViewModel.rentalServicePriceLoadingState.collectAsState()
 
     Column(
         modifier = Modifier
@@ -175,28 +196,34 @@ fun Content(
                 onClick = {
                     selectedOption = RentalNumberOption.WHOLE_LINE
                     onRentalNumberOptionChosen(selectedOption)
+
+                    // To re-initialize the values on switching
                     mainViewModel.gotRentalPrice.value = false
+                    mainViewModel.rentalPrice.value = 0.0
                 },
                 colors = RadioButtonDefaults.colors(MaterialTheme.colors.primary)
             )
-            Text(text = "Whole Line")
+            Text(text = "Whole Line", fontWeight = FontWeight.Medium)
             Spacer(modifier = Modifier.padding(25.dp))
             RadioButton(
                 selected = selectedOption == RentalNumberOption.SINGLE_SERVICE,
                 onClick = {
                     selectedOption = RentalNumberOption.SINGLE_SERVICE
                     onRentalNumberOptionChosen(selectedOption)
+
+                    // To re-initialize the values on switching
                     mainViewModel.gotRentalPrice.value = false
                     userSelectedOption = false
-                    mainViewModel.searchTextState.value = "" // To re-initialize the value on switching
+                    mainViewModel.searchTextState.value = ""
+                    mainViewModel.selectedRentalService.value = RentalNumberServiceState()
+                    mainViewModel.rentalPrice.value = 0.0
                 },
                 colors = RadioButtonDefaults.colors(MaterialTheme.colors.primary)
             )
-            Text(text = "Single Service")
+            Text(text = "Single Service", fontWeight = FontWeight.Medium)
         }
         if (selectedOption == RentalNumberOption.SINGLE_SERVICE) {
 
-            mainViewModel.selectedRentalService.value = RentalNumberServiceState()
             RentalServicesDropDownMenu(
                 label = "Search Service State",
                 optionsList = serviceStateList,
@@ -205,6 +232,7 @@ fun Content(
                     mainViewModel.selectedRentalService.value =
                         it // We did it here because we need to check if a service was selected
                     userSelectedOption = true
+                    Log.d("Tag", "service $it ")
                 },
                 mainViewModel = mainViewModel
             )
@@ -225,42 +253,96 @@ fun Content(
         Text(
             text = "Cost",
             fontSize = MaterialTheme.typography.subtitle1.fontSize,
-            fontWeight = FontWeight.Bold
+            fontWeight = FontWeight.Medium
         )
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(20.dp),
             horizontalArrangement = Arrangement.Center
         ) {
+            val borderColor: Color
+            val priceText: String
+            val textColor: Color
+
             if (selectedOption == RentalNumberOption.SINGLE_SERVICE && !userSelectedOption) {
-                Text(
-                    text = "Please select a service",
-                    fontWeight = FontWeight.Bold,
-                    fontSize = MaterialTheme.typography.h6.fontSize,
-                    color = Red
-                )
+                borderColor = Red
+                priceText = "Please select a service"
+                textColor = Red
             } else {
-                Text(
-                    text = "$price credits",
-                    fontWeight = FontWeight.Bold,
-                    fontSize = MaterialTheme.typography.h6.fontSize,
-                )
+                borderColor = MaterialTheme.colors.primary
+                priceText = "$priceInCredits credits"
+                textColor = MaterialTheme.colors.TextColor
+            }
+
+            Card(
+                modifier = Modifier
+                    .border(
+                        width = 1.dp,
+                        color = borderColor,
+                        shape = RoundedCornerShape(5.dp)
+                    )
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(5.dp))
+            )
+            {
+                Row(
+                    modifier = Modifier.padding(top = 15.dp, bottom = 15.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    when (loadingPrice) {
+                        LoadingState.LOADING -> {
+                            CircularProgressIndicator(
+                                modifier = Modifier.size(24.dp),
+                                color = MaterialTheme.colors.ButtonColor,
+                                strokeWidth = 3.dp
+                            )
+                        }
+                        LoadingState.ERROR -> {
+                            Text(
+                                text = "Error loading the price",
+                                fontWeight = FontWeight.Medium,
+                                fontSize = MaterialTheme.typography.h6.fontSize,
+                                color = Red
+                            )
+                        }
+                        else -> {
+                            Text(
+                                text = priceText,
+                                fontWeight = FontWeight.Medium,
+                                fontSize = MaterialTheme.typography.h6.fontSize,
+                                color = textColor
+                            )
+                        }
+                    }
+                }
             }
         }
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(20.dp),
             horizontalArrangement = Arrangement.Center
         ) {
             Button(
                 modifier = Modifier
-                    .fillMaxWidth(0.8f)
+                    .fillMaxWidth()
                     .height(50.dp),
                 colors = ButtonDefaults.buttonColors(MaterialTheme.colors.ButtonColor),
                 enabled = mainViewModel.gotRentalPrice.value && superUserCheckingBalanceState != LoadingState.ERROR && superUserCheckingBalanceState != LoadingState.LOADING,
                 onClick = {
-                    if (superUserBalance > price) { // If the superUser has balance we can let the users order.
-                        //TODO Add a condition to check if the user has enough balance to buy
-                        //TODO Add a function to proceed with buying
-
+                    Log.d("Tag", "Balance $superUserBalance")
+                    Log.d("Tag", "State ${superUserCheckingBalanceState.status}")
+                    if (dollarToCreditForPurchasingNumbers(superUserBalance) > priceInCredits) { // If the superUser has balance we can let the users order.
+                        if (userBalance >= priceInCredits) { // If the user has enough balance to buy we proceed
+                            proceedBuying() // function callback done in higher function because we need the serviceID and the duration
+                        } else {
+                            snackbar(
+                                context.getString(R.string.not_enough_balance),
+                                SnackbarDuration.Short
+                            )
+                        }
                     } else {
                         snackbar(context.getString(R.string.cant_purchase), SnackbarDuration.Short)
                     }
@@ -410,65 +492,3 @@ fun RentalOptionsDropDownMenu(
         }
     }
 }
-//
-//@OptIn(ExperimentalMaterialApi::class)
-//@Composable
-//fun RentalOptionsDropDownMenu(
-//    label: String,
-//    optionsList: List<RentalOptionsData>,
-//    onRentalOptionSelected: (RentalOptionsData) -> Unit
-//) {
-//    var expanded by remember { mutableStateOf(false) }
-//    var selectedText by remember { mutableStateOf("") }
-//    var textFieldSize by remember { mutableStateOf(Size.Zero) }
-//
-//    Column(Modifier.padding(20.dp)) {
-//        Box {
-//            ExposedDropdownMenuBox(
-//                expanded = expanded,
-//                onExpandedChange = {
-//                    expanded = !expanded
-//                }
-//            ) {
-//                TextField(
-//                    readOnly = true,
-//                    value = selectedText,
-//                    onValueChange = {
-//                        selectedText = it
-//                    },
-//                    modifier = Modifier
-//                        .fillMaxWidth()
-//                        .onGloballyPositioned { coordinates ->
-//                            //This value is used to assign to the DropDown the same width
-//                            textFieldSize = coordinates.size.toSize()
-//                        },
-//                    label = { Text(label) },
-//                    trailingIcon = {
-//                        ExposedDropdownMenuDefaults.TrailingIcon(
-//                            expanded = expanded
-//                        )
-//                    },
-//                    colors = ExposedDropdownMenuDefaults.textFieldColors()
-//                )
-//                ExposedDropdownMenu(
-//                    expanded = expanded,
-//                    onDismissRequest = {
-//                        expanded = false
-//                    }
-//                ) {
-//                    optionsList.forEach { selectionOption ->
-//                        DropdownMenuItem(
-//                            onClick = {
-//                                selectedText = selectionOption.duration
-//                                onRentalOptionSelected(selectionOption)
-//                                expanded = false
-//                            }
-//                        ) {
-//                            Text(text = selectionOption.duration)
-//                        }
-//                    }
-//                }
-//            }
-//        }
-//    }
-//}

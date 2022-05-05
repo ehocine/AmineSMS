@@ -20,12 +20,14 @@ import com.google.firebase.ktx.Firebase
 import com.helic.aminesms.R
 import com.helic.aminesms.data.models.cancel_number.CancelNumberResponse
 import com.helic.aminesms.data.models.messages.Sms
+import com.helic.aminesms.data.models.number_data.RentalNumberData
 import com.helic.aminesms.data.models.number_data.ReusableNumbersData
 import com.helic.aminesms.data.models.number_data.TempNumberData
-import com.helic.aminesms.data.models.order_temp_number.ListOfOrderedNumber
 import com.helic.aminesms.data.models.rental_numbers.RentalNumberServiceState
 import com.helic.aminesms.data.models.rental_numbers.rental_options.RentalOptionsData
-import com.helic.aminesms.data.models.service_state.ServiceState
+import com.helic.aminesms.data.models.temp_number.ListOfOrderedRentalNumber
+import com.helic.aminesms.data.models.temp_number.ListOfOrderedTempNumber
+import com.helic.aminesms.data.models.temp_number.service_state.ServiceState
 import com.helic.aminesms.data.repository.Repository
 import com.helic.aminesms.presentation.navigation.MainAppScreens
 import com.helic.aminesms.utils.*
@@ -119,9 +121,13 @@ class MainViewModel @Inject constructor(
         mutableStateOf(TempNumberData())
 
     @SuppressLint("MutableCollectionMutableState")
-    private var _NumbersList: MutableStateFlow<MutableList<TempNumberData>> =
+    private var _TempNumbersList: MutableStateFlow<MutableList<TempNumberData>> =
         MutableStateFlow(mutableListOf())
-    var orderedNumbersList = _NumbersList.asStateFlow()
+    var orderedTempNumbersList = _TempNumbersList.asStateFlow()
+
+    private var _RentalNumbersList: MutableStateFlow<MutableList<RentalNumberData>> =
+        MutableStateFlow(mutableListOf())
+    var orderedRentalNumbers = _RentalNumbersList.asStateFlow()
 
     val selectedTempNumber: MutableState<TempNumberData> =
         mutableStateOf(TempNumberData())
@@ -201,9 +207,9 @@ class MainViewModel @Inject constructor(
         }
     }
 
-    var gettingListOfNumbersLoadingState = MutableStateFlow(LoadingState.IDLE)
+    var gettingListOfTempNumbersLoadingState = MutableStateFlow(LoadingState.IDLE)
 
-    fun getListOfNumbersFromFirebase(
+    fun getListOfTempNumbersFromFirebase(
         context: Context,
         snackbar: (String, SnackbarDuration) -> Unit
     ) {
@@ -214,15 +220,15 @@ class MainViewModel @Inject constructor(
             if (currentUser != null) {
                 CoroutineScope(Dispatchers.IO).launch {
                     try {
-                        gettingListOfNumbersLoadingState.emit(LoadingState.LOADING)
+                        gettingListOfTempNumbersLoadingState.emit(LoadingState.LOADING)
                         registration = data?.addSnapshotListener { value, error ->
                             if (error != null) {
                                 snackbar("Error occurred: $error", SnackbarDuration.Short)
                                 return@addSnapshotListener
                             }
                             if (value != null && value.exists()) {
-                                _NumbersList.value =
-                                    value.toObject(ListOfOrderedNumber::class.java)?.listOfTempNumbers
+                                _TempNumbersList.value =
+                                    value.toObject(ListOfOrderedTempNumber::class.java)?.listOfTempNumbers
                                         ?: mutableListOf()
                             } else {
                                 snackbar(
@@ -231,12 +237,59 @@ class MainViewModel @Inject constructor(
                                 )
                             }
                         }
-                        gettingListOfNumbersLoadingState.emit(LoadingState.LOADED)
+                        gettingListOfTempNumbersLoadingState.emit(LoadingState.LOADED)
                     } catch (e: Exception) {
 
                         //Cancel the database request if there is an error
                         registration?.remove()
-                        gettingListOfNumbersLoadingState.emit(LoadingState.ERROR)
+                        gettingListOfTempNumbersLoadingState.emit(LoadingState.ERROR)
+                        withContext(Dispatchers.Main) {
+                            snackbar(e.message!!, SnackbarDuration.Short)
+                        }
+                    }
+                }
+            }
+        } else {
+            snackbar(context.getString(R.string.device_not_connected), SnackbarDuration.Short)
+        }
+    }
+
+    var gettingListOfRentalNumbersLoadingState = MutableStateFlow(LoadingState.IDLE)
+
+    fun getListOfRentalNumbersFromFirebase(
+        context: Context,
+        snackbar: (String, SnackbarDuration) -> Unit
+    ) {
+        val db = Firebase.firestore
+        val currentUser = Firebase.auth.currentUser
+        val data = currentUser?.let { db.collection(FIRESTORE_DATABASE).document(it.uid) }
+        if (hasInternetConnection(getApplication<Application>())) {
+            if (currentUser != null) {
+                CoroutineScope(Dispatchers.IO).launch {
+                    try {
+                        gettingListOfRentalNumbersLoadingState.emit(LoadingState.LOADING)
+                        registration = data?.addSnapshotListener { value, error ->
+                            if (error != null) {
+                                snackbar("Error occurred: $error", SnackbarDuration.Short)
+                                return@addSnapshotListener
+                            }
+                            if (value != null && value.exists()) {
+                                _RentalNumbersList.value =
+                                    value.toObject(ListOfOrderedRentalNumber::class.java)?.listOfRentalNumbers
+                                        ?: mutableListOf()
+                            } else {
+                                snackbar(
+                                    context.getString(R.string.error_occurred),
+                                    SnackbarDuration.Short
+                                )
+                            }
+                        }
+                        gettingListOfRentalNumbersLoadingState.emit(LoadingState.LOADED)
+                    } catch (e: Exception) {
+
+                        //Cancel the database request if there is an error
+                        registration?.remove()
+                        gettingListOfRentalNumbersLoadingState.emit(LoadingState.ERROR)
                         withContext(Dispatchers.Main) {
                             snackbar(e.message!!, SnackbarDuration.Short)
                         }
@@ -318,7 +371,7 @@ class MainViewModel @Inject constructor(
                         if (response.isSuccessful) {
                             tempNumberData.value = response.body()!!.tempNumberData
                             buyingLoadingStateOfViewModel.emit(LoadingState.LOADED)
-                            Log.d("Tag", "Number: ${tempNumberData.value.reuseableUntil}")
+
                             reduceBalance(
                                 context = getApplication<Application>(),
                                 snackbar = snackbar,
@@ -331,7 +384,7 @@ class MainViewModel @Inject constructor(
                                 AddOrRemoveNumberAction.ADD,
                                 tempNumberData = tempNumberData.value
                             )
-                            navController.navigate(MainAppScreens.Messages.route) {
+                            navController.navigate(MainAppScreens.TempNumberMessages.route) {
                                 popUpTo(navController.graph.findStartDestination().id) {
                                     inclusive = true
                                 }
@@ -380,8 +433,8 @@ class MainViewModel @Inject constructor(
                             message?.value = response.body()!!.data.sms
                             if (message?.value != null) {
                                 val orderedNumberInList =
-                                    orderedNumbersList.value.find { it.temporaryNumberId == temporaryNumberId }
-                                updateNumberState(
+                                    orderedTempNumbersList.value.find { it.temporaryNumberId == temporaryNumberId }
+                                updateTempNumberState(
                                     context = context,
                                     snackbar = snackbar,
                                     tempNumberToBeUpdated = orderedNumberInList,
@@ -431,8 +484,8 @@ class MainViewModel @Inject constructor(
                             message?.value = response.body()!!.data.sms
                             if (message?.value != null) {
                                 val orderedNumberInList =
-                                    orderedNumbersList.value.find { it.temporaryNumberId == temporaryNumberId }
-                                updateNumberState(
+                                    orderedTempNumbersList.value.find { it.temporaryNumberId == temporaryNumberId }
+                                updateTempNumberState(
                                     context = context,
                                     snackbar = snackbar,
                                     tempNumberToBeUpdated = orderedNumberInList,
@@ -496,9 +549,9 @@ class MainViewModel @Inject constructor(
                         if (response.isSuccessful) {
                             cancelTempNumber.value = response.body()!!
                             val orderedNumberInList =
-                                orderedNumbersList.value.find { it.temporaryNumberId == temporaryNumberId }
+                                orderedTempNumbersList.value.find { it.temporaryNumberId == temporaryNumberId }
 
-                            updateNumberState(
+                            updateTempNumberState(
                                 context = context,
                                 snackbar = snackbar,
                                 tempNumberToBeUpdated = orderedNumberInList,
@@ -515,7 +568,7 @@ class MainViewModel @Inject constructor(
                                     dollarToCreditForPurchasingNumbers(orderedNumberInList.price)
                                 )
                             }
-                            navController.navigate(MainAppScreens.Messages.route) {
+                            navController.navigate(MainAppScreens.TempNumberMessages.route) {
                                 popUpTo(navController.graph.findStartDestination().id) {
                                     inclusive = true
                                 }
@@ -647,7 +700,7 @@ class MainViewModel @Inject constructor(
                                 action = AddOrRemoveNumberAction.ADD,
                                 tempNumberData = reuseTempNumberResponse.value
                             )
-                            navController.navigate(MainAppScreens.Messages.route) {
+                            navController.navigate(MainAppScreens.TempNumberMessages.route) {
                                 popUpTo(navController.graph.findStartDestination().id) {
                                     inclusive = true
                                 }
@@ -777,8 +830,8 @@ class MainViewModel @Inject constructor(
         }
     }
 
-    private var rentalServicePriceLoadingState = MutableStateFlow(LoadingState.IDLE)
-    var price: MutableState<Double> = mutableStateOf(0.0)
+    var rentalServicePriceLoadingState = MutableStateFlow(LoadingState.IDLE)
+    var rentalPrice: MutableState<Double> = mutableStateOf(0.0)
 
     var gotRentalPrice: MutableState<Boolean> = mutableStateOf(false)
 
@@ -800,7 +853,7 @@ class MainViewModel @Inject constructor(
                             rentalServicePrice.value =
                                 response.body()!!.price
                             rentalServicePriceLoadingState.emit(LoadingState.LOADED)
-                            price.value = rentalServicePrice.value
+                            rentalPrice.value = rentalServicePrice.value
 
                             gotRentalPrice.value = true
 
@@ -824,6 +877,72 @@ class MainViewModel @Inject constructor(
                 }
             } else {
                 rentalServicePriceLoadingState.emit(LoadingState.ERROR)
+                snackbar(
+                    getApplication<Application>().getString(R.string.device_not_connected),
+                    SnackbarDuration.Short
+                )
+            }
+        }
+    }
+
+    private val rentalNumberData: MutableState<RentalNumberData> =
+        mutableStateOf(RentalNumberData())
+
+    var orderRentalNumberLoadingState = MutableStateFlow(LoadingState.IDLE)
+
+    fun orderRentalNumber(
+        serviceId: String,
+        durationInHours: Int,
+        snackbar: (String, SnackbarDuration) -> Unit,
+        navController: NavController
+    ) {
+        viewModelScope.launch {
+            if (hasInternetConnection(getApplication<Application>())) {
+                try {
+                    withTimeoutOrNull(TIMEOUT_IN_MILLIS) {
+                        orderRentalNumberLoadingState.emit(LoadingState.LOADING)
+                        val response = repository.remote.orderRentalNumber(
+                            serviceId = serviceId,
+                            durationInHours = durationInHours
+                        )
+                        if (response.isSuccessful) {
+                            rentalNumberData.value = response.body()!!.rentalNumberData
+                            orderRentalNumberLoadingState.emit(LoadingState.LOADED)
+                            reduceBalance(
+                                context = getApplication<Application>(),
+                                snackbar = snackbar,
+                                currentBalance = _userBalance.value,
+                                amount = dollarToCreditForPurchasingNumbers(rentalNumberData.value.price.toDouble())
+                            )
+                            addOrRemoveRentalNumberFromFirebase(
+                                context = getApplication<Application>(),
+                                snackbar = snackbar,
+                                AddOrRemoveNumberAction.ADD,
+                                rentalNumberData = rentalNumberData.value
+                            )
+                            navController.navigate(MainAppScreens.RentalNumbersMessages.route) {
+                                popUpTo(navController.graph.findStartDestination().id) {
+                                    inclusive = true
+                                }
+                                launchSingleTop = true
+                            }
+                        }
+
+                    } ?: withContext(Dispatchers.Main) {
+                        orderRentalNumberLoadingState.emit(LoadingState.ERROR)
+                        snackbar(
+                            getApplication<Application>().getString(R.string.time_out),
+                            SnackbarDuration.Short
+                        )
+                    }
+                } catch (e: Exception) {
+                    orderRentalNumberLoadingState.emit(LoadingState.ERROR)
+                    snackbar(e.message!!, SnackbarDuration.Short)
+                    Log.d("Tag", e.message.toString())
+                }
+
+            } else {
+                orderRentalNumberLoadingState.emit(LoadingState.ERROR)
                 snackbar(
                     getApplication<Application>().getString(R.string.device_not_connected),
                     SnackbarDuration.Short

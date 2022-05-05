@@ -1,4 +1,4 @@
-package com.helic.aminesms.data.models.service_state
+package com.helic.aminesms.data.models.temp_number.service_state
 
 
 import com.google.gson.annotations.SerializedName

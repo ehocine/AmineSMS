@@ -13,9 +13,11 @@ import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import com.helic.aminesms.R
 import com.helic.aminesms.data.models.User
+import com.helic.aminesms.data.models.number_data.RentalNumberData
 import com.helic.aminesms.data.models.number_data.TempNumberData
 import com.helic.aminesms.presentation.navigation.AuthenticationScreens
 import com.helic.aminesms.utils.Constants.FIRESTORE_DATABASE
+import com.helic.aminesms.utils.Constants.LIST_OF_RENTAL_NUMBERS
 import com.helic.aminesms.utils.Constants.LIST_OF_TEMP_NUMBERS
 import com.helic.aminesms.utils.Constants.TIMEOUT_IN_MILLIS
 import com.helic.aminesms.utils.Constants.USER_BALANCE_DATABASE
@@ -23,6 +25,9 @@ import com.helic.aminesms.utils.Constants.auth
 import com.helic.aminesms.utils.Constants.loadingState
 import kotlinx.coroutines.*
 import kotlinx.coroutines.tasks.await
+
+//TODO When creating a user add the purchased rental numbers
+
 
 //Register new user
 fun registerNewUser(
@@ -188,7 +193,8 @@ fun createUserWithBalance(user: FirebaseUser?) {
             it.displayName.toString(),
             it.email.toString(),
             userBalance = 0.0,
-            listOfTempNumbers = listOf()
+            listOfTempNumbers = listOf(),
+            listOfRentalNumbers = listOf()
         )
     }
     if (newUser != null) {
@@ -305,7 +311,6 @@ fun handleOrderedNumberState(
         }
         else -> Unit
     }
-
 }
 
 
@@ -364,7 +369,7 @@ fun addOrRemoveTempNumberFromFirebase(
     }
 }
 
-fun updateNumberState(
+fun updateTempNumberState(
     context: Context,
     snackbar: (String, SnackbarDuration) -> Unit,
     tempNumberToBeUpdated: TempNumberData?,
@@ -395,6 +400,61 @@ fun updateNumberState(
                             snackbar("Something went wrong: $it", SnackbarDuration.Short)
                         }
                     loadingState.emit(LoadingState.LOADED)
+                } catch (e: Exception) {
+                    loadingState.emit(LoadingState.ERROR)
+                    withContext(Dispatchers.Main) {
+                        withContext(Dispatchers.Main) {
+                            snackbar(e.message!!, SnackbarDuration.Short)
+                        }
+                    }
+                }
+            }
+        }
+    } else {
+        snackbar(context.getString(R.string.device_not_connected), SnackbarDuration.Short)
+    }
+}
+
+fun addOrRemoveRentalNumberFromFirebase(
+    context: Context,
+    snackbar: (String, SnackbarDuration) -> Unit,
+    action: AddOrRemoveNumberAction,
+    rentalNumberData: RentalNumberData?
+) {
+
+    val db = Firebase.firestore
+    val currentUser = Firebase.auth.currentUser
+    val data = currentUser?.let { db.collection(FIRESTORE_DATABASE).document(it.uid) }
+    if (hasInternetConnection(context)) {
+        if (currentUser != null) {
+            CoroutineScope(Dispatchers.IO).launch {
+                try {
+                    loadingState.emit(LoadingState.LOADING)
+                    when (action) {
+                        AddOrRemoveNumberAction.ADD -> {
+                            data?.update(
+                                LIST_OF_RENTAL_NUMBERS,
+                                FieldValue.arrayUnion(rentalNumberData)
+                            )
+                                ?.addOnSuccessListener {
+
+                                }?.addOnFailureListener {
+                                    snackbar("Something went wrong: $it", SnackbarDuration.Short)
+                                }
+                            loadingState.emit(LoadingState.LOADED)
+                        }
+                        AddOrRemoveNumberAction.REMOVE -> {
+                            data?.update(
+                                LIST_OF_RENTAL_NUMBERS,
+                                FieldValue.arrayRemove(rentalNumberData)
+                            )
+                                ?.addOnSuccessListener {
+                                }?.addOnFailureListener {
+                                    snackbar("Something went wrong: $it", SnackbarDuration.Short)
+                                }
+                            loadingState.emit(LoadingState.LOADED)
+                        }
+                    }
                 } catch (e: Exception) {
                     loadingState.emit(LoadingState.ERROR)
                     withContext(Dispatchers.Main) {

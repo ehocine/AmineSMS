@@ -45,4 +45,7 @@
     <string name="no">No</string>
     <string name="balance_refunded">Balance refunded successfully</string>
     <string name="search">Search</string>
+    <string name="rental_numbers">Rental numbers</string>
+    <string name="temp_numbers">Temporary numbers</string>
+    <string name="home">Home</string>
 </resources>

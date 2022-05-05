@@ -1,16 +1,15 @@
-package com.helic.aminesms.data.models.order_temp_number
-
+package com.helic.aminesms.data.models.temp_number.service_state
 
 import com.google.gson.annotations.SerializedName
-import com.helic.aminesms.data.models.number_data.TempNumberData
 
-data class OrderNumberResponse(
+data class ServiceStateListResponse(
     @SerializedName("data")
-    val tempNumberData: TempNumberData,
+    val serviceStateList: List<ServiceState>,
     @SerializedName("errors")
     val errors: Any,
     @SerializedName("msg")
     val msg: Any,
     @SerializedName("succeeded")
     val succeeded: Boolean
+
 )

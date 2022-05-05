@@ -34,7 +34,7 @@ import com.helic.aminesms.utils.SearchAppBarState
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
-fun OrderNumbers(
+fun OrderTempNumbers(
     navController: NavController,
     mainViewModel: MainViewModel,
     snackbar: (String, SnackbarDuration) -> Unit
@@ -103,7 +103,7 @@ fun OrderNumberTopAppBar(
     TopAppBar(
         navigationIcon = {
             IconButton(onClick = {
-                navController.navigate(MainAppScreens.Messages.route) {
+                navController.navigate(MainAppScreens.TempNumberMessages.route) {
                     popUpTo(navController.graph.findStartDestination().id)
                     launchSingleTop = true
                 }

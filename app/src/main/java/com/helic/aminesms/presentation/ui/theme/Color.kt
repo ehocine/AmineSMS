@@ -20,7 +20,7 @@ val MediumGray = Color(0xFF9C9C9C)
 val LightGray = Color(0xFFFCFCFC)
 val Red = Color(0xFFFF4646)
 
-val Colors.phoneMessagesTextColor: Color
+val Colors.TextColor: Color
     @Composable
     get() = if (!isSystemInDarkTheme()) DarkGray else LightGray
 
@@ -42,10 +42,10 @@ val Colors.ButtonColor : Color
     @Composable
     get() = if (!isSystemInDarkTheme()) Purple500 else Purple700
 
-
-val Colors.TextColor : Color
-    @Composable
-    get() = if (!isSystemInDarkTheme()) Color.Black else Color.White
+//
+//val Colors.TextColor : Color
+//    @Composable
+//    get() = if (!isSystemInDarkTheme()) Color.Black else Color.White
 
 val Colors.backgroundColor : Color
     @Composable

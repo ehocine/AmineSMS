@@ -1,4 +1,4 @@
-package com.helic.aminesms.presentation.screens.main_app_screens.rental_numbers
+package com.helic.aminesms.presentation.screens.main_app_screens.order_rental_numbers
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -19,7 +19,7 @@ import com.helic.aminesms.data.models.rental_numbers.RentalNumberServiceState
 import com.helic.aminesms.data.viewmodels.MainViewModel
 import com.helic.aminesms.presentation.navigation.MainAppScreens
 import com.helic.aminesms.presentation.ui.theme.Green
-import com.helic.aminesms.presentation.ui.theme.phoneMessagesTextColor
+import com.helic.aminesms.presentation.ui.theme.TextColor
 
 @Composable
 fun DisplayServiceStateList(
@@ -80,7 +80,7 @@ fun Content(
             Column {
                 Text(
                     text = serviceState.name,
-                    color = MaterialTheme.colors.phoneMessagesTextColor,
+                    color = MaterialTheme.colors.TextColor,
                     fontSize = MaterialTheme.typography.h6.fontSize,
                     fontWeight = FontWeight.Bold,
                     maxLines = 1

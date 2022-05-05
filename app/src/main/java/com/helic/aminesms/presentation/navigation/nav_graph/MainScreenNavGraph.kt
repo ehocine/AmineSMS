@@ -7,13 +7,15 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import com.helic.aminesms.data.viewmodels.MainViewModel
 import com.helic.aminesms.presentation.navigation.MainAppScreens
+import com.helic.aminesms.presentation.screens.main_app_screens.Home
 import com.helic.aminesms.presentation.screens.main_app_screens.Profile
-import com.helic.aminesms.presentation.screens.main_app_screens.messages.main_messages_screen.Messages
+import com.helic.aminesms.presentation.screens.main_app_screens.messages.temp_numbers_messages_screen.TempNumbersMessages
 import com.helic.aminesms.presentation.screens.main_app_screens.messages.message_details.MessageDetails
+import com.helic.aminesms.presentation.screens.main_app_screens.messages.rental_numbers_messages_screen.RentaNumbersMessages
 import com.helic.aminesms.presentation.screens.main_app_screens.order_temp_numbers.OrderNumberOptions
-import com.helic.aminesms.presentation.screens.main_app_screens.order_temp_numbers.OrderNumbers
-import com.helic.aminesms.presentation.screens.main_app_screens.rental_numbers.RentalNumberOptions
-import com.helic.aminesms.presentation.screens.main_app_screens.rental_numbers.RentalNumbers
+import com.helic.aminesms.presentation.screens.main_app_screens.order_temp_numbers.OrderTempNumbers
+import com.helic.aminesms.presentation.screens.main_app_screens.order_rental_numbers.RentalNumberOptions
+import com.helic.aminesms.presentation.screens.main_app_screens.order_rental_numbers.RentalNumbers
 import com.helic.aminesms.presentation.screens.main_app_screens.shop.Shop
 import com.helic.aminesms.utils.Constants.MAIN_SCREEN_ROUTE
 
@@ -25,17 +27,33 @@ fun NavGraphBuilder.mainScreenNavGraph(
 
     ) {
     navigation(
-        startDestination = MainAppScreens.Messages.route,
+        startDestination = MainAppScreens.Home.route,
         route = MAIN_SCREEN_ROUTE
     ) {
 
-        composable(route = MainAppScreens.Messages.route) {
-            Messages(
+        composable(route = MainAppScreens.Home.route) {
+            Home(
                 navController = navController,
                 mainViewModel = mainViewModel,
                 snackbar = showSnackbar
             )
         }
+
+        composable(route = MainAppScreens.TempNumberMessages.route) {
+            TempNumbersMessages(
+                navController = navController,
+                mainViewModel = mainViewModel,
+                snackbar = showSnackbar
+            )
+        }
+        composable(route = MainAppScreens.RentalNumbersMessages.route){
+            RentaNumbersMessages(
+                navController = navController,
+                mainViewModel = mainViewModel,
+                snackbar = showSnackbar
+            )
+        }
+
         composable(route = MainAppScreens.Profile.route) {
             Profile(
                 navController = navController,
@@ -60,7 +78,7 @@ fun NavGraphBuilder.mainScreenNavGraph(
             )
         }
         composable(route = MainAppScreens.OrderNumbers.route) {
-            OrderNumbers(
+            OrderTempNumbers(
                 navController = navController,
                 mainViewModel = mainViewModel,
                 snackbar = showSnackbar

@@ -1,12 +1,12 @@
-package com.helic.aminesms.data.models.reusable_numbers.reuse_number_details
+package com.helic.aminesms.data.models.temp_number.reusable_numbers
 
 
 import com.google.gson.annotations.SerializedName
-import com.helic.aminesms.data.models.number_data.TempNumberData
+import com.helic.aminesms.data.models.number_data.ReusableNumbersData
 
-data class ReuseNumberResponse(
+data class ReusableNumbersResponse(
     @SerializedName("data")
-    val reuseTempNumberData: TempNumberData,
+    val reusableNumbersListData: List<ReusableNumbersData>,
     @SerializedName("errors")
     val errors: Any,
     @SerializedName("msg")

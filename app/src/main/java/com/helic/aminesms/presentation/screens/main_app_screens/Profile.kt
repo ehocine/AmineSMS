@@ -58,7 +58,7 @@ fun Profile(
         )
     }
 
-    Scaffold() {
+    Scaffold {
         if (user != null) {
             ProfileDetails(
                 context = context,

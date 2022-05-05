@@ -14,7 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.helic.aminesms.data.models.messages.Sms
 import com.helic.aminesms.presentation.ui.theme.MediumGray
-import com.helic.aminesms.presentation.ui.theme.phoneMessagesTextColor
+import com.helic.aminesms.presentation.ui.theme.TextColor
 
 @Composable
 fun MessageDetailItem(listOfMessages: List<Sms?>) {
@@ -54,7 +54,7 @@ fun MessageContent(sms: Sms?) {
                 )
                 Text(
                     text = sms.content,
-                    color = MaterialTheme.colors.phoneMessagesTextColor,
+                    color = MaterialTheme.colors.TextColor,
                     fontSize = MaterialTheme.typography.body1.fontSize
                 )
             }

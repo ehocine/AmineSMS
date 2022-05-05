@@ -2,6 +2,7 @@ package com.helic.aminesms.presentation.screens.main_app_screens.order_temp_numb
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -33,12 +34,14 @@ fun OrderNumberOptions(
     showSnackbar: (String, SnackbarDuration) -> Unit
 ) {
     val context = LocalContext.current
+
     LaunchedEffect(key1 = true) {
         mainViewModel.getBalance(context = context, snackbar = showSnackbar)
         mainViewModel.getSuperUserBalance(snackbar = showSnackbar)
     }
     val selectedServiceState = mainViewModel.selectedServiceState.value
     val balance = mainViewModel.userBalance.collectAsState().value
+
     val superUserBalanceState by mainViewModel.checkingSuperUserBalanceLoadingState.collectAsState()
     val superUserBalance = mainViewModel.superUserBalance.value
 

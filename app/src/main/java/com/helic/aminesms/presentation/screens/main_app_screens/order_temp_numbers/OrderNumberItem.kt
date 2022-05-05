@@ -15,12 +15,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.helic.aminesms.data.models.service_state.ServiceState
+import com.helic.aminesms.data.models.temp_number.service_state.ServiceState
 import com.helic.aminesms.data.viewmodels.MainViewModel
 import com.helic.aminesms.presentation.navigation.MainAppScreens
 import com.helic.aminesms.presentation.ui.theme.Green
 import com.helic.aminesms.presentation.ui.theme.MediumGray
-import com.helic.aminesms.presentation.ui.theme.phoneMessagesTextColor
+import com.helic.aminesms.presentation.ui.theme.TextColor
 import com.helic.aminesms.utils.dollarToCreditForPurchasingNumbers
 
 @Composable
@@ -82,7 +82,7 @@ fun Content(
             Column {
                 Text(
                     text = serviceState.name,
-                    color = MaterialTheme.colors.phoneMessagesTextColor,
+                    color = MaterialTheme.colors.TextColor,
                     fontSize = MaterialTheme.typography.h6.fontSize,
                     fontWeight = FontWeight.Bold,
                     maxLines = 1

@@ -120,9 +120,15 @@ fun RentalNumbers(
                         superUserCheckingBalanceState = superUserCheckingBalanceState,
                         userBalance = balance,
                         proceedBuying = {
+                            Log.d("Tag", "ServiceID: $serviceId")
+                            Log.d(
+                                "Tag",
+                                "Duration: ${mainViewModel.rentalPeriodOption.value} and ${mainViewModel.rentalPeriodOption.value * 24}"
+                            )
+
                             mainViewModel.orderRentalNumber(
                                 serviceId = serviceId,
-                                durationInHours = mainViewModel.rentalPeriodOption.value,
+                                durationInHours = mainViewModel.rentalPeriodOption.value * 24,
                                 navController = navController,
                                 snackbar = snackbar
                             )
@@ -232,7 +238,6 @@ fun Content(
                     mainViewModel.selectedRentalService.value =
                         it // We did it here because we need to check if a service was selected
                     userSelectedOption = true
-                    Log.d("Tag", "service $it ")
                 },
                 mainViewModel = mainViewModel
             )

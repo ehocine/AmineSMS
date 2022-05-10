@@ -1,6 +1,9 @@
 package com.helic.aminesms.presentation.screens.main_app_screens.messages.rental_numbers_messages_screen
 
 import android.annotation.SuppressLint
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -9,9 +12,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import com.helic.aminesms.R
@@ -26,7 +34,7 @@ import com.helic.aminesms.utils.LoadingState
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
-fun RentaNumbersMessages(
+fun RentalNumbersMessages(
     navController: NavController,
     mainViewModel: MainViewModel,
     snackbar: (String, SnackbarDuration) -> Unit
@@ -37,10 +45,14 @@ fun RentaNumbersMessages(
     val state by mainViewModel.gettingListOfRentalNumbersLoadingState.collectAsState()
 
     val listOfOrderedNumbers = mainViewModel.orderedRentalNumbers.collectAsState().value
+
     LaunchedEffect(key1 = listOfOrderedNumbers) {
         mainViewModel.getListOfRentalNumbersFromFirebase(context = context, snackbar = snackbar)
-//        mainViewModel.getReusableNumbers(snackbar = snackbar)
+        mainViewModel.getLiveRentalNumbersList(snackbar = snackbar)
+        mainViewModel.getPendingRentalNumbersList(snackbar = snackbar)
     }
+
+    val listOfLiveRentalNumbers by mainViewModel.listOfLiveRentalNumbers
     LaunchedEffect(key1 = true) {
         mainViewModel.getBalance(context = context, snackbar = snackbar)
     }
@@ -73,13 +85,18 @@ fun RentaNumbersMessages(
             LoadingState.LOADING -> LoadingList()
             LoadingState.ERROR -> ErrorLoadingResults()
             else -> {
-                RentalNumberMessageItem(
-                    context = context,
-                    navController = navController,
-                    mainViewModel = mainViewModel,
-                    listOfRentalNumbers = listOfOrderedNumbers,
-                    showSnackbar = snackbar
-                )
+                Column(verticalArrangement = Arrangement.SpaceBetween) {
+                    // Number of pending numbers
+                    PendingRentalNumbersCount(mainViewModel.listOfPendingRentalNumbers.value)
+                    RentalNumberMessageItem(
+                        context = context,
+                        navController = navController,
+                        mainViewModel = mainViewModel,
+                        listOfRentalNumbers = listOfLiveRentalNumbers,
+                        showSnackbar = snackbar
+                    )
+                }
+
             }
         }
     }
@@ -106,4 +123,39 @@ fun MessagesTopAppBar(navController: NavController) {
         },
         backgroundColor = MaterialTheme.colors.topAppBarBackgroundColor
     )
+}
+
+@Composable
+fun <T> PendingRentalNumbersCount(listOfNumbers: List<T>) {
+    Box(
+        modifier = Modifier
+            .padding(10.dp)
+            .fillMaxWidth()
+    ) {
+        Card(
+            modifier = Modifier
+                .border(
+                    width = 1.dp,
+                    color = MaterialTheme.colors.primary,
+                    shape = RoundedCornerShape(5.dp)
+                )
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(5.dp))
+        ) {
+            Row(
+                modifier = Modifier.padding(start = 5.dp, top = 15.dp, bottom = 15.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    text = "Currently pending numbers: ${listOfNumbers.size}",
+                    fontWeight = FontWeight.Medium,
+                    color = MaterialTheme.colors.primary
+                )
+            }
+
+        }
+    }
+
+
 }

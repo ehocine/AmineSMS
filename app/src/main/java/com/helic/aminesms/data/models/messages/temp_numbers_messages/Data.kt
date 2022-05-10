@@ -1,7 +1,8 @@
-package com.helic.aminesms.data.models.messages
+package com.helic.aminesms.data.models.messages.temp_numbers_messages
 
 
 import com.google.gson.annotations.SerializedName
+import com.helic.aminesms.data.models.messages.Sms
 
 data class Data(
     @SerializedName("sms")

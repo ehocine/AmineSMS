@@ -11,7 +11,7 @@ sealed class MainAppScreens(
         route = "profile"
     )
 
-    object TempNumberMessages : MainAppScreens(
+    object TempNumbersMessages : MainAppScreens(
         route = "temp_number_messages"
     )
 
@@ -19,8 +19,12 @@ sealed class MainAppScreens(
         route = "rental_number_message"
     )
 
-    object MessageDetails : MainAppScreens(
-        route = "message_details"
+    object TempMessageDetails : MainAppScreens(
+        route = "temp_message_details"
+    )
+
+    object RentalMessageDetails : MainAppScreens(
+        route = "rental_message_details"
     )
 
     object Shop : MainAppScreens(

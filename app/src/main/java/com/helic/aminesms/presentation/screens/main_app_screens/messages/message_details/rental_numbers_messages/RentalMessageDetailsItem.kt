@@ -1,4 +1,4 @@
-package com.helic.aminesms.presentation.screens.main_app_screens.messages.message_details
+package com.helic.aminesms.presentation.screens.main_app_screens.messages.message_details.rental_numbers_messages
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -15,6 +15,7 @@ import androidx.compose.ui.unit.dp
 import com.helic.aminesms.data.models.messages.Sms
 import com.helic.aminesms.presentation.ui.theme.MediumGray
 import com.helic.aminesms.presentation.ui.theme.TextColor
+import com.helic.aminesms.utils.convertTimeStampToDate
 
 @Composable
 fun MessageDetailItem(listOfMessages: List<Sms?>) {
@@ -46,7 +47,7 @@ fun MessageContent(sms: Sms?) {
 
             if (sms != null) {
                 Text(
-                    text = sms.createdAt.toString(),
+                    text = convertTimeStampToDate(sms.createdAt.toLong()),
                     color = MediumGray,
                     fontSize = MaterialTheme.typography.subtitle2.fontSize,
                     modifier = Modifier.padding(bottom = 2.dp),

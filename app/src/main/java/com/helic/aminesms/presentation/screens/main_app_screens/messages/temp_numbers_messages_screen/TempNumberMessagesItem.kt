@@ -86,12 +86,12 @@ fun Content(
                     && phoneTempNumberData.state != NumberState.Canceled.toString()
                 ) {
                     mainViewModel.selectedTempNumber.value = phoneTempNumberData
-                    mainViewModel.checkForMessages(
+                    mainViewModel.checkForTempNumbersMessages(
                         context = context,
                         temporaryNumberId = phoneTempNumberData.temporaryNumberId,
                         snackbar = showSnackbar
                     )
-                    navController.navigate(MainAppScreens.MessageDetails.route) {
+                    navController.navigate(MainAppScreens.TempMessageDetails.route) {
                         launchSingleTop = true
                     }
                 }

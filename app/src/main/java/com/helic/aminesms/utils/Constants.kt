@@ -1,5 +1,8 @@
 package com.helic.aminesms.utils
 
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.flow.MutableStateFlow
 
@@ -12,6 +15,9 @@ object Constants {
     const val ROOT_ROUTE = "root"
     const val AUTHENTICATION_ROUTE = "authentication_root"
     const val MAIN_SCREEN_ROUTE = "main_screen_root"
+
+    val dataStoreKey = booleanPreferencesKey("Theme")
+    var DARK_THEME: MutableState<Boolean> = mutableStateOf(false)
 
     const val FIRESTORE_DATABASE = "users"
     const val USER_BALANCE_DATABASE = "userBalance"
@@ -26,9 +32,8 @@ object Constants {
 
     const val PROJECT_KEY_QONVERSION = "2F3kQuqIZg7Fd3fWhcAYNigWcSWjXPfp"
 
-//    const val BASE_URL = "https://www.smsredux.com/"
+    //    const val BASE_URL = "https://www.smsredux.com/"
 //    const val API_KEY = "live_wZw5tBuQLtRPaspTt4HAOQ61FK81Og3bctkfDjmZAHsw"
     const val BASE_URL = "https://staging.whitelabeled.win/"
     const val API_KEY = "test_JMqLaht6DOlgiDPdiU47qAl1bAkJ4KOGm7KNLTWPEAvg"
-
 }

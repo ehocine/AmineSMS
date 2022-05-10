@@ -45,7 +45,6 @@ fun TempNumbersMessages(
     LaunchedEffect(key1 = true) {
         mainViewModel.getBalance(context = context, snackbar = snackbar)
     }
-
     mainViewModel.userBalance.collectAsState().value
     Scaffold(
         topBar = {

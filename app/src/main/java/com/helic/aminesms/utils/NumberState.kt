@@ -4,5 +4,6 @@ enum class NumberState {
     Pending,
     Expired,
     Canceled,
-    Completed
+    Completed,
+    LIVE
 }

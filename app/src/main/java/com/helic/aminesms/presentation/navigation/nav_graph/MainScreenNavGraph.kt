@@ -9,13 +9,14 @@ import com.helic.aminesms.data.viewmodels.MainViewModel
 import com.helic.aminesms.presentation.navigation.MainAppScreens
 import com.helic.aminesms.presentation.screens.main_app_screens.Home
 import com.helic.aminesms.presentation.screens.main_app_screens.Profile
+import com.helic.aminesms.presentation.screens.main_app_screens.messages.message_details.rental_numbers_messages.RentalMessageDetails
+import com.helic.aminesms.presentation.screens.main_app_screens.messages.message_details.temp_numbers_messages.TempMessageDetails
+import com.helic.aminesms.presentation.screens.main_app_screens.messages.rental_numbers_messages_screen.RentalNumbersMessages
 import com.helic.aminesms.presentation.screens.main_app_screens.messages.temp_numbers_messages_screen.TempNumbersMessages
-import com.helic.aminesms.presentation.screens.main_app_screens.messages.message_details.MessageDetails
-import com.helic.aminesms.presentation.screens.main_app_screens.messages.rental_numbers_messages_screen.RentaNumbersMessages
-import com.helic.aminesms.presentation.screens.main_app_screens.order_temp_numbers.OrderNumberOptions
-import com.helic.aminesms.presentation.screens.main_app_screens.order_temp_numbers.OrderTempNumbers
 import com.helic.aminesms.presentation.screens.main_app_screens.order_rental_numbers.RentalNumberOptions
 import com.helic.aminesms.presentation.screens.main_app_screens.order_rental_numbers.RentalNumbers
+import com.helic.aminesms.presentation.screens.main_app_screens.order_temp_numbers.OrderNumberOptions
+import com.helic.aminesms.presentation.screens.main_app_screens.order_temp_numbers.OrderTempNumbers
 import com.helic.aminesms.presentation.screens.main_app_screens.shop.Shop
 import com.helic.aminesms.utils.Constants.MAIN_SCREEN_ROUTE
 
@@ -39,15 +40,15 @@ fun NavGraphBuilder.mainScreenNavGraph(
             )
         }
 
-        composable(route = MainAppScreens.TempNumberMessages.route) {
+        composable(route = MainAppScreens.TempNumbersMessages.route) {
             TempNumbersMessages(
                 navController = navController,
                 mainViewModel = mainViewModel,
                 snackbar = showSnackbar
             )
         }
-        composable(route = MainAppScreens.RentalNumbersMessages.route){
-            RentaNumbersMessages(
+        composable(route = MainAppScreens.RentalNumbersMessages.route) {
+            RentalNumbersMessages(
                 navController = navController,
                 mainViewModel = mainViewModel,
                 snackbar = showSnackbar
@@ -62,14 +63,23 @@ fun NavGraphBuilder.mainScreenNavGraph(
             )
         }
         composable(
-            route = MainAppScreens.MessageDetails.route
+            route = MainAppScreens.TempMessageDetails.route
         ) {
-            MessageDetails(
+            TempMessageDetails(
                 navController = navController,
                 showSnackbar = showSnackbar,
                 mainViewModel = mainViewModel
             )
         }
+
+        composable(route = MainAppScreens.RentalMessageDetails.route) {
+            RentalMessageDetails(
+                navController = navController,
+                showSnackbar = showSnackbar,
+                mainViewModel = mainViewModel
+            )
+        }
+
         composable(route = MainAppScreens.Shop.route) {
             Shop(
                 navController = navController,

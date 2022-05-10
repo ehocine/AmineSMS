@@ -1,4 +1,4 @@
-package com.helic.aminesms.presentation.screens.main_app_screens.messages.message_details
+package com.helic.aminesms.presentation.screens.main_app_screens.messages.message_details.temp_numbers_messages
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -38,7 +38,7 @@ import kotlinx.coroutines.delay
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
-fun MessageDetails(
+fun TempMessageDetails(
     navController: NavController,
     showSnackbar: (String, SnackbarDuration) -> Unit,
     mainViewModel: MainViewModel
@@ -48,7 +48,7 @@ fun MessageDetails(
     val isRefreshing by mainViewModel.isRefreshing.collectAsState()
     val sms = mainViewModel.message?.value
     val temporaryNumber = mainViewModel.selectedTempNumber.value
-    val state by mainViewModel.checkingMessagesLoadingStateOfViewModel.collectAsState()
+    val state by mainViewModel.checkingTempMessagesLoadingState.collectAsState()
 
     val list = mutableListOf(sms)
 
@@ -234,7 +234,7 @@ fun MessageDetailsTopAppBar(
     TopAppBar(
         navigationIcon = {
             IconButton(onClick = {
-                navController.navigate(MainAppScreens.TempNumberMessages.route) {
+                navController.navigate(MainAppScreens.TempNumbersMessages.route) {
                     popUpTo(navController.graph.findStartDestination().id)
                     launchSingleTop = true
                 }

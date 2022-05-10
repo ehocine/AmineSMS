@@ -27,7 +27,7 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.tasks.await
 
 //TODO When creating a user add the purchased rental numbers
-
+// TODO Add option to resend confirmation email
 
 //Register new user
 fun registerNewUser(
@@ -455,6 +455,52 @@ fun addOrRemoveRentalNumberFromFirebase(
                             loadingState.emit(LoadingState.LOADED)
                         }
                     }
+                } catch (e: Exception) {
+                    loadingState.emit(LoadingState.ERROR)
+                    withContext(Dispatchers.Main) {
+                        withContext(Dispatchers.Main) {
+                            snackbar(e.message!!, SnackbarDuration.Short)
+                        }
+                    }
+                }
+            }
+        }
+    } else {
+        snackbar(context.getString(R.string.device_not_connected), SnackbarDuration.Short)
+    }
+}
+
+fun updateRentalNumberState(
+    context: Context,
+    snackbar: (String, SnackbarDuration) -> Unit,
+    rentalNumberToBeUpdated: RentalNumberData?,
+    newState: NumberState
+) {
+
+    val db = Firebase.firestore
+    val currentUser = Firebase.auth.currentUser
+    val data = currentUser?.let { db.collection(FIRESTORE_DATABASE).document(it.uid) }
+    if (hasInternetConnection(context)) {
+        if (currentUser != null) {
+            CoroutineScope(Dispatchers.IO).launch {
+                try {
+                    loadingState.emit(LoadingState.LOADING)
+                    data?.update(
+                        LIST_OF_RENTAL_NUMBERS,
+                        FieldValue.arrayRemove(rentalNumberToBeUpdated)
+                    )
+                        ?.addOnSuccessListener {
+                            if (rentalNumberToBeUpdated != null) {
+                                rentalNumberToBeUpdated.state = newState.toString()
+                            }
+                            data.update(
+                                LIST_OF_RENTAL_NUMBERS,
+                                FieldValue.arrayUnion(rentalNumberToBeUpdated)
+                            )
+                        }?.addOnFailureListener {
+                            snackbar("Something went wrong: $it", SnackbarDuration.Short)
+                        }
+                    loadingState.emit(LoadingState.LOADED)
                 } catch (e: Exception) {
                     loadingState.emit(LoadingState.ERROR)
                     withContext(Dispatchers.Main) {

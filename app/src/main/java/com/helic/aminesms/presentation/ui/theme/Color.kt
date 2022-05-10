@@ -1,9 +1,9 @@
 package com.helic.aminesms.presentation.ui.theme
 
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material.Colors
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import com.helic.aminesms.utils.Constants.DARK_THEME
 
 val Purple200 = Color(0xFFBB86FC)
 val Purple500 = Color(0xFF6200EE)
@@ -22,31 +22,32 @@ val Red = Color(0xFFFF4646)
 
 val Colors.TextColor: Color
     @Composable
-    get() = if (!isSystemInDarkTheme()) DarkGray else LightGray
+    get() = if (!DARK_THEME.value) DarkGray else LightGray
 
 val Colors.phoneMessagesBackground: Color
     @Composable
-    get() = if (!isSystemInDarkTheme()) Color.White else DarkGray
+    get() = if (DARK_THEME.value) Color.White else DarkGray
 
 val Colors.topAppBarBackgroundColor: Color
     @Composable
-    get() = if (!isSystemInDarkTheme()) Purple500 else Color.Black
+    get() = if (!DARK_THEME.value) Purple500 else Color.Black
 
 
 val Colors.topAppBarContentColor: Color
     @Composable
-    get() = if (!isSystemInDarkTheme()) Color.White else LightGray
+    get() = if (!DARK_THEME.value) Color.White else LightGray
 
 
-val Colors.ButtonColor : Color
+val Colors.ButtonColor: Color
     @Composable
-    get() = if (!isSystemInDarkTheme()) Purple500 else Purple700
+    get() = if (!DARK_THEME.value) Purple500 else Purple700
 
 //
 //val Colors.TextColor : Color
 //    @Composable
 //    get() = if (!isSystemInDarkTheme()) Color.Black else Color.White
 
-val Colors.backgroundColor : Color
+val Colors.backgroundColor: Color
     @Composable
-    get() = if (!isSystemInDarkTheme()) Color.White else Color.Black
+    get() = if (!DARK_THEME.value) Color.White else Color.Black
+

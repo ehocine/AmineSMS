@@ -48,4 +48,5 @@
     <string name="rental_numbers">Rental numbers</string>
     <string name="temp_numbers">Temporary numbers</string>
     <string name="home">Home</string>
+    <string name="couldnt_process_request">Couldn\'t process your request</string>
 </resources>

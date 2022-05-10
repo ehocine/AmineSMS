@@ -103,7 +103,7 @@ fun OrderNumberTopAppBar(
     TopAppBar(
         navigationIcon = {
             IconButton(onClick = {
-                navController.navigate(MainAppScreens.TempNumberMessages.route) {
+                navController.navigate(MainAppScreens.TempNumbersMessages.route) {
                     popUpTo(navController.graph.findStartDestination().id)
                     launchSingleTop = true
                 }

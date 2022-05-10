@@ -7,7 +7,7 @@ data class Sms(
     @SerializedName("code")
     val code: String = "",
     @SerializedName("content")
-    val content: String ="",
+    val content: String = "",
     @SerializedName("createdAt")
     val createdAt: Int = 0,
     @SerializedName("parentObjectId")

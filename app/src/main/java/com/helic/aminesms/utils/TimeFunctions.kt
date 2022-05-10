@@ -1,12 +1,15 @@
 package com.helic.aminesms.utils
 
+import android.annotation.SuppressLint
 import android.content.Context
 import androidx.compose.material.SnackbarDuration
 import com.helic.aminesms.data.models.number_data.TempNumberData
+import java.text.SimpleDateFormat
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.ZoneId
+import java.util.*
 
 fun calculatingRemainingExpirationTime(
     context: Context,
@@ -83,4 +86,11 @@ fun convertSeconds(seconds: Int): String {
         else -> numberOfSeconds
     }
     return "$hoursText:$minutesText:$secondsText"
+}
+
+@SuppressLint("SimpleDateFormat")
+fun convertTimeStampToDate(epoch: Long): String {
+    val date = Date(epoch * 1000L)
+    val sdf = SimpleDateFormat("EEE, d MMM yyyy HH:mm aaa")
+    return sdf.format(date)
 }

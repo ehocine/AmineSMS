@@ -2,9 +2,15 @@ package com.helic.aminesms.data.api
 
 import com.helic.aminesms.data.models.UserBalanceResponse
 import com.helic.aminesms.data.models.cancel_number.CancelNumberResponse
-import com.helic.aminesms.data.models.messages.MessageResponse
+import com.helic.aminesms.data.models.messages.rental_numbers_messages.RentalNumbersMessagesResponse
+import com.helic.aminesms.data.models.messages.temp_numbers_messages.MessageResponse
 import com.helic.aminesms.data.models.rental_numbers.RentalNumberServiceStateListResponse
+import com.helic.aminesms.data.models.rental_numbers.activate_number.ActivateNumberResponse
+import com.helic.aminesms.data.models.rental_numbers.live_rental_numbers.LiveRentalNumbersResponse
 import com.helic.aminesms.data.models.rental_numbers.order_rental_number.OrderRentalNumberResponse
+import com.helic.aminesms.data.models.rental_numbers.pending_rental_numbers.PendingRentalNumbersResponse
+import com.helic.aminesms.data.models.rental_numbers.refund_rental_number.RefundRentalNumberResponse
+import com.helic.aminesms.data.models.rental_numbers.renew_rental_number.RenewRentalNumberResponse
 import com.helic.aminesms.data.models.rental_numbers.rental_options.RentalOptionsResponse
 import com.helic.aminesms.data.models.rental_numbers.rental_service_price.RentalServicePrice
 import com.helic.aminesms.data.models.temp_number.OrderNumberResponse
@@ -61,4 +67,21 @@ interface SMSServiceApi {
     ): Response<OrderRentalNumberResponse>
 
 
+    @GET("/api/v2/rentals/{rentalId}/messages")
+    suspend fun getRentalNumberMessages(@Path("rentalId") rentalId: String): Response<RentalNumbersMessagesResponse>
+
+    @GET("/api/v2/rentals/live")
+    suspend fun getLiveRentalNumbersList(): Response<LiveRentalNumbersResponse>
+
+    @GET("/api/v2/rentals/pending")
+    suspend fun getPendingRentalNumbersList(): Response<PendingRentalNumbersResponse>
+
+    @POST("/api/v2/rentals/{rentalId}/activate")
+    suspend fun activateRentalNumber(@Path("rentalId") rentalId: String): Response<ActivateNumberResponse>
+
+    @POST("/api/v2/rentals/{rentalId}/refund")
+    suspend fun requestRefundRentalNumber(@Path("rentalId") rentalId: String): Response<RefundRentalNumberResponse>
+
+    @POST("/api/v2/rentals/{rentalId}/renew")
+    suspend fun renewRentalNumber(@Path("rentalId") rentalId: String): Response<RenewRentalNumberResponse>
 }

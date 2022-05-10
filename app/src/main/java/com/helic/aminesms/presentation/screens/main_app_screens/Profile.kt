@@ -5,7 +5,9 @@ import android.content.Context
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -14,6 +16,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -28,7 +31,9 @@ import com.helic.aminesms.data.models.User
 import com.helic.aminesms.data.viewmodels.MainViewModel
 import com.helic.aminesms.presentation.navigation.MainAppScreens
 import com.helic.aminesms.presentation.ui.theme.Red
+import com.helic.aminesms.presentation.ui.theme.backgroundColor
 import com.helic.aminesms.utils.Constants.AUTHENTICATION_ROUTE
+import com.helic.aminesms.utils.Constants.DARK_THEME
 import com.helic.aminesms.utils.Constants.auth
 import com.helic.aminesms.utils.CustomDivider
 import com.helic.aminesms.utils.DisplayAlertDialog
@@ -60,13 +65,19 @@ fun Profile(
 
     Scaffold {
         if (user != null) {
-            ProfileDetails(
-                context = context,
-                mainViewModel = mainViewModel,
-                navController = navController,
-                showSnackbar = showSnackbar,
-                user = user
-            )
+            Surface(
+                modifier = Modifier.fillMaxSize(),
+                color = MaterialTheme.colors.backgroundColor
+            ) {
+                ProfileDetails(
+                    context = context,
+                    mainViewModel = mainViewModel,
+                    navController = navController,
+                    showSnackbar = showSnackbar,
+                    user = user
+                )
+            }
+
         }
     }
 }
@@ -81,6 +92,7 @@ fun ProfileDetails(
 ) {
     Column(
         modifier = Modifier
+            .verticalScroll(rememberScrollState())
             .padding(10.dp)
             .fillMaxHeight(),
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -106,12 +118,13 @@ fun ProfileDetails(
                 Text(
                     text = user.userEmail,
                     fontSize = MaterialTheme.typography.subtitle1.fontSize,
-                    modifier = Modifier.padding(2.dp)
+//                    modifier = Modifier.padding(2.dp)
                 )
             }
             Spacer(modifier = Modifier.padding(10.dp))
             CustomDivider()
             Spacer(modifier = Modifier.padding(10.dp))
+
             Column {
                 Text(
                     text = stringResource(R.string.balance),
@@ -133,17 +146,17 @@ fun ProfileDetails(
                                 shape = RoundedCornerShape(5.dp)
                             )
                             .fillMaxWidth()
-                            .clip(RoundedCornerShape(5.dp))
+                            .clip(RoundedCornerShape(5.dp)),
+                        backgroundColor = MaterialTheme.colors.backgroundColor
                     )
                     {
                         Row(
-                            modifier = Modifier.padding(start = 5.dp, top = 15.dp, bottom = 15.dp),
+                            modifier = Modifier.padding(top = 17.dp, bottom = 17.dp),
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.Center
                         ) {
                             Text(
                                 text = "${user.userBalance} credits",
-                                fontSize = MaterialTheme.typography.body1.fontSize,
                                 fontWeight = FontWeight.Bold,
                                 textAlign = TextAlign.Right
                             )
@@ -165,7 +178,8 @@ fun ProfileDetails(
                                 popUpTo(navController.graph.findStartDestination().id)
                                 launchSingleTop = true
                             }
-                        }
+                        },
+                    backgroundColor = MaterialTheme.colors.backgroundColor
                 ) {
                     Row(
                         modifier = Modifier.padding(start = 5.dp, top = 15.dp, bottom = 15.dp),
@@ -183,19 +197,53 @@ fun ProfileDetails(
                             fontWeight = FontWeight.Bold
                         )
                     }
+                }
+            }
 
+            Spacer(modifier = Modifier.padding(10.dp))
+            CustomDivider()
+            Spacer(modifier = Modifier.padding(10.dp))
+
+            Column() {
+                Text(
+                    text = "Change the App's Theme",
+                    fontSize = MaterialTheme.typography.body1.fontSize,
+                    fontWeight = FontWeight.Bold,
+                    textAlign = TextAlign.Right,
+                    modifier = Modifier.padding(2.dp)
+                )
+                Spacer(modifier = Modifier.padding(10.dp))
+                Card(
+                    modifier = Modifier
+                        .border(
+                            width = 1.dp,
+                            color = MaterialTheme.colors.primary,
+                            shape = RoundedCornerShape(5.dp)
+                        )
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(5.dp))
+                        .clickable {
+                            mainViewModel.changeAppTheme()
+                        },
+                    backgroundColor = MaterialTheme.colors.backgroundColor
+                )
+                {
+                    Row(
+                        modifier = Modifier.padding(top = 17.dp, bottom = 17.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        Text(
+                            text = if (DARK_THEME.value) "Switch to Light Theme" else "Switch to Dark Theme",
+                            fontWeight = FontWeight.Bold,
+                            textAlign = TextAlign.Right
+                        )
+                    }
                 }
             }
         }
 
-
-
-        Column(
-            verticalArrangement = Arrangement.Bottom
-        ) {
-//            Spacer(modifier = Modifier.padding(10.dp))
-//            CustomDivider()
-//            Spacer(modifier = Modifier.padding(10.dp))
+        Column {
             Text(
                 text = "Sign out",
                 fontSize = MaterialTheme.typography.body1.fontSize,
@@ -255,7 +303,8 @@ fun SignOutButton(onClick: () -> Unit) {
             .clip(RoundedCornerShape(5.dp))
             .clickable {
                 onClick()
-            }
+            },
+        backgroundColor = MaterialTheme.colors.backgroundColor
     ) {
         Row(
             modifier = Modifier.padding(start = 5.dp, top = 15.dp, bottom = 15.dp),
@@ -269,7 +318,6 @@ fun SignOutButton(onClick: () -> Unit) {
                 fontWeight = FontWeight.Bold
             )
         }
-
     }
 }
 

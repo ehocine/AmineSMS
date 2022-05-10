@@ -4,11 +4,13 @@ import android.annotation.SuppressLint
 import android.app.Application
 import android.content.Context
 import android.util.Log
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material.SnackbarDuration
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.preferencesDataStore
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
@@ -31,9 +33,11 @@ import com.helic.aminesms.data.models.temp_number.service_state.ServiceState
 import com.helic.aminesms.data.repository.Repository
 import com.helic.aminesms.presentation.navigation.MainAppScreens
 import com.helic.aminesms.utils.*
+import com.helic.aminesms.utils.Constants.DARK_THEME
 import com.helic.aminesms.utils.Constants.FIRESTORE_DATABASE
 import com.helic.aminesms.utils.Constants.TIMEOUT_IN_MILLIS
 import com.helic.aminesms.utils.Constants.USER_BALANCE_DATABASE
+import com.helic.aminesms.utils.Constants.dataStoreKey
 import com.qonversion.android.sdk.Qonversion
 import com.qonversion.android.sdk.QonversionError
 import com.qonversion.android.sdk.QonversionOfferingsCallback
@@ -43,15 +47,14 @@ import com.qonversion.android.sdk.dto.offerings.QOffering
 import com.qonversion.android.sdk.dto.offerings.QOfferings
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.*
 import javax.inject.Inject
 
 
 @HiltViewModel
 class MainViewModel @Inject constructor(
     private val repository: Repository,
+    private val dataStore: DataStore<Preferences>,
     application: Application
 ) : AndroidViewModel(application) {
 
@@ -121,16 +124,19 @@ class MainViewModel @Inject constructor(
         mutableStateOf(TempNumberData())
 
     @SuppressLint("MutableCollectionMutableState")
-    private var _TempNumbersList: MutableStateFlow<MutableList<TempNumberData>> =
+    private var _tempNumbersList: MutableStateFlow<MutableList<TempNumberData>> =
         MutableStateFlow(mutableListOf())
-    var orderedTempNumbersList = _TempNumbersList.asStateFlow()
+    var orderedTempNumbersList = _tempNumbersList.asStateFlow()
 
-    private var _RentalNumbersList: MutableStateFlow<MutableList<RentalNumberData>> =
+    private var _rentalNumbersList: MutableStateFlow<MutableList<RentalNumberData>> =
         MutableStateFlow(mutableListOf())
-    var orderedRentalNumbers = _RentalNumbersList.asStateFlow()
+    var orderedRentalNumbers = _rentalNumbersList.asStateFlow()
 
     val selectedTempNumber: MutableState<TempNumberData> =
         mutableStateOf(TempNumberData())
+
+    val selectedRentalNumber: MutableState<RentalNumberData> =
+        mutableStateOf(RentalNumberData())
 
     val message: MutableState<Sms>? = mutableStateOf(Sms())
 
@@ -197,7 +203,10 @@ class MainViewModel @Inject constructor(
                         registration?.remove()
                         loadingStateOfViewModel.emit(LoadingState.ERROR)
                         withContext(Dispatchers.Main) {
-                            snackbar(e.message!!, SnackbarDuration.Short)
+                            snackbar(
+                                getApplication<Application>().getString(R.string.an_error_occurred),
+                                SnackbarDuration.Short
+                            )
                         }
                     }
                 }
@@ -227,7 +236,7 @@ class MainViewModel @Inject constructor(
                                 return@addSnapshotListener
                             }
                             if (value != null && value.exists()) {
-                                _TempNumbersList.value =
+                                _tempNumbersList.value =
                                     value.toObject(ListOfOrderedTempNumber::class.java)?.listOfTempNumbers
                                         ?: mutableListOf()
                             } else {
@@ -244,7 +253,10 @@ class MainViewModel @Inject constructor(
                         registration?.remove()
                         gettingListOfTempNumbersLoadingState.emit(LoadingState.ERROR)
                         withContext(Dispatchers.Main) {
-                            snackbar(e.message!!, SnackbarDuration.Short)
+                            snackbar(
+                                getApplication<Application>().getString(R.string.an_error_occurred),
+                                SnackbarDuration.Short
+                            )
                         }
                     }
                 }
@@ -274,7 +286,7 @@ class MainViewModel @Inject constructor(
                                 return@addSnapshotListener
                             }
                             if (value != null && value.exists()) {
-                                _RentalNumbersList.value =
+                                _rentalNumbersList.value =
                                     value.toObject(ListOfOrderedRentalNumber::class.java)?.listOfRentalNumbers
                                         ?: mutableListOf()
                             } else {
@@ -291,7 +303,10 @@ class MainViewModel @Inject constructor(
                         registration?.remove()
                         gettingListOfRentalNumbersLoadingState.emit(LoadingState.ERROR)
                         withContext(Dispatchers.Main) {
-                            snackbar(e.message!!, SnackbarDuration.Short)
+                            snackbar(
+                                getApplication<Application>().getString(R.string.an_error_occurred),
+                                SnackbarDuration.Short
+                            )
                         }
                     }
                 }
@@ -331,7 +346,10 @@ class MainViewModel @Inject constructor(
                     }
                 } catch (e: Exception) {
                     loadingStateOfViewModel.emit(LoadingState.ERROR)
-                    snackbar(e.message!!, SnackbarDuration.Short)
+                    snackbar(
+                        getApplication<Application>().getString(R.string.an_error_occurred),
+                        SnackbarDuration.Short
+                    )
                 }
             } else {
                 loadingStateOfViewModel.emit(LoadingState.ERROR)
@@ -384,7 +402,7 @@ class MainViewModel @Inject constructor(
                                 AddOrRemoveNumberAction.ADD,
                                 tempNumberData = tempNumberData.value
                             )
-                            navController.navigate(MainAppScreens.TempNumberMessages.route) {
+                            navController.navigate(MainAppScreens.TempNumbersMessages.route) {
                                 popUpTo(navController.graph.findStartDestination().id) {
                                     inclusive = true
                                 }
@@ -401,7 +419,10 @@ class MainViewModel @Inject constructor(
                     }
                 } catch (e: Exception) {
                     buyingLoadingStateOfViewModel.emit(LoadingState.ERROR)
-                    snackbar(e.message!!, SnackbarDuration.Short)
+                    snackbar(
+                        getApplication<Application>().getString(R.string.an_error_occurred),
+                        SnackbarDuration.Short
+                    )
                 }
 
             } else {
@@ -414,9 +435,9 @@ class MainViewModel @Inject constructor(
         }
     }
 
-    var checkingMessagesLoadingStateOfViewModel = MutableStateFlow(LoadingState.IDLE)
+    var checkingTempMessagesLoadingState = MutableStateFlow(LoadingState.IDLE)
 
-    fun checkForMessages(
+    fun checkForTempNumbersMessages(
         context: Context,
         temporaryNumberId: String,
         snackbar: (String, SnackbarDuration) -> Unit
@@ -425,7 +446,7 @@ class MainViewModel @Inject constructor(
             if (hasInternetConnection(getApplication<Application>())) {
                 try {
                     withTimeoutOrNull(TIMEOUT_IN_MILLIS) {
-                        checkingMessagesLoadingStateOfViewModel.emit(LoadingState.LOADING)
+                        checkingTempMessagesLoadingState.emit(LoadingState.LOADING)
                         val response = repository.remote.getTempNumberInfo(
                             temporaryNumberId = temporaryNumberId
                         )
@@ -441,22 +462,25 @@ class MainViewModel @Inject constructor(
                                     newState = NumberState.Completed
                                 )
                             }
-                            checkingMessagesLoadingStateOfViewModel.emit(LoadingState.LOADED)
+                            checkingTempMessagesLoadingState.emit(LoadingState.LOADED)
                         }
                     } ?: withContext(Dispatchers.Main) {
-                        checkingMessagesLoadingStateOfViewModel.emit(LoadingState.ERROR)
+                        checkingTempMessagesLoadingState.emit(LoadingState.ERROR)
                         snackbar(
                             getApplication<Application>().getString(R.string.time_out),
                             SnackbarDuration.Short
                         )
                     }
                 } catch (e: Exception) {
-                    checkingMessagesLoadingStateOfViewModel.emit(LoadingState.ERROR)
-                    snackbar(e.message!!, SnackbarDuration.Short)
+                    checkingTempMessagesLoadingState.emit(LoadingState.ERROR)
+                    snackbar(
+                        getApplication<Application>().getString(R.string.an_error_occurred),
+                        SnackbarDuration.Short
+                    )
                 }
 
             } else {
-                checkingMessagesLoadingStateOfViewModel.emit(LoadingState.ERROR)
+                checkingTempMessagesLoadingState.emit(LoadingState.ERROR)
                 snackbar(
                     getApplication<Application>().getString(R.string.device_not_connected),
                     SnackbarDuration.Short
@@ -503,7 +527,10 @@ class MainViewModel @Inject constructor(
                     }
                 } catch (e: Exception) {
                     autoCheckingMessagesLoadingStateOfViewModel.emit(LoadingState.ERROR)
-                    snackbar(e.message!!, SnackbarDuration.Short)
+                    snackbar(
+                        getApplication<Application>().getString(R.string.an_error_occurred),
+                        SnackbarDuration.Short
+                    )
                 }
 
             } else {
@@ -523,7 +550,7 @@ class MainViewModel @Inject constructor(
     ) {
         viewModelScope.launch {
             _isRefreshing.emit(true)
-            checkForMessages(
+            checkForTempNumbersMessages(
                 context = context,
                 temporaryNumberId = temporaryNumberId,
                 snackbar = snackbar
@@ -568,7 +595,7 @@ class MainViewModel @Inject constructor(
                                     dollarToCreditForPurchasingNumbers(orderedNumberInList.price)
                                 )
                             }
-                            navController.navigate(MainAppScreens.TempNumberMessages.route) {
+                            navController.navigate(MainAppScreens.TempNumbersMessages.route) {
                                 popUpTo(navController.graph.findStartDestination().id) {
                                     inclusive = true
                                 }
@@ -584,7 +611,10 @@ class MainViewModel @Inject constructor(
                     }
                 } catch (e: Exception) {
 //                    checkingMessagesLoadingStateOfViewModel.emit(LoadingState.ERROR)
-                    snackbar(e.message!!, SnackbarDuration.Short)
+                    snackbar(
+                        getApplication<Application>().getString(R.string.an_error_occurred),
+                        SnackbarDuration.Short
+                    )
                 }
 
             } else {
@@ -619,7 +649,10 @@ class MainViewModel @Inject constructor(
                     }
                 } catch (e: Exception) {
                     checkingSuperUserBalanceLoadingState.emit(LoadingState.ERROR)
-                    snackbar(e.message!!, SnackbarDuration.Short)
+                    snackbar(
+                        getApplication<Application>().getString(R.string.an_error_occurred),
+                        SnackbarDuration.Short
+                    )
                 }
             } else {
                 checkingSuperUserBalanceLoadingState.emit(LoadingState.ERROR)
@@ -659,7 +692,10 @@ class MainViewModel @Inject constructor(
                     }
                 } catch (e: Exception) {
                     buyingLoadingStateOfViewModel.emit(LoadingState.ERROR)
-                    snackbar(e.message!!, SnackbarDuration.Short)
+                    snackbar(
+                        getApplication<Application>().getString(R.string.an_error_occurred),
+                        SnackbarDuration.Short
+                    )
                 }
 
             } else {
@@ -700,7 +736,7 @@ class MainViewModel @Inject constructor(
                                 action = AddOrRemoveNumberAction.ADD,
                                 tempNumberData = reuseTempNumberResponse.value
                             )
-                            navController.navigate(MainAppScreens.TempNumberMessages.route) {
+                            navController.navigate(MainAppScreens.TempNumbersMessages.route) {
                                 popUpTo(navController.graph.findStartDestination().id) {
                                     inclusive = true
                                 }
@@ -716,7 +752,10 @@ class MainViewModel @Inject constructor(
                     }
                 } catch (e: Exception) {
                     buyingLoadingStateOfViewModel.emit(LoadingState.ERROR)
-                    snackbar(e.message!!, SnackbarDuration.Short)
+                    snackbar(
+                        getApplication<Application>().getString(R.string.an_error_occurred),
+                        SnackbarDuration.Short
+                    )
                 }
             } else {
                 buyingLoadingStateOfViewModel.emit(LoadingState.ERROR)
@@ -758,7 +797,10 @@ class MainViewModel @Inject constructor(
                     }
                 } catch (e: Exception) {
                     rentalServiceLoadingStateOfViewModel.emit(LoadingState.ERROR)
-                    snackbar(e.message!!, SnackbarDuration.Short)
+                    snackbar(
+                        getApplication<Application>().getString(R.string.an_error_occurred),
+                        SnackbarDuration.Short
+                    )
                 }
             } else {
                 rentalServiceLoadingStateOfViewModel.emit(LoadingState.ERROR)
@@ -817,7 +859,10 @@ class MainViewModel @Inject constructor(
                     }
                 } catch (e: Exception) {
                     rentalServiceLoadingStateOfViewModel.emit(LoadingState.ERROR)
-                    snackbar(e.message!!, SnackbarDuration.Short)
+                    snackbar(
+                        getApplication<Application>().getString(R.string.an_error_occurred),
+                        SnackbarDuration.Short
+                    )
                     Log.d("Tag", e.message.toString())
                 }
             } else {
@@ -873,7 +918,10 @@ class MainViewModel @Inject constructor(
                     }
                 } catch (e: Exception) {
                     rentalServicePriceLoadingState.emit(LoadingState.ERROR)
-                    snackbar(e.message!!, SnackbarDuration.Short)
+                    snackbar(
+                        getApplication<Application>().getString(R.string.an_error_occurred),
+                        SnackbarDuration.Short
+                    )
                 }
             } else {
                 rentalServicePriceLoadingState.emit(LoadingState.ERROR)
@@ -888,7 +936,7 @@ class MainViewModel @Inject constructor(
     private val rentalNumberData: MutableState<RentalNumberData> =
         mutableStateOf(RentalNumberData())
 
-    var orderRentalNumberLoadingState = MutableStateFlow(LoadingState.IDLE)
+    private var orderRentalNumberLoadingState = MutableStateFlow(LoadingState.IDLE)
 
     fun orderRentalNumber(
         serviceId: String,
@@ -912,13 +960,17 @@ class MainViewModel @Inject constructor(
                                 context = getApplication<Application>(),
                                 snackbar = snackbar,
                                 currentBalance = _userBalance.value,
-                                amount = dollarToCreditForPurchasingNumbers(rentalNumberData.value.price.toDouble())
+                                amount = dollarToCreditForPurchasingNumbers(rentalNumberData.value.price)
                             )
                             addOrRemoveRentalNumberFromFirebase(
                                 context = getApplication<Application>(),
                                 snackbar = snackbar,
                                 AddOrRemoveNumberAction.ADD,
                                 rentalNumberData = rentalNumberData.value
+                            )
+                            snackbar(
+                                response.body()!!.msg.toString(),
+                                SnackbarDuration.Short
                             )
                             navController.navigate(MainAppScreens.RentalNumbersMessages.route) {
                                 popUpTo(navController.graph.findStartDestination().id) {
@@ -937,7 +989,10 @@ class MainViewModel @Inject constructor(
                     }
                 } catch (e: Exception) {
                     orderRentalNumberLoadingState.emit(LoadingState.ERROR)
-                    snackbar(e.message!!, SnackbarDuration.Short)
+                    snackbar(
+                        getApplication<Application>().getString(R.string.an_error_occurred),
+                        SnackbarDuration.Short
+                    )
                     Log.d("Tag", e.message.toString())
                 }
 
@@ -951,4 +1006,368 @@ class MainViewModel @Inject constructor(
         }
     }
 
+    @SuppressLint("MutableCollectionMutableState")
+    var listOfLiveRentalNumbers: MutableState<MutableList<RentalNumberData>> =
+        mutableStateOf(mutableListOf())
+
+    fun getLiveRentalNumbersList(snackbar: (String, SnackbarDuration) -> Unit) {
+        viewModelScope.launch {
+            if (hasInternetConnection(getApplication<Application>())) {
+                try {
+                    withTimeoutOrNull(TIMEOUT_IN_MILLIS) {
+                        orderRentalNumberLoadingState.emit(LoadingState.LOADING)
+                        val response = repository.remote.getLiveRentalNumbersList()
+                        if (response.isSuccessful) {
+                            listOfLiveRentalNumbers.value = response.body()!!.rentalNumberData
+                            listOfLiveRentalNumbers.value.retainAll { it -> it.rentalId in _rentalNumbersList.value.map { it.rentalId } }
+
+                            orderRentalNumberLoadingState.emit(LoadingState.LOADED)
+                        }
+                    } ?: withContext(Dispatchers.Main) {
+                        orderRentalNumberLoadingState.emit(LoadingState.ERROR)
+                        snackbar(
+                            getApplication<Application>().getString(R.string.time_out),
+                            SnackbarDuration.Short
+                        )
+                    }
+                } catch (e: Exception) {
+                    orderRentalNumberLoadingState.emit(LoadingState.ERROR)
+                    snackbar(
+                        getApplication<Application>().getString(R.string.an_error_occurred),
+                        SnackbarDuration.Short
+                    )
+                    Log.d("Tag", e.message.toString())
+                }
+
+            } else {
+                orderRentalNumberLoadingState.emit(LoadingState.ERROR)
+                snackbar(
+                    getApplication<Application>().getString(R.string.device_not_connected),
+                    SnackbarDuration.Short
+                )
+            }
+        }
+    }
+
+    @SuppressLint("MutableCollectionMutableState")
+    var listOfPendingRentalNumbers: MutableState<MutableList<RentalNumberData>> =
+        mutableStateOf(mutableListOf())
+
+    fun getPendingRentalNumbersList(snackbar: (String, SnackbarDuration) -> Unit) {
+        viewModelScope.launch {
+            if (hasInternetConnection(getApplication<Application>())) {
+                try {
+                    withTimeoutOrNull(TIMEOUT_IN_MILLIS) {
+                        orderRentalNumberLoadingState.emit(LoadingState.LOADING)
+                        val response = repository.remote.getPendingRentalNumbersList()
+                        if (response.isSuccessful) {
+                            listOfPendingRentalNumbers.value =
+                                response.body()!!.rentalNumberDataList
+                            listOfPendingRentalNumbers.value.retainAll { it -> it.rentalId in _rentalNumbersList.value.map { it.rentalId } }
+
+                            orderRentalNumberLoadingState.emit(LoadingState.LOADED)
+                        }
+                    } ?: withContext(Dispatchers.Main) {
+                        orderRentalNumberLoadingState.emit(LoadingState.ERROR)
+                        snackbar(
+                            getApplication<Application>().getString(R.string.time_out),
+                            SnackbarDuration.Short
+                        )
+                    }
+                } catch (e: Exception) {
+                    orderRentalNumberLoadingState.emit(LoadingState.ERROR)
+                    snackbar(
+                        getApplication<Application>().getString(R.string.an_error_occurred),
+                        SnackbarDuration.Short
+                    )
+                    Log.d("Tag", e.message.toString())
+                }
+
+            } else {
+                orderRentalNumberLoadingState.emit(LoadingState.ERROR)
+                snackbar(
+                    getApplication<Application>().getString(R.string.device_not_connected),
+                    SnackbarDuration.Short
+                )
+            }
+        }
+    }
+
+    var rentalNumbersMessagesList: MutableState<List<Sms>> = mutableStateOf(listOf())
+
+    var checkingRentalMessagesLoadingState = MutableStateFlow(LoadingState.IDLE)
+
+    fun getRentalNumberMessages(rentalId: String, snackbar: (String, SnackbarDuration) -> Unit) {
+        viewModelScope.launch {
+            if (hasInternetConnection(getApplication<Application>())) {
+                try {
+                    withTimeoutOrNull(TIMEOUT_IN_MILLIS) {
+                        checkingRentalMessagesLoadingState.emit(LoadingState.LOADING)
+                        val response = repository.remote.getRentalNumberMessages(
+                            rentalId = rentalId
+                        )
+                        if (response.isSuccessful) {
+                            rentalNumbersMessagesList.value = response.body()!!.data
+                            checkingRentalMessagesLoadingState.emit(LoadingState.LOADED)
+                        }
+
+                    } ?: withContext(Dispatchers.Main) {
+                        checkingRentalMessagesLoadingState.emit(LoadingState.ERROR)
+                        snackbar(
+                            getApplication<Application>().getString(R.string.time_out),
+                            SnackbarDuration.Short
+                        )
+                    }
+                } catch (e: Exception) {
+                    checkingRentalMessagesLoadingState.emit(LoadingState.ERROR)
+                    snackbar(
+                        getApplication<Application>().getString(R.string.an_error_occurred),
+                        SnackbarDuration.Short
+                    )
+                    Log.d("Tag", e.message.toString())
+                }
+
+            } else {
+                checkingRentalMessagesLoadingState.emit(LoadingState.ERROR)
+                snackbar(
+                    getApplication<Application>().getString(R.string.device_not_connected),
+                    SnackbarDuration.Short
+                )
+            }
+        }
+    }
+
+
+    var activatingRentalNumberLoadingState = MutableStateFlow(LoadingState.IDLE)
+
+    fun activateRentalNumber(rentalId: String, snackbar: (String, SnackbarDuration) -> Unit) {
+        viewModelScope.launch {
+            if (hasInternetConnection(getApplication<Application>())) {
+                try {
+                    withTimeoutOrNull(TIMEOUT_IN_MILLIS) {
+                        activatingRentalNumberLoadingState.emit(LoadingState.LOADING)
+                        val response = repository.remote.activateRentalNumber(
+                            rentalId = rentalId
+                        )
+                        if (response.isSuccessful) {
+                            activatingRentalNumberLoadingState.emit(LoadingState.LOADED)
+                            snackbar(
+                                response.body()!!.msg.toString(),
+                                SnackbarDuration.Long
+                            )
+                        }
+                    } ?: withContext(Dispatchers.Main) {
+                        activatingRentalNumberLoadingState.emit(LoadingState.ERROR)
+                        snackbar(
+                            getApplication<Application>().getString(R.string.time_out),
+                            SnackbarDuration.Short
+                        )
+                    }
+                } catch (e: Exception) {
+                    activatingRentalNumberLoadingState.emit(LoadingState.ERROR)
+                    snackbar(
+                        getApplication<Application>().getString(R.string.an_error_occurred),
+                        SnackbarDuration.Short
+                    )
+                    Log.d("Tag", e.message.toString())
+                }
+
+            } else {
+                activatingRentalNumberLoadingState.emit(LoadingState.ERROR)
+                snackbar(
+                    getApplication<Application>().getString(R.string.device_not_connected),
+                    SnackbarDuration.Short
+                )
+            }
+        }
+    }
+
+    // This function will be launched later with a LaunchedEffect in the MassageDetails screen
+    private var autoCheckingRentalMessagesLoadingState = MutableStateFlow(LoadingState.IDLE)
+
+    fun autoCheckRentalMessage(
+        rentalId: String,
+        snackbar: (String, SnackbarDuration) -> Unit
+    ) {
+        viewModelScope.launch {
+            if (hasInternetConnection(getApplication<Application>())) {
+                try {
+                    withTimeoutOrNull(TIMEOUT_IN_MILLIS) {
+                        autoCheckingRentalMessagesLoadingState.emit(LoadingState.LOADING)
+                        val response = repository.remote.getRentalNumberMessages(
+                            rentalId = rentalId
+                        )
+                        if (response.isSuccessful) {
+                            rentalNumbersMessagesList.value = response.body()!!.data
+                            autoCheckingRentalMessagesLoadingState.emit(LoadingState.LOADED)
+                        }
+
+                    } ?: withContext(Dispatchers.Main) {
+                        autoCheckingRentalMessagesLoadingState.emit(LoadingState.ERROR)
+                        snackbar(
+                            getApplication<Application>().getString(R.string.time_out),
+                            SnackbarDuration.Short
+                        )
+                    }
+                } catch (e: Exception) {
+                    autoCheckingRentalMessagesLoadingState.emit(LoadingState.ERROR)
+                    snackbar(
+                        getApplication<Application>().getString(R.string.an_error_occurred),
+                        SnackbarDuration.Short
+                    )
+                    Log.d("Tag", e.message.toString())
+                }
+
+            } else {
+                autoCheckingRentalMessagesLoadingState.emit(LoadingState.ERROR)
+                snackbar(
+                    getApplication<Application>().getString(R.string.device_not_connected),
+                    SnackbarDuration.Short
+                )
+            }
+        }
+    }
+
+    var refundRentalNumberLoadingState = MutableStateFlow(LoadingState.IDLE)
+
+    fun requestRefundRentalNumber(
+        rentalNumberData: RentalNumberData,
+        snackbar: (String, SnackbarDuration) -> Unit,
+        navController: NavController
+    ) {
+        viewModelScope.launch {
+            if (hasInternetConnection(getApplication<Application>())) {
+                try {
+                    withTimeoutOrNull(TIMEOUT_IN_MILLIS) {
+                        refundRentalNumberLoadingState.emit(LoadingState.LOADING)
+                        val response = repository.remote.requestRefundRentalNumber(
+                            rentalId = rentalNumberData.rentalId
+                        )
+                        if (response.isSuccessful && response.body()?.succeeded == true) {
+//                            rentalNumbersMessagesList.value = response.body()!!.data
+                            refundRentalNumberLoadingState.emit(LoadingState.LOADED)
+                            addBalance(
+                                context = getApplication<Application>(),
+                                snackbar = snackbar,
+                                currentBalance = userBalance.value,
+                                amount = dollarToCreditForPurchasingNumbers(rentalNumberData.price),
+                                addingBalanceState = AddingBalanceState.REFUND
+                            )
+                            // this variable is used to get reference from firebase of the same id since it's not the same object in the server
+                            val selectedRentalNumber =
+                                _rentalNumbersList.value.find { it.rentalId == rentalNumberData.rentalId }
+
+                            addOrRemoveRentalNumberFromFirebase(
+                                context = getApplication<Application>(),
+                                snackbar = snackbar,
+                                action = AddOrRemoveNumberAction.REMOVE,
+                                rentalNumberData = selectedRentalNumber
+                            )
+
+                            navController.navigate(MainAppScreens.RentalNumbersMessages.route) {
+                                popUpTo(navController.graph.findStartDestination().id) {
+                                    inclusive = true
+                                }
+                                launchSingleTop = true
+                            }
+
+                        } else {
+                            snackbar(
+                                getApplication<Application>().getString(R.string.couldnt_process_request),
+                                SnackbarDuration.Short
+                            )
+                        }
+
+                    } ?: withContext(Dispatchers.Main) {
+                        refundRentalNumberLoadingState.emit(LoadingState.ERROR)
+                        snackbar(
+                            getApplication<Application>().getString(R.string.time_out),
+                            SnackbarDuration.Short
+                        )
+                    }
+                } catch (e: Exception) {
+                    refundRentalNumberLoadingState.emit(LoadingState.ERROR)
+                    snackbar(
+                        getApplication<Application>().getString(R.string.an_error_occurred),
+                        SnackbarDuration.Short
+                    )
+                    Log.d("Tag", e.message.toString())
+                }
+
+            } else {
+                refundRentalNumberLoadingState.emit(LoadingState.ERROR)
+                snackbar(
+                    getApplication<Application>().getString(R.string.device_not_connected),
+                    SnackbarDuration.Short
+                )
+            }
+        }
+    }
+
+    fun renewRentalNumber(
+        rentalNumberData: RentalNumberData,
+        snackbar: (String, SnackbarDuration) -> Unit,
+        navController: NavController
+    ) {
+        viewModelScope.launch {
+            if (hasInternetConnection(getApplication<Application>())) {
+                try {
+                    withTimeoutOrNull(TIMEOUT_IN_MILLIS) {
+                        refundRentalNumberLoadingState.emit(LoadingState.LOADING)
+                        val response = repository.remote.renewRentalNumber(
+                            rentalId = rentalNumberData.rentalId
+                        )
+                        if (response.isSuccessful && response.body()?.succeeded == true) {
+                            refundRentalNumberLoadingState.emit(LoadingState.LOADED)
+
+                            navController.navigate(MainAppScreens.RentalNumbersMessages.route) {
+                                popUpTo(navController.graph.findStartDestination().id) {
+                                    inclusive = true
+                                }
+                                launchSingleTop = true
+                            }
+                        } else {
+                            snackbar(
+                                getApplication<Application>().getString(R.string.couldnt_process_request),
+                                SnackbarDuration.Short
+                            )
+                        }
+
+                    } ?: withContext(Dispatchers.Main) {
+                        refundRentalNumberLoadingState.emit(LoadingState.ERROR)
+                        snackbar(
+                            getApplication<Application>().getString(R.string.time_out),
+                            SnackbarDuration.Short
+                        )
+                    }
+                } catch (e: Exception) {
+                    refundRentalNumberLoadingState.emit(LoadingState.ERROR)
+                    snackbar(
+                        getApplication<Application>().getString(R.string.an_error_occurred),
+                        SnackbarDuration.Short
+                    )
+                    Log.d("Tag", e.message.toString())
+                }
+            } else {
+                refundRentalNumberLoadingState.emit(LoadingState.ERROR)
+                snackbar(
+                    getApplication<Application>().getString(R.string.device_not_connected),
+                    SnackbarDuration.Short
+                )
+            }
+        }
+    }
+    fun changeAppTheme() {
+        DARK_THEME.value = !DARK_THEME.value
+        runBlocking {
+            dataStore.edit {
+                it[dataStoreKey] = DARK_THEME.value
+            }
+        }
+    }
+    val themeValue: Flow<Boolean?> = dataStore.data
+        .map { preferences ->
+            // No type safety.
+            preferences[dataStoreKey]
+        }
 }

@@ -87,7 +87,9 @@ fun RentalNumbersMessages(
             else -> {
                 Column(verticalArrangement = Arrangement.SpaceBetween) {
                     // Number of pending numbers
-                    PendingRentalNumbersCount(mainViewModel.listOfPendingRentalNumbers.value)
+                    if (mainViewModel.listOfPendingRentalNumbers.value.size != 0) {
+                        PendingRentalNumbersCount(mainViewModel.listOfPendingRentalNumbers.value)
+                    }
                     RentalNumberMessageItem(
                         context = context,
                         navController = navController,
@@ -96,7 +98,6 @@ fun RentalNumbersMessages(
                         showSnackbar = snackbar
                     )
                 }
-
             }
         }
     }
@@ -143,7 +144,7 @@ fun <T> PendingRentalNumbersCount(listOfNumbers: List<T>) {
                 .clip(RoundedCornerShape(5.dp))
         ) {
             Row(
-                modifier = Modifier.padding(start = 5.dp, top = 15.dp, bottom = 15.dp),
+                modifier = Modifier.padding(start = 5.dp, top = 10.dp, bottom = 10.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Center
             ) {

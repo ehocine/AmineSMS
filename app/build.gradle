@@ -46,6 +46,7 @@ android {
             excludes += '/META-INF/{AL2.0,LGPL2.1}'
         }
     }
+    namespace 'com.helic.aminesms'
 }
 
 dependencies {
@@ -103,4 +104,6 @@ dependencies {
 
     // Preferences DataStore
     implementation "androidx.datastore:datastore-preferences:1.0.0"
+
+    implementation "com.google.accompanist:accompanist-systemuicontroller:0.24.7-alpha"
 }

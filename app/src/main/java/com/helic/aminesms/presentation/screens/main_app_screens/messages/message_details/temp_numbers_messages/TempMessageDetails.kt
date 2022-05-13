@@ -27,10 +27,7 @@ import com.helic.aminesms.R
 import com.helic.aminesms.data.models.number_data.TempNumberData
 import com.helic.aminesms.data.viewmodels.MainViewModel
 import com.helic.aminesms.presentation.navigation.MainAppScreens
-import com.helic.aminesms.presentation.ui.theme.Red
-import com.helic.aminesms.presentation.ui.theme.TextColor
-import com.helic.aminesms.presentation.ui.theme.topAppBarBackgroundColor
-import com.helic.aminesms.presentation.ui.theme.topAppBarContentColor
+import com.helic.aminesms.presentation.ui.theme.*
 import com.helic.aminesms.utils.*
 import com.helic.aminesms.utils.Constants.REUSE_DISCOUNT_PERCENT
 import com.helic.aminesms.utils.Constants.TIME_BETWEEN_AUTO_REFRESH
@@ -56,7 +53,7 @@ fun TempMessageDetails(
         mainViewModel.getBalance(context = context, snackbar = showSnackbar)
     }
 
-    LaunchedEffect(key1 = state) {
+    LaunchedEffect(key1 = temporaryNumber.state) { // We relaunch the function after state of the number changes so we recheck the reusable numbers list
         mainViewModel.getReusableNumbersList(snackbar = showSnackbar)
 //        val reusableNumber =
 //            mainViewModel.reusableNumbersList.value.find { it.reusableId == temporaryNumber.temporaryNumberId }
@@ -106,7 +103,7 @@ fun TempMessageDetails(
     }
 
     //This is added to auto-check the incoming messages every TIME_BETWEEN_AUTO_REFRESH,
-    // we added the variable counter to autoupdate the LaunchedEffect
+    // we added the variable counter to auto-update the LaunchedEffect
     // we added the condition to reduce resources usage when there is a message
 
     if (sms == null && hasInternetConnection(context = context)) {
@@ -141,80 +138,89 @@ fun TempMessageDetails(
                 )
             }
         ) {
-            Column(
-                modifier = Modifier
-                    .padding(top = 20.dp)
-                    .fillMaxHeight(),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.SpaceBetween
+            Surface(
+                modifier = Modifier.fillMaxSize(),
+                color = MaterialTheme.colors.backgroundColor
             ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(
-                        text =
-                        when {
-                            remainingExpirationTime > 0 -> "Expires in ${
-                                convertSeconds(
-                                    remainingExpirationTime
-                                )
-                            }"
-                            else -> temporaryNumber.state
-                        },
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colors.TextColor
-                    )
-                    Spacer(modifier = Modifier.padding(20.dp))
-                    when (state) {
-                        LoadingState.LOADING -> LoadingList()
-                        LoadingState.ERROR -> ErrorLoadingResults()
-                        else -> {
-                            if (sms != null) {
-                                MessageDetailItem(listOfMessages = list)
-                            } else {
-                                NoResults()
+                Box(
+                    modifier = Modifier
+                        .padding(top = 20.dp)
+                        .fillMaxSize()
+                ) {
+                    Column(
+                        modifier = Modifier.align(Alignment.TopCenter),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+
+                        Text(
+                            text = when {
+                                remainingExpirationTime > 0 -> "Expires in ${
+                                    convertSeconds(
+                                        remainingExpirationTime
+                                    )
+                                }"
+                                else -> {
+                                    temporaryNumber.state
+                                }
+                            },
+                            fontWeight = FontWeight.Bold,
+                            color = MaterialTheme.colors.TextColor
+                        )
+                        Spacer(modifier = Modifier.padding(20.dp))
+                        when (state) {
+                            LoadingState.LOADING -> LoadingList()
+                            LoadingState.ERROR -> ErrorLoadingResults()
+                            else -> {
+                                if (sms != null) {
+                                    MessageDetailItem(listOfMessages = list)
+                                } else {
+                                    NoResults()
+                                }
                             }
                         }
                     }
-                }
-                Column(
-                    modifier = Modifier.padding(10.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Bottom
-                ) {
-                    when (temporaryNumber.state) {
-                        NumberState.Completed.toString() -> {
-                            if (mainViewModel.reusableNumbersList.value.find
-                                { it.reusableId == temporaryNumber.temporaryNumberId } != null
-                            ) {
-                                when {
-                                    remainingReuseTime > 0 -> {
-                                        Row {
-                                            Text(
-                                                text = "Number can be reused within ",
-                                                fontWeight = FontWeight.Medium,
-                                                color = MaterialTheme.colors.TextColor
-                                            )
-                                            Text(
-                                                text = convertSeconds(remainingReuseTime),
-                                                fontWeight = FontWeight.Bold,
-                                                color = MaterialTheme.colors.TextColor
+                    Column(
+                        modifier = Modifier
+                            .padding(10.dp)
+                            .align(Alignment.BottomCenter),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+//                        if (tempNumberState == NumberState.Completed.toString()) Text(text = "Hey")
+                        when (temporaryNumber.state) {
+                            NumberState.Completed.toString() -> {
+                                if (mainViewModel.reusableNumbersList.value.find
+                                    { it.reusableId == temporaryNumber.temporaryNumberId } != null
+                                ) {
+                                    when {
+                                        remainingReuseTime > 0 -> {
+                                            Row {
+                                                Text(
+                                                    text = "Number can be reused within ",
+                                                    fontWeight = FontWeight.Medium,
+                                                    color = MaterialTheme.colors.TextColor
+                                                )
+                                                Text(
+                                                    text = convertSeconds(remainingReuseTime),
+                                                    fontWeight = FontWeight.Bold,
+                                                    color = MaterialTheme.colors.TextColor
+                                                )
+                                            }
+                                            Spacer(modifier = Modifier.padding(10.dp))
+                                            ReuseNumber(
+                                                mainViewModel = mainViewModel,
+                                                temporaryTempNumber = temporaryNumber,
+                                                showSnackbar = showSnackbar,
+                                                navController = navController
                                             )
                                         }
-                                        Spacer(modifier = Modifier.padding(10.dp))
-                                        ReuseNumber(
-                                            mainViewModel = mainViewModel,
-                                            temporaryTempNumber = temporaryNumber,
-                                            showSnackbar = showSnackbar,
-                                            navController = navController
-                                        )
-                                    }
-                                    else -> {
-                                        CantBeReusedDisplay()
+                                        else -> {
+                                            CantBeReusedDisplay()
+                                        }
                                     }
                                 }
-
                             }
+                            else -> Unit
                         }
-                        else -> Unit
                     }
                 }
             }
@@ -273,7 +279,13 @@ fun ReuseNumber(
 
     DisplayAlertDialog(
         title = "Reuse Number ${temporaryTempNumber.number}",
-        message = "You can reuse this number for a $REUSE_DISCOUNT_PERCENT% off, Are you sure you want to continue?",
+        message = {
+            Text(
+                text = "You can reuse this number for a $REUSE_DISCOUNT_PERCENT% off, Are you sure you want to continue?",
+                fontSize = MaterialTheme.typography.subtitle1.fontSize,
+                fontWeight = FontWeight.Normal
+            )
+        },
         openDialog = openDialog,
         closeDialog = { openDialog = false },
         onYesClicked = {
@@ -302,7 +314,7 @@ fun ReuseButton(onClick: () -> Unit) {
             }
     ) {
         Row(
-            modifier = Modifier.padding(start = 5.dp, top = 15.dp, bottom = 15.dp),
+            modifier = Modifier.padding(start = 5.dp, top = 10.dp, bottom = 10.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center
         ) {
@@ -334,7 +346,7 @@ fun CantBeReusedDisplay() {
             .clip(RoundedCornerShape(5.dp))
     ) {
         Row(
-            modifier = Modifier.padding(start = 5.dp, top = 15.dp, bottom = 15.dp),
+            modifier = Modifier.padding(start = 5.dp, top = 10.dp, bottom = 10.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center
         ) {
@@ -359,7 +371,13 @@ fun ExistingTaskAppBarActions(
     var openDialog by remember { mutableStateOf(false) }
     DisplayAlertDialog(
         title = "Cancel ${tempNumber?.number}",
-        message = "Are you sure you want to cancel this number?",
+        message = {
+            Text(
+                text = "Are you sure you want to cancel this number?",
+                fontSize = MaterialTheme.typography.subtitle1.fontSize,
+                fontWeight = FontWeight.Normal
+            )
+        },
         openDialog = openDialog,
         closeDialog = { openDialog = false },
         onYesClicked = {

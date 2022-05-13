@@ -16,7 +16,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -151,7 +150,7 @@ fun ProfileDetails(
                     )
                     {
                         Row(
-                            modifier = Modifier.padding(top = 17.dp, bottom = 17.dp),
+                            modifier = Modifier.padding(top = 10.dp, bottom = 10.dp),
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.Center
                         ) {
@@ -182,7 +181,7 @@ fun ProfileDetails(
                     backgroundColor = MaterialTheme.colors.backgroundColor
                 ) {
                     Row(
-                        modifier = Modifier.padding(start = 5.dp, top = 15.dp, bottom = 15.dp),
+                        modifier = Modifier.padding(start = 5.dp, top = 10.dp, bottom = 10.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Icon(
@@ -229,7 +228,7 @@ fun ProfileDetails(
                 )
                 {
                     Row(
-                        modifier = Modifier.padding(top = 17.dp, bottom = 17.dp),
+                        modifier = Modifier.padding(top = 10.dp, bottom = 10.dp),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.Center
                     ) {
@@ -275,7 +274,13 @@ fun SigningOutFunction(
 
     DisplayAlertDialog(
         title = "Sign out",
-        message = "Are you sure you want to sign out?",
+        message = {
+            Text(
+                text = "Are you sure you want to sign out?",
+                fontSize = MaterialTheme.typography.subtitle1.fontSize,
+                fontWeight = FontWeight.Normal
+            )
+        },
         openDialog = openDialog,
         closeDialog = { openDialog = false },
         onYesClicked = {
@@ -307,7 +312,7 @@ fun SignOutButton(onClick: () -> Unit) {
         backgroundColor = MaterialTheme.colors.backgroundColor
     ) {
         Row(
-            modifier = Modifier.padding(start = 5.dp, top = 15.dp, bottom = 15.dp),
+            modifier = Modifier.padding(start = 5.dp, top = 10.dp, bottom = 10.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(imageVector = Icons.Default.Logout, contentDescription = "", tint = Red)

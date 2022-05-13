@@ -4,13 +4,14 @@ import android.annotation.SuppressLint
 import android.app.Application
 import android.content.Context
 import android.util.Log
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material.SnackbarDuration
-import androidx.compose.runtime.*
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
-import androidx.datastore.preferences.preferencesDataStore
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
@@ -368,6 +369,8 @@ class MainViewModel @Inject constructor(
             _isRefreshing.emit(false)
         }
     }
+
+    var tempNumberState: MutableState<String> = mutableStateOf(selectedTempNumber.value.state)
 
     var buyingLoadingStateOfViewModel = MutableStateFlow(LoadingState.IDLE)
 
@@ -970,7 +973,7 @@ class MainViewModel @Inject constructor(
                             )
                             snackbar(
                                 response.body()!!.msg.toString(),
-                                SnackbarDuration.Short
+                                SnackbarDuration.Long
                             )
                             navController.navigate(MainAppScreens.RentalNumbersMessages.route) {
                                 popUpTo(navController.graph.findStartDestination().id) {
@@ -1319,7 +1322,12 @@ class MainViewModel @Inject constructor(
                         )
                         if (response.isSuccessful && response.body()?.succeeded == true) {
                             refundRentalNumberLoadingState.emit(LoadingState.LOADED)
-
+                            reduceBalance(
+                                context = getApplication<Application>(),
+                                snackbar = snackbar,
+                                currentBalance = _userBalance.value,
+                                amount = dollarToCreditForPurchasingNumbers(rentalNumberData.price)
+                            )
                             navController.navigate(MainAppScreens.RentalNumbersMessages.route) {
                                 popUpTo(navController.graph.findStartDestination().id) {
                                     inclusive = true
@@ -1357,6 +1365,8 @@ class MainViewModel @Inject constructor(
             }
         }
     }
+
+    // Write data to dataStore: storing the user's theme
     fun changeAppTheme() {
         DARK_THEME.value = !DARK_THEME.value
         runBlocking {
@@ -1365,6 +1375,8 @@ class MainViewModel @Inject constructor(
             }
         }
     }
+
+    //Read data from dataStore
     val themeValue: Flow<Boolean?> = dataStore.data
         .map { preferences ->
             // No type safety.

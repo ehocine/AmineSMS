@@ -87,7 +87,7 @@ fun Content(
                     fontWeight = FontWeight.Bold,
                     maxLines = 1
                 )
-                Spacer(modifier = Modifier.padding(5.dp))
+//                Spacer(modifier = Modifier.padding(5.dp))
                 Text(
                     text = "${dollarToCreditForPurchasingNumbers(serviceState.price)} credits",
                     color = MediumGray,

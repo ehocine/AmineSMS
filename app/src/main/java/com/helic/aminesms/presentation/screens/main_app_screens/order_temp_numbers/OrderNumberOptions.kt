@@ -125,7 +125,7 @@ fun DisplayOptions(
                         areaCodeValue.length < 3
                     }
                 }
-                Spacer(modifier = Modifier.padding(10.dp))
+                Spacer(modifier = Modifier.padding(5.dp))
                 Text(
                     text = when (invalidAreaCode) {
                         false -> "Leave blank for no filter"
@@ -136,7 +136,7 @@ fun DisplayOptions(
                         else -> Red
                     }
                 )
-                Spacer(modifier = Modifier.padding(20.dp))
+                Spacer(modifier = Modifier.padding(15.dp))
                 Button(
                     onClick = {
                         if (superUserBalance > mainViewModel.selectedServiceState.value.price) {

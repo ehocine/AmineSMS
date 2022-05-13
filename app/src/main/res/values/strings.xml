@@ -49,4 +49,7 @@
     <string name="temp_numbers">Temporary numbers</string>
     <string name="home">Home</string>
     <string name="couldnt_process_request">Couldn\'t process your request</string>
+    <string name="rental_48_hours_notice">Rentals are not always available immediately! New rental activations can take up to 48 hours. This is normal.</string>
+    <string name="renew_rental_numbers_notice">Rental numbers may only be cancelled for a refund within 36 hours of being assigned a number and if there has been no usage.</string>
+    <string name="renew_rental_number_decision">Are you sure you want to cancel this number?</string>
 </resources>

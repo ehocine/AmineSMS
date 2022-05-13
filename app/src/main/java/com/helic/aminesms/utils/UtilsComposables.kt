@@ -21,12 +21,15 @@ import androidx.compose.ui.unit.dp
 import com.helic.aminesms.R
 import com.helic.aminesms.presentation.ui.theme.ButtonColor
 import com.helic.aminesms.presentation.ui.theme.MediumGray
+import com.helic.aminesms.presentation.ui.theme.backgroundColor
 
 
 @Composable
 fun LoadingList() {
     Column(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .background(MaterialTheme.colors.backgroundColor),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -39,8 +42,8 @@ fun ErrorLoadingResults() {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colors.background)
-            .verticalScroll(rememberScrollState()),
+            .background(MaterialTheme.colors.backgroundColor),
+//            .verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -63,8 +66,8 @@ fun NoResults() {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colors.background)
-            .verticalScroll(rememberScrollState()),
+            .background(MaterialTheme.colors.backgroundColor),
+//            .verticalScroll(rememberScrollState()),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {

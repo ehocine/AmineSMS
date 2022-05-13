@@ -120,12 +120,6 @@ fun RentalNumbers(
                         superUserCheckingBalanceState = superUserCheckingBalanceState,
                         userBalance = balance,
                         proceedBuying = {
-                            Log.d("Tag", "ServiceID: $serviceId")
-                            Log.d(
-                                "Tag",
-                                "Duration: ${mainViewModel.rentalPeriodOption.value} and ${mainViewModel.rentalPeriodOption.value * 24}"
-                            )
-
                             mainViewModel.orderRentalNumber(
                                 serviceId = serviceId,
                                 durationInHours = mainViewModel.rentalPeriodOption.value * 24,
@@ -186,6 +180,7 @@ fun Content(
 ) {
     var selectedOption by remember { mutableStateOf(RentalNumberOption.WHOLE_LINE) }
     var userSelectedOption by remember { mutableStateOf(false) }
+    var serviceText by remember { mutableStateOf("") }
 
     val loadingPrice by mainViewModel.rentalServicePriceLoadingState.collectAsState()
 
@@ -233,7 +228,11 @@ fun Content(
             RentalServicesDropDownMenu(
                 label = "Search Service State",
                 optionsList = serviceStateList,
-                onTextChange = onTextChange,
+                onTextChange = {
+                    onTextChange(it)
+                    serviceText = it
+                    Log.d("Tag", serviceText)
+                },
                 onOptionSelected = {
                     mainViewModel.selectedRentalService.value =
                         it // We did it here because we need to check if a service was selected
@@ -270,7 +269,7 @@ fun Content(
             val priceText: String
             val textColor: Color
 
-            if (selectedOption == RentalNumberOption.SINGLE_SERVICE && !userSelectedOption) {
+            if (selectedOption == RentalNumberOption.SINGLE_SERVICE && !userSelectedOption && serviceText.isEmpty()) {
                 borderColor = Red
                 priceText = "Please select a service"
                 textColor = Red
@@ -292,14 +291,14 @@ fun Content(
             )
             {
                 Row(
-                    modifier = Modifier.padding(top = 15.dp, bottom = 15.dp),
+                    modifier = Modifier.padding(top = 10.dp, bottom = 10.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.Center
                 ) {
                     when (loadingPrice) {
                         LoadingState.LOADING -> {
                             CircularProgressIndicator(
-                                modifier = Modifier.size(24.dp),
+                                modifier = Modifier.size(40.dp),
                                 color = MaterialTheme.colors.ButtonColor,
                                 strokeWidth = 3.dp
                             )
@@ -324,6 +323,12 @@ fun Content(
                 }
             }
         }
+        Text(
+            text = stringResource(R.string.rental_48_hours_notice),
+            color = Red,
+            fontSize = MaterialTheme.typography.subtitle1.fontSize,
+            fontWeight = FontWeight.Medium
+        )
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -335,10 +340,8 @@ fun Content(
                     .fillMaxWidth()
                     .height(50.dp),
                 colors = ButtonDefaults.buttonColors(MaterialTheme.colors.ButtonColor),
-                enabled = mainViewModel.gotRentalPrice.value && superUserCheckingBalanceState != LoadingState.ERROR && superUserCheckingBalanceState != LoadingState.LOADING,
+                enabled = mainViewModel.gotRentalPrice.value && superUserCheckingBalanceState != LoadingState.ERROR && superUserCheckingBalanceState != LoadingState.LOADING && serviceText.isNotEmpty(),
                 onClick = {
-                    Log.d("Tag", "Balance $superUserBalance")
-                    Log.d("Tag", "State ${superUserCheckingBalanceState.status}")
                     if (dollarToCreditForPurchasingNumbers(superUserBalance) > priceInCredits) { // If the superUser has balance we can let the users order.
                         if (userBalance >= priceInCredits) { // If the user has enough balance to buy we proceed
                             proceedBuying() // function callback done in higher function because we need the serviceID and the duration

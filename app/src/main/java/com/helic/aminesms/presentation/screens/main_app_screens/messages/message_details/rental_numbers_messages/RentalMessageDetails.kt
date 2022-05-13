@@ -6,28 +6,29 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
+import com.helic.aminesms.R
 import com.helic.aminesms.data.models.number_data.RentalNumberData
-import com.helic.aminesms.data.models.number_data.TempNumberData
 import com.helic.aminesms.data.viewmodels.MainViewModel
 import com.helic.aminesms.presentation.navigation.MainAppScreens
 import com.helic.aminesms.presentation.ui.theme.ButtonColor
+import com.helic.aminesms.presentation.ui.theme.backgroundColor
 import com.helic.aminesms.presentation.ui.theme.topAppBarBackgroundColor
 import com.helic.aminesms.presentation.ui.theme.topAppBarContentColor
 import com.helic.aminesms.utils.*
-import com.helic.aminesms.utils.Constants.REUSE_DISCOUNT_PERCENT
 import kotlinx.coroutines.delay
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
@@ -86,50 +87,50 @@ fun RentalMessageDetails(
 //                )
             }
         ) {
-            Column(
-                modifier = Modifier
-                    .padding(top = 20.dp)
-                    .fillMaxHeight(),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.SpaceBetween
+            Surface(
+                modifier = Modifier.fillMaxSize(),
+                color = MaterialTheme.colors.backgroundColor
             ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-//                    Text(
-//                        text =
-//                        when {
-//                            remainingExpirationTime > 0 -> "Expires in ${
-//                                convertSeconds(
-//                                    remainingExpirationTime
-//                                )
-//                            }"
-//                            else -> temporaryNumber.state
-//                        },
-//                        fontWeight = FontWeight.Bold,
-//                        color = MaterialTheme.colors.TextColor
-//                    )
-                    Spacer(modifier = Modifier.padding(20.dp))
-                    when (state) {
-                        LoadingState.LOADING -> LoadingList()
-                        LoadingState.ERROR -> ErrorLoadingResults()
-                        else -> {
-                            if (rentalNumbersMessagesList.isNotEmpty()) {
-                                MessageDetailItem(listOfMessages = rentalNumbersMessagesList)
-                            } else {
-                                NoResults()
-                            }
-                        }
-                    }
-                }
-                Column(
-                    modifier = Modifier.padding(10.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Bottom
+                Box(
+                    modifier = Modifier
+                        .padding(top = 20.dp)
+                        .fillMaxSize(),
                 ) {
-                    ActivateButton(state = activationState) {
-                        mainViewModel.activateRentalNumber(
-                            rentalId = rentalNumber.rentalId,
-                            snackbar = showSnackbar
-                        )
+                    when (state) {
+                        LoadingState.LOADING -> Column(
+                            modifier = Modifier.align(Alignment.TopCenter),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) { LoadingList() }
+                        LoadingState.ERROR -> Column(
+                            modifier = Modifier.align(Alignment.TopCenter),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) { ErrorLoadingResults() }
+                        else -> {
+                            Column(
+                                modifier = Modifier.align(Alignment.TopCenter),
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                if (rentalNumbersMessagesList.isNotEmpty()) {
+                                    MessageDetailItem(listOfMessages = rentalNumbersMessagesList)
+                                } else {
+                                    NoResults()
+                                }
+                            }
+                            Column(
+                                modifier = Modifier
+                                    .padding(10.dp)
+                                    .align(Alignment.BottomCenter),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                            ) {
+                                ActivateButton(state = activationState) {
+                                    mainViewModel.activateRentalNumber(
+                                        rentalId = rentalNumber.rentalId,
+                                        snackbar = showSnackbar
+                                    )
+                                }
+                            }
+
+                        }
                     }
                 }
             }
@@ -165,7 +166,6 @@ fun RentalMessageDetailsTopAppBar(
         title = { mainViewModel.selectedRentalNumber.value.number?.let { Text(text = it) } },
         actions = {
             ExistingTaskAppBarActions(
-                context = context,
                 navController = navController,
                 rentalNumber = rentalNumber,
                 mainViewModel = mainViewModel,
@@ -173,31 +173,6 @@ fun RentalMessageDetailsTopAppBar(
             )
         },
         backgroundColor = MaterialTheme.colors.topAppBarBackgroundColor
-    )
-}
-
-@Composable
-fun ReuseNumber(
-    mainViewModel: MainViewModel,
-    temporaryTempNumber: TempNumberData,
-    showSnackbar: (String, SnackbarDuration) -> Unit,
-    navController: NavController
-) {
-    var openDialog by remember { mutableStateOf(false) }
-//    ActivateButton { openDialog = true }
-
-    DisplayAlertDialog(
-        title = "Reuse Number ${temporaryTempNumber.number}",
-        message = "You can reuse this number for a $REUSE_DISCOUNT_PERCENT% off, Are you sure you want to continue?",
-        openDialog = openDialog,
-        closeDialog = { openDialog = false },
-        onYesClicked = {
-            mainViewModel.reuseNumber(
-                temporaryNumberId = temporaryTempNumber.temporaryNumberId,
-                snackbar = showSnackbar,
-                navController = navController
-            )
-        }
     )
 }
 
@@ -228,71 +203,131 @@ fun ActivateButton(state: LoadingState, onClick: () -> Unit) {
 
 @Composable
 fun ExistingTaskAppBarActions(
-    context: Context,
     navController: NavController,
     rentalNumber: RentalNumberData,
     mainViewModel: MainViewModel,
     showSnackbar: (String, SnackbarDuration) -> Unit
 ) {
-    var openDialog by remember { mutableStateOf(false) }
+    var openCancelDialog by remember { mutableStateOf(false) }
+    var openRenewDialog by remember { mutableStateOf(false) }
+    DropMenu(
+        onRenewClicked = { openRenewDialog = true },
+        onCancelClicked = { openCancelDialog = true }
+    )
+
     DisplayAlertDialog(
         title = "Cancel ${rentalNumber.number}",
-        message = "Are you sure you want to cancel this number?",
-        openDialog = openDialog,
-        closeDialog = { openDialog = false },
+        message = {
+            Column() {
+                Text(
+                    text = stringResource(R.string.renew_rental_numbers_notice),
+                    fontSize = MaterialTheme.typography.subtitle1.fontSize,
+                    fontWeight = FontWeight.Bold
+                )
+                Text(
+                    text = stringResource(R.string.renew_rental_number_decision),
+                    fontSize = MaterialTheme.typography.subtitle1.fontSize,
+                    fontWeight = FontWeight.Normal
+                )
+            }
+        },
+        openDialog = openCancelDialog,
+        closeDialog = { openCancelDialog = false },
         onYesClicked = {
             mainViewModel.requestRefundRentalNumber(
                 rentalNumberData = rentalNumber,
                 snackbar = showSnackbar,
                 navController = navController
             )
-//            if (rentalNumber.state == NumberState.Pending.toString()) {
-//                mainViewModel.cancelTempNumber(
-//                    context = context,
-//                    temporaryNumberId = RentalNumber.rentalId,
-//                    snackbar = showSnackbar,
-//                    navController = navController
-//                )
-//            } else {
-//                showSnackbar(
-//                    context.getString(R.string.cant_cancel_number),
-//                    SnackbarDuration.Short
-//                )
-//            }
-
         }
     )
 
-    CancelAction(onCancelClicked = { openDialog = true })
-    RefreshAction(onRefreshClicked = {
-//        mainViewModel.refreshMessageCheck(
-//            context = context,
-//            temporaryNumberId = tempNumber.temporaryNumberId,
-//            snackbar = showSnackbar
+    DisplayAlertDialog(
+        title = "Renew ${rentalNumber.number}",
+        message = {
+            Text(
+                text = "Only 30 day rental numbers can be extended/renewed! \nRenew this number for ${
+                    dollarToCreditForPurchasingNumbers(
+                        rentalNumber.price
+                    )
+                } credits, continue?", fontSize = MaterialTheme.typography.subtitle1.fontSize
+            )
+        },
+        openDialog = openRenewDialog,
+        closeDialog = { openRenewDialog = false },
+        onYesClicked = {
+            mainViewModel.renewRentalNumber(
+                rentalNumberData = rentalNumber,
+                snackbar = showSnackbar,
+                navController = navController
+            )
+        }
+    )
+
+//    CancelAction(onCancelClicked = { openDialog = true })
+//    RefreshAction(onRefreshClicked = {
+////        mainViewModel.refreshMessageCheck(
+////            context = context,
+////            temporaryNumberId = tempNumber.temporaryNumberId,
+////            snackbar = showSnackbar
+////        )
+//    })
+}
+
+@Composable
+fun DropMenu(onRenewClicked: () -> Unit, onCancelClicked: () -> Unit) {
+    var expanded by remember { mutableStateOf(false) }
+    IconButton(onClick = { expanded = true }) {
+        Icon(
+            painterResource(id = R.drawable.ic_more_vert),
+            contentDescription = "Menu",
+            tint = MaterialTheme.colors.topAppBarContentColor
+        )
+        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+            DropdownMenuItem(onClick = {
+                expanded = false
+                onRenewClicked()
+            }) {
+                Text(
+                    text = "Renew number",
+                    modifier = Modifier.padding(start = 5.dp),
+//                    fontSize = MaterialTheme.typography.subtitle2.fontSize
+                )
+            }
+            DropdownMenuItem(onClick = {
+                expanded = false
+                onCancelClicked()
+            }) {
+                Text(
+                    text = "Cancel number",
+                    modifier = Modifier.padding(start = 5.dp),
+//                    fontSize = MaterialTheme.typography.subtitle2.fontSize
+                )
+            }
+        }
+    }
+}
+
+//@Composable
+//fun CancelAction(
+//    onCancelClicked: () -> Unit
+//) {
+//    IconButton(onClick = { onCancelClicked() }) {
+//        Icon(
+//            imageVector = Icons.Default.Close, contentDescription = "Cancel Button",
+//            tint = MaterialTheme.colors.topAppBarContentColor
 //        )
-    })
-}
+//    }
+//}
 
-@Composable
-fun CancelAction(
-    onCancelClicked: () -> Unit
-) {
-    IconButton(onClick = { onCancelClicked() }) {
-        Icon(
-            imageVector = Icons.Default.Close, contentDescription = "Cancel Button",
-            tint = MaterialTheme.colors.topAppBarContentColor
-        )
-    }
-}
-
-@Composable
-fun RefreshAction(
-    onRefreshClicked: () -> Unit
-) {
-    IconButton(onClick = { onRefreshClicked() }) {
-        Icon(
-            imageVector = Icons.Default.Refresh, contentDescription = "Refresh Button",
-            tint = MaterialTheme.colors.topAppBarContentColor
-        )
-    }
-}
+//@Composable
+//fun RefreshAction(
+//    onRefreshClicked: () -> Unit
+//) {
+//    IconButton(onClick = { onRefreshClicked() }) {
+//        Icon(
+//            imageVector = Icons.Default.Refresh, contentDescription = "Refresh Button",
+//            tint = MaterialTheme.colors.topAppBarContentColor
+//        )
+//    }
+//}

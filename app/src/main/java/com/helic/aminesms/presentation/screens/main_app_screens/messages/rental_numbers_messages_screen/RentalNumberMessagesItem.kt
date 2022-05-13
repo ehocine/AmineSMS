@@ -23,6 +23,7 @@ import com.helic.aminesms.presentation.ui.theme.MediumGray
 import com.helic.aminesms.presentation.ui.theme.Red
 import com.helic.aminesms.presentation.ui.theme.TextColor
 import com.helic.aminesms.utils.NumberState
+import com.helic.aminesms.utils.calculatingRemainingDaysForRentals
 
 @Composable
 fun RentalNumberMessageItem(
@@ -110,30 +111,34 @@ fun Content(
                         maxLines = 1
                     )
                 }
-                Spacer(modifier = Modifier.padding(5.dp))
+//                Spacer(modifier = Modifier.padding(5.dp))
                 Text(
                     text = rentalNumberData.rentalServiceName,
                     color = MaterialTheme.colors.TextColor,
                     fontSize = MaterialTheme.typography.subtitle1.fontSize,
                     maxLines = 1
                 )
-                Spacer(modifier = Modifier.padding(5.dp))
+//                Spacer(modifier = Modifier.padding(5.dp))
+                rentalNumberData.expiresAt?.let {
+                    Text(
+                        text = "Number expires in: ${calculatingRemainingDaysForRentals(it.toLong())} days",
+                        color = MaterialTheme.colors.TextColor,
+                        fontSize = MaterialTheme.typography.subtitle1.fontSize,
+                        maxLines = 1
+                    )
+                }
+//                Spacer(modifier = Modifier.padding(5.dp))
                 Text(
-                    text = rentalNumberData.state,
+                    text = "Number state: ${rentalNumberData.state}",
                     color = MediumGray,
                     fontSize = MaterialTheme.typography.subtitle1.fontSize,
                     maxLines = 1
                 )
             }
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    text = rentalNumberData.expiresAt.toString(),
-                    color = MediumGray,
-                    fontSize = MaterialTheme.typography.subtitle1.fontSize,
-                    maxLines = 1
-                )
+
                 when (rentalNumberData.state) {
-                    NumberState.LIVE.toString() -> {
+                    NumberState.live.toString() -> {
                         Canvas(modifier = Modifier.size(15.dp)) {
                             drawCircle(color = Green)
                         }
@@ -145,7 +150,7 @@ fun Content(
                     }
                 }
                 when (rentalNumberData.state) {
-                    NumberState.LIVE.toString() -> {
+                    NumberState.live.toString() -> {
                         Icon(
                             imageVector = Icons.Default.KeyboardArrowRight,
                             contentDescription = ""

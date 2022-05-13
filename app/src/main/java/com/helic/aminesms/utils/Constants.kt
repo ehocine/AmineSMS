@@ -35,5 +35,5 @@ object Constants {
     //    const val BASE_URL = "https://www.smsredux.com/"
 //    const val API_KEY = "live_wZw5tBuQLtRPaspTt4HAOQ61FK81Og3bctkfDjmZAHsw"
     const val BASE_URL = "https://staging.whitelabeled.win/"
-    const val API_KEY = "test_JMqLaht6DOlgiDPdiU47qAl1bAkJ4KOGm7KNLTWPEAvg"
+    const val API_KEY = "test_AmnOrKCMVHvirDB7jyKEpghNnQ70NoYcXR8UpRw1xSQA"
 }

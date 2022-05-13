@@ -10,7 +10,7 @@ import com.helic.aminesms.R
 @Composable
 fun DisplayAlertDialog(
     title: String,
-    message: String,
+    message: @Composable (() -> Unit),
     openDialog: Boolean,
     closeDialog: () -> Unit,
     onYesClicked: () -> Unit,
@@ -24,13 +24,14 @@ fun DisplayAlertDialog(
                     fontWeight = FontWeight.Bold
                 )
             },
-            text = {
-                Text(
-                    text = message,
-                    fontSize = MaterialTheme.typography.subtitle1.fontSize,
-                    fontWeight = FontWeight.Normal
-                )
-            },
+            text = message,
+//            {
+//                Text(
+//                    text = message,
+//                    fontSize = MaterialTheme.typography.subtitle1.fontSize,
+//                    fontWeight = FontWeight.Normal
+//                )
+//            },
             confirmButton = {
                 Button(
                     onClick = {

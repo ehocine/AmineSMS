@@ -8,6 +8,7 @@ data class User(
     val userName: String = "",
     val userEmail: String = "",
     val userBalance: Double = 0.0,
+    val emailVerified: Boolean = false,
     val listOfTempNumbers: List<TempNumberData> = listOf(),
     val listOfRentalNumbers: List<RentalNumberData> = listOf()
 )

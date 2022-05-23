@@ -24,8 +24,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.helic.aminesms.R
+import com.helic.aminesms.data.viewmodels.MainViewModel
 import com.helic.aminesms.presentation.navigation.AuthenticationScreens
 import com.helic.aminesms.presentation.ui.theme.ButtonColor
+import com.helic.aminesms.presentation.ui.theme.ProgressIndicatorColor
 import com.helic.aminesms.presentation.ui.theme.primaryColor
 import com.helic.aminesms.utils.Constants.loadingState
 import com.helic.aminesms.utils.LoadingState
@@ -33,7 +35,11 @@ import com.helic.aminesms.utils.registerNewUser
 import kotlinx.coroutines.flow.MutableStateFlow
 
 @Composable
-fun RegisterPage(navController: NavController, showSnackbar: (String, SnackbarDuration) -> Unit) {
+fun RegisterPage(
+    navController: NavController,
+    mainViewModel: MainViewModel,
+    showSnackbar: (String, SnackbarDuration) -> Unit
+) {
 
     val context = LocalContext.current
     val focusManager = LocalFocusManager.current
@@ -53,7 +59,7 @@ fun RegisterPage(navController: NavController, showSnackbar: (String, SnackbarDu
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .fillMaxHeight(0.70f)
+                    .fillMaxHeight(0.80f)
                     .clip(RoundedCornerShape(topStart = 30.dp, topEnd = 30.dp))
                     .padding(10.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -131,7 +137,7 @@ fun RegisterPage(navController: NavController, showSnackbar: (String, SnackbarDu
                             colors = ButtonDefaults.buttonColors(MaterialTheme.colors.ButtonColor)
                         ) {
                             if (state == LoadingState.LOADING) {
-                                CircularProgressIndicator(color = MaterialTheme.colors.ButtonColor)
+                                CircularProgressIndicator(color = MaterialTheme.colors.ProgressIndicatorColor)
                             } else {
                                 Text(
                                     text = stringResource(R.string.sign_up),

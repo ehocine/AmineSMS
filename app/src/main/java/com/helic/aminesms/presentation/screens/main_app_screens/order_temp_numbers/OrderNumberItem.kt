@@ -35,7 +35,7 @@ fun DisplayServiceStateList(
         listOfServiceState
     } else {
         listOfServiceState.filter { serviceState ->
-            serviceState.name.contains(searchText)
+            serviceState.name.contains(searchText, ignoreCase = true)
         }
     }
     LazyColumn(modifier = Modifier.fillMaxWidth()) {

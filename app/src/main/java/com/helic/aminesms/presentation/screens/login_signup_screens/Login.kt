@@ -26,16 +26,26 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.helic.aminesms.R
+import com.helic.aminesms.data.viewmodels.MainViewModel
 import com.helic.aminesms.presentation.navigation.AuthenticationScreens
 import com.helic.aminesms.presentation.ui.theme.ButtonColor
+import com.helic.aminesms.presentation.ui.theme.ProgressIndicatorColor
 import com.helic.aminesms.presentation.ui.theme.primaryColor
+import com.helic.aminesms.utils.Constants
 import com.helic.aminesms.utils.Constants.loadingState
 import com.helic.aminesms.utils.LoadingState
+import com.helic.aminesms.utils.resendVerificationEmail
 import com.helic.aminesms.utils.signInUser
 import kotlinx.coroutines.flow.MutableStateFlow
 
 @Composable
-fun LoginPage(navController: NavController, showSnackbar: (String, SnackbarDuration) -> Unit) {
+fun LoginPage(
+    navController: NavController,
+    mainViewModel: MainViewModel,
+    showSnackbar: (String, SnackbarDuration) -> Unit
+) {
+
+    val user = Constants.auth.currentUser
 
     val context = LocalContext.current
     val focusManager = LocalFocusManager.current
@@ -59,7 +69,7 @@ fun LoginPage(navController: NavController, showSnackbar: (String, SnackbarDurat
                 verticalArrangement = Arrangement.Center,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .fillMaxHeight(0.60f)
+                    .fillMaxHeight(0.80f)
                     .clip(RoundedCornerShape(topStart = 30.dp, topEnd = 30.dp))
                     .padding(10.dp)
             ) {
@@ -139,7 +149,7 @@ fun LoginPage(navController: NavController, showSnackbar: (String, SnackbarDurat
                             colors = ButtonDefaults.buttonColors(MaterialTheme.colors.ButtonColor)
                         ) {
                             if (state == LoadingState.LOADING) {
-                                CircularProgressIndicator(color = MaterialTheme.colors.ButtonColor)
+                                CircularProgressIndicator(color = MaterialTheme.colors.ProgressIndicatorColor)
                             } else {
                                 Text(
                                     text = stringResource(R.string.sign_in),
@@ -165,6 +175,31 @@ fun LoginPage(navController: NavController, showSnackbar: (String, SnackbarDurat
                                         launchSingleTop = true
                                     }
                                 })
+                        }
+                        Spacer(modifier = Modifier.padding(15.dp))
+
+                        if (user != null && !user.isEmailVerified) {
+                            Row {
+                                Text(
+                                    text = "Didn't get the verification email?",
+                                    fontSize = MaterialTheme.typography.subtitle2.fontSize
+                                )
+                                Spacer(modifier = Modifier.padding(end = 2.dp))
+                                Text(
+                                    text = "Request one",
+                                    fontSize = MaterialTheme.typography.subtitle2.fontSize,
+                                    fontWeight = FontWeight.Bold,
+                                    modifier = Modifier.clickable {
+                                        resendVerificationEmail(
+                                            snackbar = showSnackbar,
+                                            context = context
+                                        )
+                                    })
+                            }
+                            Text(
+                                text = "(${user.email})",
+                                fontSize = MaterialTheme.typography.subtitle2.fontSize
+                            )
                         }
                         Spacer(modifier = Modifier.padding(20.dp))
                     }

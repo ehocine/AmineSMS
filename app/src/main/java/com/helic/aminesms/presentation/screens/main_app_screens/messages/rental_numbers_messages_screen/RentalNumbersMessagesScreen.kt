@@ -53,6 +53,7 @@ fun RentalNumbersMessages(
     }
 
     val listOfLiveRentalNumbers by mainViewModel.listOfLiveRentalNumbers
+
     LaunchedEffect(key1 = true) {
         mainViewModel.getBalance(context = context, snackbar = snackbar)
     }

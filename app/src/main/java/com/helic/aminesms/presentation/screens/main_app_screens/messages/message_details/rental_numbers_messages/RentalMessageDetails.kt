@@ -1,7 +1,6 @@
 package com.helic.aminesms.presentation.screens.main_app_screens.messages.message_details.rental_numbers_messages
 
 import android.annotation.SuppressLint
-import android.content.Context
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -48,12 +47,11 @@ fun RentalMessageDetails(
     LaunchedEffect(key1 = true) {
         mainViewModel.getBalance(context = context, snackbar = showSnackbar)
     }
-    val userBalance = mainViewModel.userBalance.collectAsState().value
     val activationState by mainViewModel.activatingRentalNumberLoadingState.collectAsState()
 
 
     //This is added to auto-check the incoming messages every TIME_BETWEEN_AUTO_REFRESH,
-    // we added the variable counter to autoupdate the LaunchedEffect
+    // we added the variable counter to auto-update the LaunchedEffect
     // we added the condition to reduce resources usage when there is a message
 
     if (hasInternetConnection(context = context)) {
@@ -62,29 +60,33 @@ fun RentalMessageDetails(
             delay(timeMillis = Constants.TIME_BETWEEN_AUTO_REFRESH)
             counter += 1
             mainViewModel.autoCheckRentalMessage(
-                rentalId = rentalNumber.rentalId,
-                snackbar = showSnackbar
+                rentalId = rentalNumber.rentalId
             )
         }
     }
 
     Scaffold(topBar = {
         RentalMessageDetailsTopAppBar(
-            context = context,
             navController = navController,
             mainViewModel = mainViewModel,
             rentalNumber = rentalNumber,
             showSnackbar = showSnackbar
         )
-    }) {
+    }, bottomBar = {
+        ActivateButton(state = activationState) {
+            mainViewModel.activateRentalNumber(
+                rentalId = rentalNumber.rentalId,
+                snackbar = showSnackbar
+            )
+        }
+    }) { paddingValues ->
         SwipeRefresh(
             state = rememberSwipeRefreshState(isRefreshing),
             onRefresh = {
-//                mainViewModel.refreshMessageCheck(
-//                    context = context,
-//                    temporaryNumberId = temporaryNumber.temporaryNumberId,
-//                    snackbar = showSnackbar
-//                )
+                mainViewModel.refreshRentalNumberMessagesCheck(
+                    rentalId = rentalNumber.rentalId,
+                    snackbar = showSnackbar
+                )
             }
         ) {
             Surface(
@@ -93,22 +95,18 @@ fun RentalMessageDetails(
             ) {
                 Box(
                     modifier = Modifier
-                        .padding(top = 20.dp)
-                        .fillMaxSize(),
+                        .padding(paddingValues)
                 ) {
                     when (state) {
                         LoadingState.LOADING -> Column(
-                            modifier = Modifier.align(Alignment.TopCenter),
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) { LoadingList() }
                         LoadingState.ERROR -> Column(
-                            modifier = Modifier.align(Alignment.TopCenter),
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) { ErrorLoadingResults() }
                         else -> {
                             Column(
-                                modifier = Modifier.align(Alignment.TopCenter),
-                                horizontalAlignment = Alignment.CenterHorizontally
+                                modifier = Modifier.fillMaxSize()
                             ) {
                                 if (rentalNumbersMessagesList.isNotEmpty()) {
                                     MessageDetailItem(listOfMessages = rentalNumbersMessagesList)
@@ -116,20 +114,6 @@ fun RentalMessageDetails(
                                     NoResults()
                                 }
                             }
-                            Column(
-                                modifier = Modifier
-                                    .padding(10.dp)
-                                    .align(Alignment.BottomCenter),
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                            ) {
-                                ActivateButton(state = activationState) {
-                                    mainViewModel.activateRentalNumber(
-                                        rentalId = rentalNumber.rentalId,
-                                        snackbar = showSnackbar
-                                    )
-                                }
-                            }
-
                         }
                     }
                 }
@@ -141,7 +125,6 @@ fun RentalMessageDetails(
 @SuppressLint("StateFlowValueCalledInComposition")
 @Composable
 fun RentalMessageDetailsTopAppBar(
-    context: Context,
     navController: NavController,
     mainViewModel: MainViewModel,
     rentalNumber: RentalNumberData,
@@ -179,24 +162,30 @@ fun RentalMessageDetailsTopAppBar(
 @Composable
 fun ActivateButton(state: LoadingState, onClick: () -> Unit) {
 
-    Button(
-        onClick = {
-            onClick()
-        },
-        enabled = state != LoadingState.LOADING,
+    Box(
         modifier = Modifier
+            .padding(10.dp)
             .fillMaxWidth()
-            .height(50.dp),
-        colors = ButtonDefaults.buttonColors(MaterialTheme.colors.ButtonColor)
     ) {
-        if (state == LoadingState.LOADING) {
-            CircularProgressIndicator(color = MaterialTheme.colors.ButtonColor)
-        } else {
-            Text(
-                text = "Activate",
-                fontSize = 20.sp,
-                color = Color.White
-            )
+        Button(
+            onClick = {
+                onClick()
+            },
+            enabled = state != LoadingState.LOADING,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(50.dp),
+            colors = ButtonDefaults.buttonColors(MaterialTheme.colors.ButtonColor)
+        ) {
+            if (state == LoadingState.LOADING) {
+                CircularProgressIndicator(color = MaterialTheme.colors.ButtonColor)
+            } else {
+                Text(
+                    text = "Activate",
+                    fontSize = 20.sp,
+                    color = Color.White
+                )
+            }
         }
     }
 }
@@ -218,7 +207,7 @@ fun ExistingTaskAppBarActions(
     DisplayAlertDialog(
         title = "Cancel ${rentalNumber.number}",
         message = {
-            Column() {
+            Column {
                 Text(
                     text = stringResource(R.string.renew_rental_numbers_notice),
                     fontSize = MaterialTheme.typography.subtitle1.fontSize,
@@ -263,15 +252,6 @@ fun ExistingTaskAppBarActions(
             )
         }
     )
-
-//    CancelAction(onCancelClicked = { openDialog = true })
-//    RefreshAction(onRefreshClicked = {
-////        mainViewModel.refreshMessageCheck(
-////            context = context,
-////            temporaryNumberId = tempNumber.temporaryNumberId,
-////            snackbar = showSnackbar
-////        )
-//    })
 }
 
 @Composable
@@ -307,27 +287,3 @@ fun DropMenu(onRenewClicked: () -> Unit, onCancelClicked: () -> Unit) {
         }
     }
 }
-
-//@Composable
-//fun CancelAction(
-//    onCancelClicked: () -> Unit
-//) {
-//    IconButton(onClick = { onCancelClicked() }) {
-//        Icon(
-//            imageVector = Icons.Default.Close, contentDescription = "Cancel Button",
-//            tint = MaterialTheme.colors.topAppBarContentColor
-//        )
-//    }
-//}
-
-//@Composable
-//fun RefreshAction(
-//    onRefreshClicked: () -> Unit
-//) {
-//    IconButton(onClick = { onRefreshClicked() }) {
-//        Icon(
-//            imageVector = Icons.Default.Refresh, contentDescription = "Refresh Button",
-//            tint = MaterialTheme.colors.topAppBarContentColor
-//        )
-//    }
-//}

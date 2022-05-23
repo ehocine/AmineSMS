@@ -16,6 +16,7 @@ import com.helic.aminesms.data.models.User
 import com.helic.aminesms.data.models.number_data.RentalNumberData
 import com.helic.aminesms.data.models.number_data.TempNumberData
 import com.helic.aminesms.presentation.navigation.AuthenticationScreens
+import com.helic.aminesms.utils.Constants.EMAIL_VERIFIED
 import com.helic.aminesms.utils.Constants.FIRESTORE_DATABASE
 import com.helic.aminesms.utils.Constants.LIST_OF_RENTAL_NUMBERS
 import com.helic.aminesms.utils.Constants.LIST_OF_TEMP_NUMBERS
@@ -26,9 +27,6 @@ import com.helic.aminesms.utils.Constants.loadingState
 import kotlinx.coroutines.*
 import kotlinx.coroutines.tasks.await
 
-//TODO When creating a user add the purchased rental numbers
-// TODO Add option to resend confirmation email
-
 //Register new user
 fun registerNewUser(
     navController: NavController,
@@ -38,7 +36,6 @@ fun registerNewUser(
     emailAddress: String,
     password: String
 ) {
-
     if (hasInternetConnection(context)) {
         if (emailAddress.isNotEmpty() && password.isNotEmpty()) {
             CoroutineScope(Dispatchers.IO).launch {
@@ -55,6 +52,7 @@ fun registerNewUser(
                             user!!.updateProfile(setUserName).addOnCompleteListener { task ->
                                 if (task.isSuccessful) {
                                     Log.d("Tag", user.displayName.toString())
+                                    createUserWithBalance(user)
                                 }
                             }
                             user.sendEmailVerification().addOnCompleteListener { task ->
@@ -65,7 +63,8 @@ fun registerNewUser(
                                     )
                                 }
                             }
-                            createUserWithBalance(user)
+//                            mainViewModel.recentlyCreatedAccount.value = true
+//                            createUserWithBalance(user)
                             navController.navigate(AuthenticationScreens.Login.route) {
                                 popUpTo(navController.graph.findStartDestination().id) {
                                     inclusive = true
@@ -81,7 +80,11 @@ fun registerNewUser(
                 } catch (e: Exception) {
                     loadingState.emit(LoadingState.ERROR)
                     withContext(Dispatchers.Main) {
-                        snackbar(e.message!!, SnackbarDuration.Short)
+                        Log.d("Tag", "Register: ${e.message}")
+                        snackbar(
+                            "${e.message}",
+                            SnackbarDuration.Short
+                        )
                     }
                 }
             }
@@ -111,6 +114,10 @@ fun signInUser(
                         loadingState.emit(LoadingState.LOADED)
                         val user = Firebase.auth.currentUser
                         if (user!!.isEmailVerified) {
+
+//                            mainViewModel.recentlyCreatedAccount.value = false
+
+                            updateVerifiedEmailEntry(user = user)
                             withContext(Dispatchers.Main) {
                                 navController.navigate(Constants.MAIN_SCREEN_ROUTE) {
                                     popUpTo(navController.graph.findStartDestination().id) {
@@ -135,7 +142,11 @@ fun signInUser(
                 } catch (e: Exception) {
                     loadingState.emit(LoadingState.ERROR)
                     withContext(Dispatchers.Main) {
-                        snackbar(e.message!!, SnackbarDuration.Short)
+                        Log.d("Tag", "Sign in: ${e.message}")
+                        snackbar(
+                            "${e.message}",
+                            SnackbarDuration.Short
+                        )
                     }
                 }
             }
@@ -147,6 +158,51 @@ fun signInUser(
     }
 }
 
+fun resendVerificationEmail(
+    snackbar: (String, SnackbarDuration) -> Unit,
+    context: Context
+) {
+    val user = auth.currentUser
+    if (user != null) {
+        if (!user.isEmailVerified) {
+            user.sendEmailVerification().addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    snackbar(
+                        context.getString(R.string.verification_email_sent),
+                        SnackbarDuration.Short
+                    )
+                }
+            }.addOnFailureListener {
+                snackbar(
+                    it.message.toString(),
+                    SnackbarDuration.Long
+                )
+            }
+        } else {
+            snackbar(
+                context.getString(R.string.email_already_verified),
+                SnackbarDuration.Short
+            )
+        }
+    } else {
+        snackbar(
+            context.getString(R.string.an_error_occurred),
+            SnackbarDuration.Short
+        )
+    }
+}
+
+fun updateVerifiedEmailEntry(user: FirebaseUser?) {
+    val db = Firebase.firestore
+    val data = user?.let { db.collection(FIRESTORE_DATABASE).document(it.uid) }
+
+    data?.update(EMAIL_VERIFIED, user.isEmailVerified)?.addOnSuccessListener {
+        Log.d("Tag", "Email verified: true")
+    }?.addOnFailureListener {
+        Log.d("Tag", "Email verified: Failure")
+    }
+
+}
 
 //Reset password function
 fun resetUserPassword(
@@ -172,7 +228,11 @@ fun resetUserPassword(
                 } catch (e: Exception) {
                     loadingState.emit(LoadingState.ERROR)
                     withContext(Dispatchers.Main) {
-                        snackbar(e.message!!, SnackbarDuration.Short)
+                        Log.d("Tag", "Reset: ${e.message}")
+                        snackbar(
+                            e.message.toString(),
+                            SnackbarDuration.Short
+                        )
                     }
                 }
             }
@@ -193,6 +253,7 @@ fun createUserWithBalance(user: FirebaseUser?) {
             it.displayName.toString(),
             it.email.toString(),
             userBalance = 0.0,
+            emailVerified = it.isEmailVerified,
             listOfTempNumbers = listOf(),
             listOfRentalNumbers = listOf()
         )
@@ -245,7 +306,11 @@ fun addBalance(
                     loadingState.emit(LoadingState.ERROR)
                     withContext(Dispatchers.Main) {
                         withContext(Dispatchers.Main) {
-                            snackbar(e.message!!, SnackbarDuration.Short)
+                            Log.d("Tag", "Balance: ${e.message}")
+                            snackbar(
+                                e.message.toString(),
+                                SnackbarDuration.Short
+                            )
                         }
                     }
                 }
@@ -281,7 +346,11 @@ fun reduceBalance(
                     loadingState.emit(LoadingState.ERROR)
                     withContext(Dispatchers.Main) {
                         withContext(Dispatchers.Main) {
-                            snackbar(e.message!!, SnackbarDuration.Short)
+                            Log.d("Tag", "Balance: ${e.message}")
+                            snackbar(
+                                e.message.toString(),
+                                SnackbarDuration.Short
+                            )
                         }
                     }
                 }
@@ -320,7 +389,6 @@ fun addOrRemoveTempNumberFromFirebase(
     action: AddOrRemoveNumberAction,
     tempNumberData: TempNumberData?
 ) {
-
     val db = Firebase.firestore
     val currentUser = Firebase.auth.currentUser
     val data = currentUser?.let { db.collection(FIRESTORE_DATABASE).document(it.uid) }
@@ -358,7 +426,11 @@ fun addOrRemoveTempNumberFromFirebase(
                     loadingState.emit(LoadingState.ERROR)
                     withContext(Dispatchers.Main) {
                         withContext(Dispatchers.Main) {
-                            snackbar(e.message!!, SnackbarDuration.Short)
+                            Log.d("Tag", "Temp num: ${e.message}")
+                            snackbar(
+                                context.getString(R.string.an_error_occurred),
+                                SnackbarDuration.Short
+                            )
                         }
                     }
                 }
@@ -404,7 +476,11 @@ fun updateTempNumberState(
                     loadingState.emit(LoadingState.ERROR)
                     withContext(Dispatchers.Main) {
                         withContext(Dispatchers.Main) {
-                            snackbar(e.message!!, SnackbarDuration.Short)
+                            Log.d("Tag", "Temp num: ${e.message}")
+                            snackbar(
+                                context.getString(R.string.an_error_occurred),
+                                SnackbarDuration.Short
+                            )
                         }
                     }
                 }
@@ -459,7 +535,11 @@ fun addOrRemoveRentalNumberFromFirebase(
                     loadingState.emit(LoadingState.ERROR)
                     withContext(Dispatchers.Main) {
                         withContext(Dispatchers.Main) {
-                            snackbar(e.message!!, SnackbarDuration.Short)
+                            Log.d("Tag", "Rent num: ${e.message}")
+                            snackbar(
+                                context.getString(R.string.an_error_occurred),
+                                SnackbarDuration.Short
+                            )
                         }
                     }
                 }
@@ -505,7 +585,11 @@ fun updateRentalNumberState(
                     loadingState.emit(LoadingState.ERROR)
                     withContext(Dispatchers.Main) {
                         withContext(Dispatchers.Main) {
-                            snackbar(e.message!!, SnackbarDuration.Short)
+                            Log.d("Tag", "Rent num: ${e.message}")
+                            snackbar(
+                                context.getString(R.string.an_error_occurred),
+                                SnackbarDuration.Short
+                            )
                         }
                     }
                 }

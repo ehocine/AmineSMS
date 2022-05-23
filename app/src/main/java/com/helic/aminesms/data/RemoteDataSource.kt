@@ -4,7 +4,7 @@ import com.helic.aminesms.data.api.SMSServiceApi
 import com.helic.aminesms.data.models.UserBalanceResponse
 import com.helic.aminesms.data.models.cancel_number.CancelNumberResponse
 import com.helic.aminesms.data.models.messages.rental_numbers_messages.RentalNumbersMessagesResponse
-import com.helic.aminesms.data.models.messages.temp_numbers_messages.MessageResponse
+import com.helic.aminesms.data.models.messages.temp_numbers_messages.TempNumberMessageResponse
 import com.helic.aminesms.data.models.rental_numbers.RentalNumberServiceStateListResponse
 import com.helic.aminesms.data.models.rental_numbers.activate_number.ActivateNumberResponse
 import com.helic.aminesms.data.models.rental_numbers.live_rental_numbers.LiveRentalNumbersResponse
@@ -12,6 +12,7 @@ import com.helic.aminesms.data.models.rental_numbers.order_rental_number.OrderRe
 import com.helic.aminesms.data.models.rental_numbers.pending_rental_numbers.PendingRentalNumbersResponse
 import com.helic.aminesms.data.models.rental_numbers.refund_rental_number.RefundRentalNumberResponse
 import com.helic.aminesms.data.models.rental_numbers.renew_rental_number.RenewRentalNumberResponse
+import com.helic.aminesms.data.models.rental_numbers.renewal_rental_numbers.RenewalRequestStateResponse
 import com.helic.aminesms.data.models.rental_numbers.rental_options.RentalOptionsResponse
 import com.helic.aminesms.data.models.rental_numbers.rental_service_price.RentalServicePrice
 import com.helic.aminesms.data.models.temp_number.OrderNumberResponse
@@ -37,7 +38,7 @@ class RemoteDataSource @Inject constructor(private val smsServiceApi: SMSService
         )
     }
 
-    suspend fun getTempNumberInfo(temporaryNumberId: String): Response<MessageResponse> {
+    suspend fun getTempNumberInfo(temporaryNumberId: String): Response<TempNumberMessageResponse> {
         return smsServiceApi.getTempNumberInfo(temporaryNumberId = temporaryNumberId)
     }
 
@@ -108,5 +109,9 @@ class RemoteDataSource @Inject constructor(private val smsServiceApi: SMSService
 
     suspend fun renewRentalNumber(rentalId: String): Response<RenewRentalNumberResponse> {
         return smsServiceApi.renewRentalNumber(rentalId = rentalId)
+    }
+
+    suspend fun checkingRenewalState(renewalId: String): Response<RenewalRequestStateResponse> {
+        return smsServiceApi.checkingRenewalState(renewalId = renewalId)
     }
 }

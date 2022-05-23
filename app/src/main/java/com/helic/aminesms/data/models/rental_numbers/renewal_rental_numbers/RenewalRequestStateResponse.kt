@@ -1,11 +1,11 @@
-package com.helic.aminesms.data.models.messages.temp_numbers_messages
+package com.helic.aminesms.data.models.rental_numbers.renewal_rental_numbers
 
 
 import com.google.gson.annotations.SerializedName
 
-data class MessageResponse(
+data class RenewalRequestStateResponse(
     @SerializedName("data")
-    val data: Data,
+    val renewalRequestStateData: RenewalRequestStateData,
     @SerializedName("errors")
     val errors: Any,
     @SerializedName("msg")

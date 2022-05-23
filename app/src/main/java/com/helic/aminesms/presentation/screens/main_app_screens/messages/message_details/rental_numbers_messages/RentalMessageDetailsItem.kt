@@ -1,5 +1,6 @@
 package com.helic.aminesms.presentation.screens.main_app_screens.messages.message_details.rental_numbers_messages
 
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -11,6 +12,7 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.helic.aminesms.data.models.messages.Sms
 import com.helic.aminesms.presentation.ui.theme.MediumGray
@@ -25,7 +27,11 @@ fun MessageDetailItem(listOfMessages: List<Sms?>) {
 @Composable
 fun DisplayMessage(listOfMessages: List<Sms?>) {
 
-    LazyColumn(modifier = Modifier.fillMaxWidth()) {
+    LazyColumn(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.Bottom,
+        reverseLayout = true
+    ) {
         items(listOfMessages) { message ->
             MessageContent(
                 sms = message
@@ -45,6 +51,12 @@ fun MessageContent(sms: Sms?) {
     ) {
         Column(modifier = Modifier.padding(10.dp)) {
 
+            Text(
+                text = "From: ${sms?.sender.toString()}",
+                color = MaterialTheme.colors.TextColor,
+                fontSize = MaterialTheme.typography.subtitle1.fontSize,
+                fontWeight = FontWeight.Bold
+            )
             if (sms != null) {
                 Text(
                     text = convertTimeStampToDate(sms.createdAt.toLong()),
@@ -57,6 +69,12 @@ fun MessageContent(sms: Sms?) {
                     text = sms.content,
                     color = MaterialTheme.colors.TextColor,
                     fontSize = MaterialTheme.typography.body1.fontSize
+                )
+                Text(
+                    text = "Code: ${sms.code}",
+                    color = MaterialTheme.colors.TextColor,
+                    fontSize = MaterialTheme.typography.body1.fontSize,
+                    fontWeight = FontWeight.Medium
                 )
             }
 

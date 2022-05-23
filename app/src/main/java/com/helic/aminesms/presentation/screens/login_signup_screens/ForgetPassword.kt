@@ -19,6 +19,7 @@ import androidx.navigation.NavController
 import com.helic.aminesms.R
 import com.helic.aminesms.presentation.navigation.AuthenticationScreens
 import com.helic.aminesms.presentation.ui.theme.ButtonColor
+import com.helic.aminesms.presentation.ui.theme.ProgressIndicatorColor
 import com.helic.aminesms.utils.Constants.loadingState
 import com.helic.aminesms.utils.LoadingState
 import com.helic.aminesms.utils.resetUserPassword
@@ -79,7 +80,7 @@ fun ForgetPassword(navController: NavController, showSnackbar: (String, Snackbar
                             colors = ButtonDefaults.buttonColors(MaterialTheme.colors.ButtonColor)
                         ) {
                             if (state == LoadingState.LOADING) {
-                                CircularProgressIndicator(color = MaterialTheme.colors.ButtonColor)
+                                CircularProgressIndicator(color = MaterialTheme.colors.ProgressIndicatorColor)
                             } else {
                                 Text(
                                     text = stringResource(R.string.submit),

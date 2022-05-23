@@ -111,7 +111,7 @@ fun TempMessageDetails(
         LaunchedEffect(key1 = counter) {
             delay(timeMillis = TIME_BETWEEN_AUTO_REFRESH)
             counter += 1
-            mainViewModel.autoCheckMessage(
+            mainViewModel.autoCheckTempMessage(
                 context = context,
                 temporaryNumberId = temporaryNumber.temporaryNumberId,
                 snackbar = showSnackbar
@@ -131,7 +131,7 @@ fun TempMessageDetails(
         SwipeRefresh(
             state = rememberSwipeRefreshState(isRefreshing),
             onRefresh = {
-                mainViewModel.refreshMessageCheck(
+                mainViewModel.refreshTempNumberMessageCheck(
                     context = context,
                     temporaryNumberId = temporaryNumber.temporaryNumberId,
                     snackbar = showSnackbar
@@ -396,14 +396,13 @@ fun ExistingTaskAppBarActions(
                     )
                 }
             }
-
         }
     )
 
     CancelAction(onCancelClicked = { openDialog = true })
     RefreshAction(onRefreshClicked = {
         if (tempNumber != null) {
-            mainViewModel.refreshMessageCheck(
+            mainViewModel.refreshTempNumberMessageCheck(
                 context = context,
                 temporaryNumberId = tempNumber.temporaryNumberId,
                 snackbar = showSnackbar

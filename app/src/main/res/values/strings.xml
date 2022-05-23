@@ -52,4 +52,14 @@
     <string name="rental_48_hours_notice">Rentals are not always available immediately! New rental activations can take up to 48 hours. This is normal.</string>
     <string name="renew_rental_numbers_notice">Rental numbers may only be cancelled for a refund within 36 hours of being assigned a number and if there has been no usage.</string>
     <string name="renew_rental_number_decision">Are you sure you want to cancel this number?</string>
+    <string name="error_loading_price">Error loading the price</string>
+    <string name="cost">Cost</string>
+    <string name="select_period">Select a period</string>
+    <string name="email_already_verified">Your email has already been verified</string>
+    <string name="sign_out_confirmation">Are you sure you want to sign out?</string>
+    <string name="switch_to_light_theme">Switch to light theme</string>
+    <string name="switch_to_dark_theme">Switch to dark theme</string>
+    <string name="change_app_theme">Change the App\'s Theme</string>
+    <string name="temporary_numbers">Temporary numbers</string>
+    <string name="add_options_to_temp_number">Add options to your number</string>
 </resources>

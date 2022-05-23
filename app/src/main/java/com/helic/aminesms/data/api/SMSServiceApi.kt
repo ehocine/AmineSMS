@@ -3,7 +3,7 @@ package com.helic.aminesms.data.api
 import com.helic.aminesms.data.models.UserBalanceResponse
 import com.helic.aminesms.data.models.cancel_number.CancelNumberResponse
 import com.helic.aminesms.data.models.messages.rental_numbers_messages.RentalNumbersMessagesResponse
-import com.helic.aminesms.data.models.messages.temp_numbers_messages.MessageResponse
+import com.helic.aminesms.data.models.messages.temp_numbers_messages.TempNumberMessageResponse
 import com.helic.aminesms.data.models.rental_numbers.RentalNumberServiceStateListResponse
 import com.helic.aminesms.data.models.rental_numbers.activate_number.ActivateNumberResponse
 import com.helic.aminesms.data.models.rental_numbers.live_rental_numbers.LiveRentalNumbersResponse
@@ -11,6 +11,7 @@ import com.helic.aminesms.data.models.rental_numbers.order_rental_number.OrderRe
 import com.helic.aminesms.data.models.rental_numbers.pending_rental_numbers.PendingRentalNumbersResponse
 import com.helic.aminesms.data.models.rental_numbers.refund_rental_number.RefundRentalNumberResponse
 import com.helic.aminesms.data.models.rental_numbers.renew_rental_number.RenewRentalNumberResponse
+import com.helic.aminesms.data.models.rental_numbers.renewal_rental_numbers.RenewalRequestStateResponse
 import com.helic.aminesms.data.models.rental_numbers.rental_options.RentalOptionsResponse
 import com.helic.aminesms.data.models.rental_numbers.rental_service_price.RentalServicePrice
 import com.helic.aminesms.data.models.temp_number.OrderNumberResponse
@@ -33,7 +34,7 @@ interface SMSServiceApi {
     ): Response<OrderNumberResponse>
 
     @GET("/api/v2/temporary/{temporaryNumberId}")
-    suspend fun getTempNumberInfo(@Path("temporaryNumberId") temporaryNumberId: String): Response<MessageResponse>
+    suspend fun getTempNumberInfo(@Path("temporaryNumberId") temporaryNumberId: String): Response<TempNumberMessageResponse>
 
     @POST("/api/v2/temporary/{temporaryNumberId}/cancel")
     suspend fun cancelTempNumber(@Path("temporaryNumberId") temporaryNumberId: String): Response<CancelNumberResponse>
@@ -84,4 +85,7 @@ interface SMSServiceApi {
 
     @POST("/api/v2/rentals/{rentalId}/renew")
     suspend fun renewRentalNumber(@Path("rentalId") rentalId: String): Response<RenewRentalNumberResponse>
+
+    @GET("/api/v2/rentals/renewals/{renewalId}")
+    suspend fun checkingRenewalState(@Path("renewalId") renewalId: String): Response<RenewalRequestStateResponse>
 }

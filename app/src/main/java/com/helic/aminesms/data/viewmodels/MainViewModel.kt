@@ -27,6 +27,8 @@ import com.helic.aminesms.data.models.number_data.RentalNumberData
 import com.helic.aminesms.data.models.number_data.ReusableNumbersData
 import com.helic.aminesms.data.models.number_data.TempNumberData
 import com.helic.aminesms.data.models.rental_numbers.RentalNumberServiceState
+import com.helic.aminesms.data.models.rental_numbers.renew_rental_number.RenewRentalNumberData
+import com.helic.aminesms.data.models.rental_numbers.renewal_rental_numbers.RenewalRequestStateData
 import com.helic.aminesms.data.models.rental_numbers.rental_options.RentalOptionsData
 import com.helic.aminesms.data.models.temp_number.ListOfOrderedRentalNumber
 import com.helic.aminesms.data.models.temp_number.ListOfOrderedTempNumber
@@ -90,7 +92,6 @@ class MainViewModel @Inject constructor(
             }
         })
     }
-
 
     private var _addBalanceAmount = MutableStateFlow(0.0)
     private var addBalanceAmount = _addBalanceAmount.asStateFlow()
@@ -370,8 +371,6 @@ class MainViewModel @Inject constructor(
         }
     }
 
-    var tempNumberState: MutableState<String> = mutableStateOf(selectedTempNumber.value.state)
-
     var buyingLoadingStateOfViewModel = MutableStateFlow(LoadingState.IDLE)
 
     fun orderNumber(
@@ -494,7 +493,7 @@ class MainViewModel @Inject constructor(
 
     // This function will be launched later with a LaunchedEffect in the MassageDetails screen
     private var autoCheckingMessagesLoadingStateOfViewModel = MutableStateFlow(LoadingState.IDLE)
-    fun autoCheckMessage(
+    fun autoCheckTempMessage(
         context: Context,
         temporaryNumberId: String,
         snackbar: (String, SnackbarDuration) -> Unit
@@ -523,30 +522,33 @@ class MainViewModel @Inject constructor(
                         }
                     } ?: withContext(Dispatchers.Main) {
                         autoCheckingMessagesLoadingStateOfViewModel.emit(LoadingState.ERROR)
-                        snackbar(
-                            getApplication<Application>().getString(R.string.time_out),
-                            SnackbarDuration.Short
-                        )
+                        Log.d("Tag", "Time out")
+//                        snackbar(
+//                            getApplication<Application>().getString(R.string.time_out),
+//                            SnackbarDuration.Short
+//                        )
                     }
                 } catch (e: Exception) {
                     autoCheckingMessagesLoadingStateOfViewModel.emit(LoadingState.ERROR)
-                    snackbar(
-                        getApplication<Application>().getString(R.string.an_error_occurred),
-                        SnackbarDuration.Short
-                    )
+                    Log.d("Tag", e.message.toString())
+//                    snackbar(
+//                        getApplication<Application>().getString(R.string.an_error_occurred),
+//                        SnackbarDuration.Short
+//                    )
                 }
 
             } else {
                 autoCheckingMessagesLoadingStateOfViewModel.emit(LoadingState.ERROR)
-                snackbar(
-                    getApplication<Application>().getString(R.string.device_not_connected),
-                    SnackbarDuration.Short
-                )
+                Log.d("Tag", "Device not connected")
+//                snackbar(
+//                    getApplication<Application>().getString(R.string.device_not_connected),
+//                    SnackbarDuration.Short
+//                )
             }
         }
     }
 
-    fun refreshMessageCheck(
+    fun refreshTempNumberMessageCheck(
         context: Context,
         temporaryNumberId: String,
         snackbar: (String, SnackbarDuration) -> Unit
@@ -667,7 +669,7 @@ class MainViewModel @Inject constructor(
         }
     }
 
-    //TODO it seems there is an issue with the reusableUntil value from the test API, it's always zero when getting the number ordered. Check with the production API
+    //TODO it seems there is an issue with the reusableUntil value from the test API, it's always zero when getting the number ordered. Must check with the production API
     fun getReusableNumbersList(
         snackbar: (String, SnackbarDuration) -> Unit
     ) {
@@ -939,7 +941,7 @@ class MainViewModel @Inject constructor(
     private val rentalNumberData: MutableState<RentalNumberData> =
         mutableStateOf(RentalNumberData())
 
-    private var orderRentalNumberLoadingState = MutableStateFlow(LoadingState.IDLE)
+    var orderRentalNumberLoadingState = MutableStateFlow(LoadingState.IDLE)
 
     fun orderRentalNumber(
         serviceId: String,
@@ -1189,8 +1191,7 @@ class MainViewModel @Inject constructor(
     private var autoCheckingRentalMessagesLoadingState = MutableStateFlow(LoadingState.IDLE)
 
     fun autoCheckRentalMessage(
-        rentalId: String,
-        snackbar: (String, SnackbarDuration) -> Unit
+        rentalId: String
     ) {
         viewModelScope.launch {
             if (hasInternetConnection(getApplication<Application>())) {
@@ -1207,31 +1208,47 @@ class MainViewModel @Inject constructor(
 
                     } ?: withContext(Dispatchers.Main) {
                         autoCheckingRentalMessagesLoadingState.emit(LoadingState.ERROR)
-                        snackbar(
-                            getApplication<Application>().getString(R.string.time_out),
-                            SnackbarDuration.Short
-                        )
+                        Log.d("Tag", "Time out")
+//                        snackbar(
+//                            getApplication<Application>().getString(R.string.time_out),
+//                            SnackbarDuration.Short
+//                        )
                     }
                 } catch (e: Exception) {
                     autoCheckingRentalMessagesLoadingState.emit(LoadingState.ERROR)
-                    snackbar(
-                        getApplication<Application>().getString(R.string.an_error_occurred),
-                        SnackbarDuration.Short
-                    )
+//                    snackbar(
+//                        getApplication<Application>().getString(R.string.an_error_occurred),
+//                        SnackbarDuration.Short
+//                    )
                     Log.d("Tag", e.message.toString())
                 }
 
             } else {
                 autoCheckingRentalMessagesLoadingState.emit(LoadingState.ERROR)
-                snackbar(
-                    getApplication<Application>().getString(R.string.device_not_connected),
-                    SnackbarDuration.Short
-                )
+                Log.d("Tag", "Device not connected")
+//                snackbar(
+//                    getApplication<Application>().getString(R.string.device_not_connected),
+//                    SnackbarDuration.Short
+//                )
             }
         }
     }
 
-    var refundRentalNumberLoadingState = MutableStateFlow(LoadingState.IDLE)
+    fun refreshRentalNumberMessagesCheck(
+        rentalId: String,
+        snackbar: (String, SnackbarDuration) -> Unit
+    ) {
+        viewModelScope.launch {
+            _isRefreshing.emit(true)
+            getRentalNumberMessages(
+                rentalId = rentalId,
+                snackbar = snackbar
+            )
+            _isRefreshing.emit(false)
+        }
+    }
+
+    private var refundRentalNumberLoadingState = MutableStateFlow(LoadingState.IDLE)
 
     fun requestRefundRentalNumber(
         rentalNumberData: RentalNumberData,
@@ -1273,14 +1290,12 @@ class MainViewModel @Inject constructor(
                                 }
                                 launchSingleTop = true
                             }
-
                         } else {
                             snackbar(
                                 getApplication<Application>().getString(R.string.couldnt_process_request),
                                 SnackbarDuration.Short
                             )
                         }
-
                     } ?: withContext(Dispatchers.Main) {
                         refundRentalNumberLoadingState.emit(LoadingState.ERROR)
                         snackbar(
@@ -1307,6 +1322,12 @@ class MainViewModel @Inject constructor(
         }
     }
 
+    //TODO: when renewing a number, we get it in created state then success or failure. This must be checked and tell the user about it.
+
+    private var renewRentalNumber: MutableState<RenewRentalNumberData> = mutableStateOf(
+        RenewRentalNumberData()
+    )
+
     fun renewRentalNumber(
         rentalNumberData: RentalNumberData,
         snackbar: (String, SnackbarDuration) -> Unit,
@@ -1322,6 +1343,7 @@ class MainViewModel @Inject constructor(
                         )
                         if (response.isSuccessful && response.body()?.succeeded == true) {
                             refundRentalNumberLoadingState.emit(LoadingState.LOADED)
+                            renewRentalNumber.value = response.body()!!.renewRentalNumberData
                             reduceBalance(
                                 context = getApplication<Application>(),
                                 snackbar = snackbar,
@@ -1334,13 +1356,71 @@ class MainViewModel @Inject constructor(
                                 }
                                 launchSingleTop = true
                             }
+                            checkingRenewalState(
+                                renewalId = renewRentalNumber.value.renewalId,
+                                snackbar = snackbar
+                            )
                         } else {
                             snackbar(
                                 getApplication<Application>().getString(R.string.couldnt_process_request),
                                 SnackbarDuration.Short
                             )
                         }
+                    } ?: withContext(Dispatchers.Main) {
+                        refundRentalNumberLoadingState.emit(LoadingState.ERROR)
+                        snackbar(
+                            getApplication<Application>().getString(R.string.time_out),
+                            SnackbarDuration.Short
+                        )
+                    }
+                } catch (e: Exception) {
+                    refundRentalNumberLoadingState.emit(LoadingState.ERROR)
+                    snackbar(
+                        getApplication<Application>().getString(R.string.an_error_occurred),
+                        SnackbarDuration.Short
+                    )
+                    Log.d("Tag", e.message.toString())
+                }
+            } else {
+                refundRentalNumberLoadingState.emit(LoadingState.ERROR)
+                snackbar(
+                    getApplication<Application>().getString(R.string.device_not_connected),
+                    SnackbarDuration.Short
+                )
+            }
+        }
+    }
 
+
+    private var renewalRequestState: MutableState<RenewalRequestStateData> =
+        mutableStateOf(RenewalRequestStateData())
+
+    private fun checkingRenewalState(
+        renewalId: String,
+        snackbar: (String, SnackbarDuration) -> Unit
+    ) {
+        viewModelScope.launch {
+            if (hasInternetConnection(getApplication<Application>())) {
+                try {
+                    withTimeoutOrNull(TIMEOUT_IN_MILLIS) {
+//                        refundRentalNumberLoadingState.emit(LoadingState.LOADING)
+                        val response = repository.remote.checkingRenewalState(
+                            renewalId = renewalId
+                        )
+                        if (response.isSuccessful && response.body()?.succeeded == true) {
+//                            refundRentalNumberLoadingState.emit(LoadingState.LOADED)
+                            renewalRequestState.value = response.body()!!.renewalRequestStateData
+
+                            snackbar(
+                                "Your renewal request was a ${renewalRequestState.value.state}",
+                                SnackbarDuration.Short
+                            )
+                        } else {
+                            snackbar(
+                                getApplication<Application>().getString(R.string.couldnt_process_request),
+                                SnackbarDuration.Short
+                            )
+                        }
                     } ?: withContext(Dispatchers.Main) {
                         refundRentalNumberLoadingState.emit(LoadingState.ERROR)
                         snackbar(

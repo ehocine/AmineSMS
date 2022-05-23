@@ -2,8 +2,9 @@ package com.helic.aminesms.presentation.screens.main_app_screens.order_temp_numb
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.util.Log
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
@@ -12,6 +13,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -96,11 +98,12 @@ fun DisplayOptions(
         contentAlignment = Alignment.TopCenter
     ) {
         Column(
+            modifier = Modifier.verticalScroll(rememberScrollState()),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
             Text(
-                text = "Add options to your number",
+                text = stringResource(R.string.add_options_to_temp_number),
                 fontWeight = FontWeight.Bold,
                 fontSize = MaterialTheme.typography.h5.fontSize
             )
@@ -172,7 +175,7 @@ fun DisplayOptions(
                     colors = ButtonDefaults.buttonColors(MaterialTheme.colors.ButtonColor)
                 ) {
                     if (buyingState == LoadingState.LOADING) {
-                        CircularProgressIndicator(color = MaterialTheme.colors.ButtonColor)
+                        CircularProgressIndicator(color = MaterialTheme.colors.ProgressIndicatorColor)
                     } else {
                         Text(
                             text = "Order number for ${

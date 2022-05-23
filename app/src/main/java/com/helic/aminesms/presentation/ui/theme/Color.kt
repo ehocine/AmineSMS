@@ -15,10 +15,13 @@ val whiteBackground = Color(0xFFF7F7F7)
 
 val Green = Color(0xFF00C980)
 val Yellow = Color(0xFFFFC114)
+val LightOrange = Color(0xffff9839)
+val DarkOrange = Color(0xffe7740b)
 val DarkGray = Color(0xFF141414)
 val MediumGray = Color(0xFF9C9C9C)
 val LightGray = Color(0xFFFCFCFC)
 val Red = Color(0xFFFF4646)
+
 
 val Colors.TextColor: Color
     @Composable
@@ -42,12 +45,19 @@ val Colors.ButtonColor: Color
     @Composable
     get() = if (!DARK_THEME.value) Purple500 else Purple700
 
-//
-//val Colors.TextColor : Color
-//    @Composable
-//    get() = if (!isSystemInDarkTheme()) Color.Black else Color.White
-
 val Colors.backgroundColor: Color
     @Composable
     get() = if (!DARK_THEME.value) Color.White else Color.Black
+
+val Colors.DialogNoText: Color
+    @Composable
+    get() = if (!DARK_THEME.value) Purple700 else Color.White
+
+val Colors.ProgressIndicatorColor: Color
+    @Composable
+    get() = if (!DARK_THEME.value) Purple500 else LightGray
+
+val Colors.NoticeColor: Color
+    @Composable
+    get() = if (!DARK_THEME.value) DarkOrange else LightOrange
 

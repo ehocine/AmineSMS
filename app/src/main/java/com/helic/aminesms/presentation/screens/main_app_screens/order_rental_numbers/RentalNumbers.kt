@@ -3,7 +3,6 @@ package com.helic.aminesms.presentation.screens.main_app_screens.order_rental_nu
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.util.Log
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -17,11 +16,13 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -72,6 +73,7 @@ fun RentalNumbers(
     val balance = mainViewModel.userBalance.collectAsState().value
 
     val state by mainViewModel.rentalServiceLoadingStateOfViewModel.collectAsState()
+    val orderRentalNumberState by mainViewModel.orderRentalNumberLoadingState.collectAsState()
 
     Scaffold(topBar = {
         RentalNumberTopAppBar(navController = navController)
@@ -89,9 +91,6 @@ fun RentalNumbers(
                         serviceStateList = listOfRentalServices,
                         optionsList = optionsList,
                         mainViewModel = mainViewModel,
-                        onTextChange = { newText ->
-                            mainViewModel.searchTextState.value = newText
-                        },
                         onRentalOptionSelected = {
                             when (it.duration) {
                                 "30.00:00:00" -> mainViewModel.rentalPeriodOption.value = 30
@@ -127,7 +126,8 @@ fun RentalNumbers(
                                 snackbar = snackbar
                             )
                         },
-                        snackbar = snackbar
+                        snackbar = snackbar,
+                        orderRentalNumberState = orderRentalNumberState
                     )
                 }
             }
@@ -161,14 +161,12 @@ fun RentalNumberTopAppBar(
     )
 }
 
-//TODO Loading services list takes so long, this must be fixed
 @Composable
 fun Content(
     context: Context,
     serviceStateList: List<RentalNumberServiceState>,
     optionsList: List<RentalOptionsData>,
     mainViewModel: MainViewModel,
-    onTextChange: (String) -> Unit,
     onRentalOptionSelected: (RentalOptionsData) -> Unit,
     onRentalNumberOptionChosen: (RentalNumberOption) -> Unit,
     priceInCredits: Double,
@@ -177,17 +175,19 @@ fun Content(
     userBalance: Double,
     proceedBuying: () -> Unit,
     snackbar: (String, SnackbarDuration) -> Unit,
+    orderRentalNumberState: LoadingState
 ) {
     var selectedOption by remember { mutableStateOf(RentalNumberOption.WHOLE_LINE) }
     var userSelectedOption by remember { mutableStateOf(false) }
     var serviceText by remember { mutableStateOf("") }
+    var serviceDecisionText by remember { mutableStateOf("") }
 
     val loadingPrice by mainViewModel.rentalServicePriceLoadingState.collectAsState()
 
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(10.dp)
+            .padding(20.dp)
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically
@@ -202,7 +202,7 @@ fun Content(
                     mainViewModel.gotRentalPrice.value = false
                     mainViewModel.rentalPrice.value = 0.0
                 },
-                colors = RadioButtonDefaults.colors(MaterialTheme.colors.primary)
+                colors = RadioButtonDefaults.colors(Purple500)
             )
             Text(text = "Whole Line", fontWeight = FontWeight.Medium)
             Spacer(modifier = Modifier.padding(25.dp))
@@ -219,64 +219,78 @@ fun Content(
                     mainViewModel.selectedRentalService.value = RentalNumberServiceState()
                     mainViewModel.rentalPrice.value = 0.0
                 },
-                colors = RadioButtonDefaults.colors(MaterialTheme.colors.primary)
+                colors = RadioButtonDefaults.colors(Purple500)
             )
             Text(text = "Single Service", fontWeight = FontWeight.Medium)
         }
-        if (selectedOption == RentalNumberOption.SINGLE_SERVICE) {
 
+        Spacer(modifier = Modifier.padding(20.dp))
+
+        if (selectedOption == RentalNumberOption.SINGLE_SERVICE) {
             RentalServicesDropDownMenu(
                 label = "Search Service State",
                 optionsList = serviceStateList,
                 onTextChange = {
-                    onTextChange(it)
                     serviceText = it
-                    Log.d("Tag", serviceText)
+                    serviceDecisionText = it
                 },
                 onOptionSelected = {
-                    mainViewModel.selectedRentalService.value =
-                        it // We did it here because we need to check if a service was selected
+                    // We did it here because we need to check if a service was selected
+                    mainViewModel.selectedRentalService.value = it
                     userSelectedOption = true
-                },
-                mainViewModel = mainViewModel
+                    serviceText = it.name
+                    serviceDecisionText = it.name
+                }
             )
             if (userSelectedOption) { // if the user didn't select a service we won't show the period options
+                Spacer(modifier = Modifier.padding(10.dp))
                 RentalOptionsDropDownMenu(
-                    label = "Select a period",
+                    label = stringResource(R.string.select_period),
                     optionsList = optionsList.filter { it.rentalType == "SingleService" },
                     onRentalOptionSelected = onRentalOptionSelected
                 )
             }
         } else {
             RentalOptionsDropDownMenu(
-                label = "Select a period",
+                label = stringResource(R.string.select_period),
                 optionsList = optionsList.filter { it.rentalType != "SingleService" },
                 onRentalOptionSelected = onRentalOptionSelected
             )
         }
+        Spacer(modifier = Modifier.padding(20.dp))
         Text(
-            text = "Cost",
+            text = stringResource(R.string.cost),
             fontSize = MaterialTheme.typography.subtitle1.fontSize,
             fontWeight = FontWeight.Medium
         )
+        Spacer(modifier = Modifier.padding(10.dp))
         Row(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(20.dp),
+                .fillMaxWidth(),
+//                .padding(20.dp),
             horizontalArrangement = Arrangement.Center
         ) {
             val borderColor: Color
             val priceText: String
             val textColor: Color
 
-            if (selectedOption == RentalNumberOption.SINGLE_SERVICE && !userSelectedOption && serviceText.isEmpty()) {
-                borderColor = Red
-                priceText = "Please select a service"
-                textColor = Red
-            } else {
-                borderColor = MaterialTheme.colors.primary
-                priceText = "$priceInCredits credits"
-                textColor = MaterialTheme.colors.TextColor
+            when (selectedOption) {
+                RentalNumberOption.SINGLE_SERVICE -> {
+                    if (userSelectedOption && serviceText.isNotEmpty()) {
+                        borderColor = MaterialTheme.colors.primary
+                        priceText = "$priceInCredits credits"
+                        textColor = MaterialTheme.colors.TextColor
+                    } else {
+                        borderColor = Red
+                        priceText = "Please select a service"
+                        textColor = Red
+                    }
+                }
+                else -> {
+                    borderColor = MaterialTheme.colors.primary
+                    priceText = "$priceInCredits credits"
+                    textColor = MaterialTheme.colors.TextColor
+                }
             }
 
             Card(
@@ -305,7 +319,7 @@ fun Content(
                         }
                         LoadingState.ERROR -> {
                             Text(
-                                text = "Error loading the price",
+                                text = stringResource(R.string.error_loading_price),
                                 fontWeight = FontWeight.Medium,
                                 fontSize = MaterialTheme.typography.h6.fontSize,
                                 color = Red
@@ -323,24 +337,42 @@ fun Content(
                 }
             }
         }
-        Text(
-            text = stringResource(R.string.rental_48_hours_notice),
-            color = Red,
-            fontSize = MaterialTheme.typography.subtitle1.fontSize,
-            fontWeight = FontWeight.Medium
-        )
+        Spacer(modifier = Modifier.padding(20.dp))
+        Card(
+            modifier = Modifier
+                .border(
+                    width = 1.dp,
+                    color = MaterialTheme.colors.NoticeColor,
+                    shape = RoundedCornerShape(5.dp)
+                )
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(5.dp))
+        ) {
+            Text(
+                text = stringResource(R.string.rental_48_hours_notice),
+                color = MaterialTheme.colors.NoticeColor,
+                fontSize = MaterialTheme.typography.subtitle1.fontSize,
+                fontWeight = FontWeight.Medium,
+                modifier = Modifier.padding(5.dp)
+            )
+        }
+        Spacer(modifier = Modifier.padding(20.dp))
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(20.dp),
-            horizontalArrangement = Arrangement.Center
+//                .padding(20.dp),
+            , horizontalArrangement = Arrangement.Center
         ) {
             Button(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(50.dp),
                 colors = ButtonDefaults.buttonColors(MaterialTheme.colors.ButtonColor),
-                enabled = mainViewModel.gotRentalPrice.value && superUserCheckingBalanceState != LoadingState.ERROR && superUserCheckingBalanceState != LoadingState.LOADING && serviceText.isNotEmpty(),
+                enabled = orderRentalNumberState != LoadingState.LOADING
+                        && mainViewModel.gotRentalPrice.value
+                        && superUserCheckingBalanceState != LoadingState.ERROR
+                        && superUserCheckingBalanceState != LoadingState.LOADING
+                        && serviceDecisionText.isNotEmpty(),
                 onClick = {
                     if (dollarToCreditForPurchasingNumbers(superUserBalance) > priceInCredits) { // If the superUser has balance we can let the users order.
                         if (userBalance >= priceInCredits) { // If the user has enough balance to buy we proceed
@@ -356,82 +388,81 @@ fun Content(
                     }
                 }
             ) {
-                Text(
-                    text = stringResource(R.string.proceed),
-                    fontSize = 20.sp,
-                    color = Color.White
-                )
+                if (orderRentalNumberState == LoadingState.LOADING) {
+                    CircularProgressIndicator(color = MaterialTheme.colors.ProgressIndicatorColor)
+                } else {
+                    Text(
+                        text = stringResource(R.string.proceed),
+                        fontSize = 20.sp,
+                        color = Color.White
+                    )
+                }
             }
         }
     }
 }
 
-
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun RentalServicesDropDownMenu(
     label: String,
     optionsList: List<RentalNumberServiceState>,
-    mainViewModel: MainViewModel,
     onTextChange: (String) -> Unit,
     onOptionSelected: (RentalNumberServiceState) -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
-    var selectedText by remember { mutableStateOf("") }
-
-    var textFieldSize by remember { mutableStateOf(Size.Zero) }
-
-    val searchText = mainViewModel.searchTextState.value
-
-    val filteredList: List<RentalNumberServiceState> = if (searchText.isEmpty()) {
-        optionsList
-    } else {
-        optionsList.filter { serviceState ->
-            serviceState.name.contains(searchText)
-        }
-    }
+    var selectedOptionText by remember { mutableStateOf("") }
 
     val icon = if (expanded)
         Icons.Filled.KeyboardArrowUp
     else
         Icons.Filled.KeyboardArrowDown
-
-    Column(Modifier.padding(20.dp)) {
-        Box {
-            OutlinedTextField(
-                value = selectedText,
-                onValueChange = {
-                    selectedText = it
-                    onTextChange(it)
-                    expanded = true
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .onGloballyPositioned { coordinates ->
-                        //This value is used to assign to the DropDown the same width
-                        textFieldSize = coordinates.size.toSize()
-                    },
-                label = { Text(label) },
-                trailingIcon = {
-                    Icon(icon, "contentDescription",
-                        Modifier.clickable {
-                            expanded = !expanded
-                        })
-                }
-            )
-            DropdownMenu(
+    ExposedDropdownMenuBox(
+        expanded = expanded,
+        onExpandedChange = {
+            expanded = !expanded
+        }
+    ) {
+        OutlinedTextField(
+            value = selectedOptionText,
+            onValueChange = {
+                selectedOptionText = it
+                onTextChange(it)
+                expanded = true
+            },
+            modifier = Modifier
+                .fillMaxWidth(),
+            label = { Text(label) },
+            trailingIcon = {
+                Icon(icon, "contentDescription",
+                    Modifier.clickable {
+                        expanded = !expanded
+                    }
+                )
+            }
+        )
+        // filter options based on text field value
+        val filteringOptions =
+            optionsList.filter { it.name.contains(selectedOptionText, ignoreCase = true) }
+        if (filteringOptions.isNotEmpty()) {
+            ExposedDropdownMenu(
                 expanded = expanded,
-                onDismissRequest = { expanded = false },
-                modifier = Modifier
-                    .width(with(LocalDensity.current) { textFieldSize.width.toDp() })
-                    .requiredSizeIn(maxHeight = 500.dp)
+                onDismissRequest = {
+                    expanded = false
+                },
+//                modifier = Modifier
+//                    .width(with(LocalDensity.current) { textFieldSize.width.toDp() })
+//                    .requiredSizeIn(maxHeight = 500.dp)
             ) {
-                filteredList.forEach { item ->
-                    DropdownMenuItem(onClick = {
-                        selectedText = item.name
-                        onOptionSelected(item)
-                        expanded = false
-                    }) {
-                        Text(text = item.name)
+                filteringOptions.forEach { selectionOption ->
+                    DropdownMenuItem(
+                        onClick = {
+                            selectedOptionText = selectionOption.name
+                            expanded = false
+                            onOptionSelected(selectionOption)
+                        }
+                    ) {
+                        Text(text = selectionOption.name)
                     }
                 }
             }
@@ -450,51 +481,56 @@ fun RentalOptionsDropDownMenu(
 
     var textFieldSize by remember { mutableStateOf(Size.Zero) }
 
+    val focusManager = LocalFocusManager.current
 
     val icon = if (expanded)
         Icons.Filled.KeyboardArrowUp
     else
         Icons.Filled.KeyboardArrowDown
 
-    Column(Modifier.padding(20.dp)) {
-        Box {
-            OutlinedTextField(
-                readOnly = true,
-                value = selectedText,
-                onValueChange = {
-                    selectedText = it
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable { expanded = !expanded }
-                    .onGloballyPositioned { coordinates ->
-                        //This value is used to assign to the DropDown the same width
-                        textFieldSize = coordinates.size.toSize()
-                    },
-                label = { Text(label) },
-                trailingIcon = {
-
-                    Icon(icon, "contentDescription",
-                        Modifier.clickable {
-                            expanded = !expanded
-                        })
+    Box {
+        OutlinedTextField(
+            readOnly = true,
+            value = selectedText,
+            onValueChange = {
+                selectedText = it
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .clickable { expanded = !expanded }
+                .onGloballyPositioned { coordinates ->
+                    //This value is used to assign to the DropDown the same width
+                    textFieldSize = coordinates.size.toSize()
                 }
-            )
-            DropdownMenu(
-                expanded = expanded,
-                onDismissRequest = { expanded = false },
-                modifier = Modifier
-                    .width(with(LocalDensity.current) { textFieldSize.width.toDp() })
-                    .requiredSizeIn(maxHeight = 500.dp)
-            ) {
-                optionsList.forEach { item ->
-                    DropdownMenuItem(onClick = {
-                        selectedText = item.duration
-                        onRentalOptionSelected(item)
-                        expanded = false
-                    }) {
-                        Text(text = item.duration)
-                    }
+                .onFocusChanged {
+                    expanded = it.isFocused
+                },
+            label = { Text(label) },
+            trailingIcon = {
+                Icon(icon, "contentDescription",
+                    Modifier.clickable {
+                        expanded = !expanded
+                    })
+            }
+        )
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = {
+                expanded = false
+                focusManager.clearFocus()
+            },
+            modifier = Modifier
+                .width(with(LocalDensity.current) { textFieldSize.width.toDp() })
+                .requiredSizeIn(maxHeight = 500.dp)
+        ) {
+            optionsList.forEach { item ->
+                DropdownMenuItem(onClick = {
+                    selectedText = item.duration
+                    onRentalOptionSelected(item)
+                    expanded = false
+                    focusManager.clearFocus()
+                }) {
+                    Text(text = item.duration)
                 }
             }
         }

@@ -2,9 +2,12 @@ package com.helic.aminesms.utils
 
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import com.helic.aminesms.R
+import com.helic.aminesms.presentation.ui.theme.ButtonColor
+import com.helic.aminesms.presentation.ui.theme.DialogNoText
 
 
 @Composable
@@ -34,18 +37,22 @@ fun DisplayAlertDialog(
 //            },
             confirmButton = {
                 Button(
+                    colors = ButtonDefaults.buttonColors(MaterialTheme.colors.ButtonColor),
                     onClick = {
                         onYesClicked()
                         closeDialog()
                     })
                 {
-                    Text(text = stringResource(R.string.yes))
+                    Text(text = stringResource(R.string.yes), color = Color.White)
                 }
             },
             dismissButton = {
                 OutlinedButton(onClick = { closeDialog() })
                 {
-                    Text(text = stringResource(R.string.no))
+                    Text(
+                        text = stringResource(R.string.no),
+                        color = MaterialTheme.colors.DialogNoText
+                    )
                 }
             },
             onDismissRequest = { closeDialog() }

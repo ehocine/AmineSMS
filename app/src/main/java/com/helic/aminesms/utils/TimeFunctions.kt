@@ -108,6 +108,6 @@ fun calculatingRemainingDaysForRentals(epoch: Long): Double {
 
     val number3digits: Double = (hours / 24 * 1000.0).roundToInt() / 1000.0
     val number2digits: Double = (number3digits * 100.0).roundToInt() / 100.0
-
-    return (number2digits * 10.0).roundToInt() / 10.0 // One decimal
+    val remainingTimeInHours = (number2digits * 10.0).roundToInt() / 10.0 // One decimal
+    return if (remainingTimeInHours < 0) 0.0 else remainingTimeInHours
 }

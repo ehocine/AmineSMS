@@ -151,8 +151,8 @@ fun Content(
                             addOrRemoveTempNumberFromFirebase(
                                 context = context,
                                 snackbar = showSnackbar,
-                                AddOrRemoveNumberAction.REMOVE,
-                                phoneTempNumberData
+                                action = AddOrRemoveNumberAction.REMOVE,
+                                tempNumberData = phoneTempNumberData
                             )
                         }) {
                             Icon(

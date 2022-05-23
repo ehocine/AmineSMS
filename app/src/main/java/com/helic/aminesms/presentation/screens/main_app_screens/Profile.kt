@@ -11,11 +11,14 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.DarkMode
+import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.Logout
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -103,7 +106,6 @@ fun ProfileDetails(
         ) {
             Text(
                 text = stringResource(R.string.welcome),
-                Modifier.padding(start = 8.dp, bottom = 15.dp),
                 fontWeight = FontWeight.Bold,
                 fontSize = MaterialTheme.typography.h5.fontSize
             )
@@ -112,12 +114,10 @@ fun ProfileDetails(
                     text = user.userName,
                     fontSize = MaterialTheme.typography.body1.fontSize,
                     fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(2.dp)
                 )
                 Text(
                     text = user.userEmail,
                     fontSize = MaterialTheme.typography.subtitle1.fontSize,
-//                    modifier = Modifier.padding(2.dp)
                 )
             }
             Spacer(modifier = Modifier.padding(10.dp))
@@ -129,8 +129,7 @@ fun ProfileDetails(
                     text = stringResource(R.string.balance),
                     fontSize = MaterialTheme.typography.body1.fontSize,
                     fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.Right,
-                    modifier = Modifier.padding(2.dp)
+                    textAlign = TextAlign.Right
                 )
                 Column(
                     modifier = Modifier.fillMaxWidth(),
@@ -191,7 +190,7 @@ fun ProfileDetails(
                         )
                         Spacer(modifier = Modifier.padding(10.dp))
                         Text(
-                            text = "Add Balance",
+                            text = stringResource(R.string.add_balance),
                             color = MaterialTheme.colors.primary,
                             fontWeight = FontWeight.Bold
                         )
@@ -203,13 +202,12 @@ fun ProfileDetails(
             CustomDivider()
             Spacer(modifier = Modifier.padding(10.dp))
 
-            Column() {
+            Column {
                 Text(
-                    text = "Change the App's Theme",
+                    text = stringResource(R.string.change_app_theme),
                     fontSize = MaterialTheme.typography.body1.fontSize,
                     fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.Right,
-                    modifier = Modifier.padding(2.dp)
+                    textAlign = TextAlign.Right
                 )
                 Spacer(modifier = Modifier.padding(10.dp))
                 Card(
@@ -232,8 +230,19 @@ fun ProfileDetails(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.Center
                     ) {
+                        val themeText: String
+                        val themeIcon: ImageVector
+                        if (DARK_THEME.value) {
+                            themeText = stringResource(R.string.switch_to_light_theme)
+                            themeIcon = Icons.Default.LightMode
+                        } else {
+                            themeText = stringResource(R.string.switch_to_dark_theme)
+                            themeIcon = Icons.Default.DarkMode
+                        }
+                        Icon(imageVector = themeIcon, contentDescription = "Theme Icon")
+                        Spacer(modifier = Modifier.padding(end = 5.dp))
                         Text(
-                            text = if (DARK_THEME.value) "Switch to Light Theme" else "Switch to Dark Theme",
+                            text = themeText,
                             fontWeight = FontWeight.Bold,
                             textAlign = TextAlign.Right
                         )
@@ -244,11 +253,10 @@ fun ProfileDetails(
 
         Column {
             Text(
-                text = "Sign out",
+                text = stringResource(R.string.sign_out),
                 fontSize = MaterialTheme.typography.body1.fontSize,
                 fontWeight = FontWeight.Bold,
-                textAlign = TextAlign.Right,
-                modifier = Modifier.padding(2.dp)
+                textAlign = TextAlign.Right
             )
             Spacer(modifier = Modifier.padding(10.dp))
             SigningOutFunction(
@@ -273,10 +281,10 @@ fun SigningOutFunction(
     SignOutButton(onClick = { openDialog = true })
 
     DisplayAlertDialog(
-        title = "Sign out",
+        title = stringResource(R.string.sign_out),
         message = {
             Text(
-                text = "Are you sure you want to sign out?",
+                text = stringResource(R.string.sign_out_confirmation),
                 fontSize = MaterialTheme.typography.subtitle1.fontSize,
                 fontWeight = FontWeight.Normal
             )

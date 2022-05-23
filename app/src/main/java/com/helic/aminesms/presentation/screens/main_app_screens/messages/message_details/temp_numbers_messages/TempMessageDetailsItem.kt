@@ -11,10 +11,12 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.helic.aminesms.data.models.messages.Sms
 import com.helic.aminesms.presentation.ui.theme.MediumGray
 import com.helic.aminesms.presentation.ui.theme.TextColor
+import com.helic.aminesms.utils.convertTimeStampToDate
 
 @Composable
 fun MessageDetailItem(listOfMessages: List<Sms?>) {
@@ -44,9 +46,15 @@ fun MessageContent(sms: Sms?) {
     ) {
         Column(modifier = Modifier.padding(10.dp)) {
 
+            Text(
+                text = "From: ${sms?.sender.toString()}",
+                color = MaterialTheme.colors.TextColor,
+                fontSize = MaterialTheme.typography.subtitle1.fontSize,
+                fontWeight = FontWeight.Bold
+            )
             if (sms != null) {
                 Text(
-                    text = sms.createdAt.toString(),
+                    text = convertTimeStampToDate(sms.createdAt.toLong()),
                     color = MediumGray,
                     fontSize = MaterialTheme.typography.subtitle2.fontSize,
                     modifier = Modifier.padding(bottom = 2.dp),
@@ -56,6 +64,12 @@ fun MessageContent(sms: Sms?) {
                     text = sms.content,
                     color = MaterialTheme.colors.TextColor,
                     fontSize = MaterialTheme.typography.body1.fontSize
+                )
+                Text(
+                    text = "Code: ${sms.code}",
+                    color = MaterialTheme.colors.TextColor,
+                    fontSize = MaterialTheme.typography.body1.fontSize,
+                    fontWeight = FontWeight.Medium
                 )
             }
 

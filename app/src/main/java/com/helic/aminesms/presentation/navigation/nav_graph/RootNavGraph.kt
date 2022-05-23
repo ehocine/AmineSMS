@@ -23,7 +23,15 @@ fun RootNavGraph(
         startDestination = if (!userLoggedIn()) AUTHENTICATION_ROUTE else MAIN_SCREEN_ROUTE,
         route = ROOT_ROUTE
     ) {
-        authNavGraph(navController = navController, showSnackbar = showSnackbar)
-        mainScreenNavGraph(navController = navController, mainViewModel, showSnackbar = showSnackbar)
+        authNavGraph(
+            navController = navController,
+            mainViewModel = mainViewModel,
+            showSnackbar = showSnackbar
+        )
+        mainScreenNavGraph(
+            navController = navController,
+            mainViewModel = mainViewModel,
+            showSnackbar = showSnackbar
+        )
     }
 }

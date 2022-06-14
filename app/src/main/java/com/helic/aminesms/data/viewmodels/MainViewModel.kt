@@ -43,11 +43,8 @@ import com.helic.aminesms.utils.Constants.USER_BALANCE_DATABASE
 import com.helic.aminesms.utils.Constants.dataStoreKey
 import com.qonversion.android.sdk.Qonversion
 import com.qonversion.android.sdk.QonversionError
-import com.qonversion.android.sdk.QonversionOfferingsCallback
-import com.qonversion.android.sdk.QonversionPermissionsCallback
-import com.qonversion.android.sdk.dto.QPermission
-import com.qonversion.android.sdk.dto.offerings.QOffering
-import com.qonversion.android.sdk.dto.offerings.QOfferings
+import com.qonversion.android.sdk.QonversionProductsCallback
+import com.qonversion.android.sdk.dto.products.QProduct
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
@@ -61,37 +58,58 @@ class MainViewModel @Inject constructor(
     application: Application
 ) : AndroidViewModel(application) {
 
-    var offerings by mutableStateOf<List<QOffering>>(emptyList())
+    var products by mutableStateOf<Collection<QProduct>>(emptyList())
         private set
 
     init {
-        loadOfferings()
+        loadProducts()
     }
 
-    private fun loadOfferings() {
-        Qonversion.offerings(object : QonversionOfferingsCallback {
-            override fun onError(error: QonversionError) = Unit
-
-            override fun onSuccess(offerings: QOfferings) {
-                this@MainViewModel.offerings = offerings.availableOfferings
+    private fun loadProducts() {
+        Qonversion.products(callback = object : QonversionProductsCallback {
+            override fun onSuccess(products: Map<String, QProduct>) {
+                Log.d("Products", products.toString())
+                this@MainViewModel.products = products.values
+                this@MainViewModel.products.forEach{
+                    Log.d("Product", it.qonversionID)
+                }
             }
-        })
-    }
 
-    fun updatePermissions(context: Context, snackbar: (String, SnackbarDuration) -> Unit) {
-        Qonversion.checkPermissions(object : QonversionPermissionsCallback {
             override fun onError(error: QonversionError) {
-                snackbar(
-                    "${context.getString(R.string.something_went_wrong)}: ${error.description}",
-                    SnackbarDuration.Short
-                )
-            }
-
-            override fun onSuccess(permissions: Map<String, QPermission>) {
-                TODO("Not yet implemented")
+                Log.d("Products Error", error.description)
             }
         })
+//        Qonversion.offerings(object : QonversionOfferingsCallback {
+//            override fun onError(error: QonversionError) {
+//                Log.d("Offering Error", error.description)
+//            }
+//
+//            override fun onSuccess(offerings: QOfferings) {
+//                this@MainViewModel.offerings = offerings.availableOfferings
+//                Log.d("Offering", offerings.availableOfferings.toString())
+//        offerings.main?.products?.forEach {
+//            Log.d("Products", it.offeringID.toString())
+//        }
+//            }
+//        })
     }
+
+//    private fun purchase(product: QProduct): Boolean {
+//        var result = false
+//        Qonversion.purchase(, product, callback = object :
+//            QonversionPermissionsCallback {
+//            override fun onSuccess(permissions: Map<String, QPermission>) {
+//                Log.d("Tag", "Purchase succeeded")
+//                result = true
+//            }
+//
+//            override fun onError(error: QonversionError) {
+//                Log.d("Tag", error.description)
+//                result =  false
+//            }
+//        })
+//        return result
+//    }
 
     private var _addBalanceAmount = MutableStateFlow(0.0)
     private var addBalanceAmount = _addBalanceAmount.asStateFlow()
@@ -155,20 +173,20 @@ class MainViewModel @Inject constructor(
 
     private var rentalServicePrice: MutableState<Double> = mutableStateOf(0.0)
 
-    fun proceedToBuy(
-        chosenOption: Int,
-        showSnackbar: (String, SnackbarDuration) -> Unit
-    ) {
-        _addBalanceAmount.value = dollarToCreditForPurchasingCurrency(chosenOption.toDouble())
-        Log.d("Tag", "You chose to buy $chosenOption option")
-        addBalance(
-            context = getApplication<Application>(),
-            snackbar = showSnackbar,
-            currentBalance = userBalance.value,
-            amount = addBalanceAmount.value,
-            AddingBalanceState.ADD
-        )
-    }
+//    fun proceedToBuy(
+//        chosenOption: Int,
+//        showSnackbar: (String, SnackbarDuration) -> Unit
+//    ) {
+//        _addBalanceAmount.value = dollarToCreditForPurchasingCurrency(chosenOption.toDouble())
+//        Log.d("Tag", "You chose to buy $chosenOption option")
+//        addBalance(
+//            context = getApplication<Application>(),
+//            snackbar = showSnackbar,
+//            currentBalance = userBalance.value,
+//            amount = addBalanceAmount.value,
+//            addingBalanceState = AddingBalanceState.ADD
+//        )
+//    }
 
     fun getBalance(context: Context, snackbar: (String, SnackbarDuration) -> Unit) {
         val db = Firebase.firestore
@@ -388,7 +406,7 @@ class MainViewModel @Inject constructor(
                             serviceID = serviceID,
                             areaCode = areaCode
                         )
-                        if (response.isSuccessful) {
+                        if (response.isSuccessful && response.body()?.succeeded == true) {
                             tempNumberData.value = response.body()!!.tempNumberData
                             buyingLoadingStateOfViewModel.emit(LoadingState.LOADED)
 
@@ -410,6 +428,12 @@ class MainViewModel @Inject constructor(
                                 }
                                 launchSingleTop = true
                             }
+                        } else {
+                            buyingLoadingStateOfViewModel.emit(LoadingState.ERROR)
+                            snackbar(
+                                getApplication<Application>().getString(R.string.couldnt_process_request),
+                                SnackbarDuration.Short
+                            )
                         }
 
                     } ?: withContext(Dispatchers.Main) {
@@ -670,6 +694,7 @@ class MainViewModel @Inject constructor(
     }
 
     //TODO it seems there is an issue with the reusableUntil value from the test API, it's always zero when getting the number ordered. Must check with the production API
+    var tempReusableListLoadingState = MutableStateFlow(LoadingState.IDLE)
     fun getReusableNumbersList(
         snackbar: (String, SnackbarDuration) -> Unit
     ) {
@@ -677,7 +702,7 @@ class MainViewModel @Inject constructor(
             if (hasInternetConnection(getApplication<Application>())) {
                 try {
                     withTimeoutOrNull(TIMEOUT_IN_MILLIS) {
-                        buyingLoadingStateOfViewModel.emit(LoadingState.LOADING)
+                        tempReusableListLoadingState.emit(LoadingState.LOADING)
                         val response = repository.remote.getReusableNumbers()
                         if (response.isSuccessful) {
                             reusableNumbersList.value = response.body()!!.reusableNumbersListData
@@ -685,18 +710,18 @@ class MainViewModel @Inject constructor(
                             reusableNumbersList.value.forEach {
                                 Log.d("Tag", "Service: ${it.serviceName}, price: ${it.price} ")
                             }
-                            buyingLoadingStateOfViewModel.emit(LoadingState.LOADED)
+                            tempReusableListLoadingState.emit(LoadingState.LOADED)
                         }
 
                     } ?: withContext(Dispatchers.Main) {
-                        buyingLoadingStateOfViewModel.emit(LoadingState.ERROR)
+                        tempReusableListLoadingState.emit(LoadingState.ERROR)
                         snackbar(
                             getApplication<Application>().getString(R.string.time_out),
                             SnackbarDuration.Short
                         )
                     }
                 } catch (e: Exception) {
-                    buyingLoadingStateOfViewModel.emit(LoadingState.ERROR)
+                    tempReusableListLoadingState.emit(LoadingState.ERROR)
                     snackbar(
                         getApplication<Application>().getString(R.string.an_error_occurred),
                         SnackbarDuration.Short
@@ -704,7 +729,7 @@ class MainViewModel @Inject constructor(
                 }
 
             } else {
-                buyingLoadingStateOfViewModel.emit(LoadingState.ERROR)
+                tempReusableListLoadingState.emit(LoadingState.ERROR)
                 snackbar(
                     getApplication<Application>().getString(R.string.device_not_connected),
                     SnackbarDuration.Short
@@ -713,6 +738,7 @@ class MainViewModel @Inject constructor(
         }
     }
 
+    var reuseTemNumberLoadingState = MutableStateFlow(LoadingState.IDLE)
     fun reuseNumber(
         navController: NavController,
         temporaryNumberId: String,
@@ -722,12 +748,12 @@ class MainViewModel @Inject constructor(
             if (hasInternetConnection(getApplication<Application>())) {
                 try {
                     withTimeoutOrNull(TIMEOUT_IN_MILLIS) {
-                        buyingLoadingStateOfViewModel.emit(LoadingState.LOADING)
+                        reuseTemNumberLoadingState.emit(LoadingState.LOADING)
                         val response =
                             repository.remote.reuseNumber(temporaryNumberId = temporaryNumberId)
-                        if (response.isSuccessful) {
+                        if (response.isSuccessful && response.body()?.succeeded == true) {
                             reuseTempNumberResponse.value = response.body()!!.reuseTempNumberData
-                            buyingLoadingStateOfViewModel.emit(LoadingState.LOADED)
+                            reuseTemNumberLoadingState.emit(LoadingState.LOADED)
 
                             reduceBalance(
                                 context = getApplication<Application>(),
@@ -747,23 +773,29 @@ class MainViewModel @Inject constructor(
                                 }
                                 launchSingleTop = true
                             }
+                        } else {
+                            reuseTemNumberLoadingState.emit(LoadingState.ERROR)
+                            snackbar(
+                                getApplication<Application>().getString(R.string.couldnt_process_request),
+                                SnackbarDuration.Short
+                            )
                         }
                     } ?: withContext(Dispatchers.Main) {
-                        buyingLoadingStateOfViewModel.emit(LoadingState.ERROR)
+                        reuseTemNumberLoadingState.emit(LoadingState.ERROR)
                         snackbar(
                             getApplication<Application>().getString(R.string.time_out),
                             SnackbarDuration.Short
                         )
                     }
                 } catch (e: Exception) {
-                    buyingLoadingStateOfViewModel.emit(LoadingState.ERROR)
+                    reuseTemNumberLoadingState.emit(LoadingState.ERROR)
                     snackbar(
                         getApplication<Application>().getString(R.string.an_error_occurred),
                         SnackbarDuration.Short
                     )
                 }
             } else {
-                buyingLoadingStateOfViewModel.emit(LoadingState.ERROR)
+                reuseTemNumberLoadingState.emit(LoadingState.ERROR)
                 snackbar(
                     getApplication<Application>().getString(R.string.device_not_connected),
                     SnackbarDuration.Short
@@ -958,7 +990,7 @@ class MainViewModel @Inject constructor(
                             serviceId = serviceId,
                             durationInHours = durationInHours
                         )
-                        if (response.isSuccessful) {
+                        if (response.isSuccessful && response.body()?.succeeded == true) {
                             rentalNumberData.value = response.body()!!.rentalNumberData
                             orderRentalNumberLoadingState.emit(LoadingState.LOADED)
                             reduceBalance(
@@ -983,6 +1015,11 @@ class MainViewModel @Inject constructor(
                                 }
                                 launchSingleTop = true
                             }
+                        } else {
+                            snackbar(
+                                getApplication<Application>().getString(R.string.couldnt_process_request),
+                                SnackbarDuration.Short
+                            )
                         }
 
                     } ?: withContext(Dispatchers.Main) {
@@ -1024,32 +1061,36 @@ class MainViewModel @Inject constructor(
                         val response = repository.remote.getLiveRentalNumbersList()
                         if (response.isSuccessful) {
                             listOfLiveRentalNumbers.value = response.body()!!.rentalNumberData
+
+
+                            //This is used to keep only the numbers this user purchased by comparing the list from firebase
+                            // and the list from the server
                             listOfLiveRentalNumbers.value.retainAll { it -> it.rentalId in _rentalNumbersList.value.map { it.rentalId } }
 
                             orderRentalNumberLoadingState.emit(LoadingState.LOADED)
                         }
                     } ?: withContext(Dispatchers.Main) {
                         orderRentalNumberLoadingState.emit(LoadingState.ERROR)
-                        snackbar(
-                            getApplication<Application>().getString(R.string.time_out),
-                            SnackbarDuration.Short
-                        )
+//                        snackbar(
+//                            getApplication<Application>().getString(R.string.time_out),
+//                            SnackbarDuration.Short
+//                        )
                     }
                 } catch (e: Exception) {
                     orderRentalNumberLoadingState.emit(LoadingState.ERROR)
-                    snackbar(
-                        getApplication<Application>().getString(R.string.an_error_occurred),
-                        SnackbarDuration.Short
-                    )
+//                    snackbar(
+//                        getApplication<Application>().getString(R.string.an_error_occurred),
+//                        SnackbarDuration.Short
+//                    )
                     Log.d("Tag", e.message.toString())
                 }
 
             } else {
                 orderRentalNumberLoadingState.emit(LoadingState.ERROR)
-                snackbar(
-                    getApplication<Application>().getString(R.string.device_not_connected),
-                    SnackbarDuration.Short
-                )
+//                snackbar(
+//                    getApplication<Application>().getString(R.string.device_not_connected),
+//                    SnackbarDuration.Short
+//                )
             }
         }
     }
@@ -1068,32 +1109,36 @@ class MainViewModel @Inject constructor(
                         if (response.isSuccessful) {
                             listOfPendingRentalNumbers.value =
                                 response.body()!!.rentalNumberDataList
+
+                            //This is used to keep only the numbers this user purchased by comparing the list from firebase
+                            // and the list from the server
+
                             listOfPendingRentalNumbers.value.retainAll { it -> it.rentalId in _rentalNumbersList.value.map { it.rentalId } }
 
                             orderRentalNumberLoadingState.emit(LoadingState.LOADED)
                         }
                     } ?: withContext(Dispatchers.Main) {
                         orderRentalNumberLoadingState.emit(LoadingState.ERROR)
-                        snackbar(
-                            getApplication<Application>().getString(R.string.time_out),
-                            SnackbarDuration.Short
-                        )
+//                        snackbar(
+//                            getApplication<Application>().getString(R.string.time_out),
+//                            SnackbarDuration.Short
+//                        )
                     }
                 } catch (e: Exception) {
                     orderRentalNumberLoadingState.emit(LoadingState.ERROR)
-                    snackbar(
-                        getApplication<Application>().getString(R.string.an_error_occurred),
-                        SnackbarDuration.Short
-                    )
+//                    snackbar(
+//                        getApplication<Application>().getString(R.string.an_error_occurred),
+//                        SnackbarDuration.Short
+//                    )
                     Log.d("Tag", e.message.toString())
                 }
 
             } else {
                 orderRentalNumberLoadingState.emit(LoadingState.ERROR)
-                snackbar(
-                    getApplication<Application>().getString(R.string.device_not_connected),
-                    SnackbarDuration.Short
-                )
+//                snackbar(
+//                    getApplication<Application>().getString(R.string.device_not_connected),
+//                    SnackbarDuration.Short
+//                )
             }
         }
     }
@@ -1111,7 +1156,7 @@ class MainViewModel @Inject constructor(
                         val response = repository.remote.getRentalNumberMessages(
                             rentalId = rentalId
                         )
-                        if (response.isSuccessful) {
+                        if (response.isSuccessful && response.body()?.succeeded == true) {
                             rentalNumbersMessagesList.value = response.body()!!.data
                             checkingRentalMessagesLoadingState.emit(LoadingState.LOADED)
                         }
@@ -1154,11 +1199,16 @@ class MainViewModel @Inject constructor(
                         val response = repository.remote.activateRentalNumber(
                             rentalId = rentalId
                         )
-                        if (response.isSuccessful) {
+                        if (response.isSuccessful && response.body()?.succeeded == true) {
                             activatingRentalNumberLoadingState.emit(LoadingState.LOADED)
                             snackbar(
                                 response.body()!!.msg.toString(),
                                 SnackbarDuration.Long
+                            )
+                        } else {
+                            snackbar(
+                                getApplication<Application>().getString(R.string.couldnt_process_request),
+                                SnackbarDuration.Short
                             )
                         }
                     } ?: withContext(Dispatchers.Main) {

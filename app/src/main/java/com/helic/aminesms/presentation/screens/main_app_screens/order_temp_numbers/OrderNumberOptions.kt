@@ -8,6 +8,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowBackIos
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -115,8 +116,8 @@ fun DisplayOptions(
                         areaCodeValue = it
                         mainViewModel.selectedAreaCode.value = it
                     },
-                    label = { Text(text = "Area code") },
-                    placeholder = { Text(text = "Area code") },
+                    label = { Text(text = stringResource(R.string.area_code)) },
+                    placeholder = { Text(text = stringResource(R.string.area_code)) },
                     singleLine = true,
                     modifier = Modifier.fillMaxWidth(0.8f)
                 )
@@ -131,8 +132,8 @@ fun DisplayOptions(
                 Spacer(modifier = Modifier.padding(5.dp))
                 Text(
                     text = when (invalidAreaCode) {
-                        false -> "Leave blank for no filter"
-                        else -> "Invalid length"
+                        false -> stringResource(R.string.leave_blank_no_filter)
+                        else -> stringResource(R.string.invalid_length)
                     },
                     color = when (invalidAreaCode) {
                         false -> MediumGray
@@ -206,7 +207,7 @@ fun OrderNumberOptionsTopAppBar(navController: NavController, serviceStateName: 
 
             }) {
                 Icon(
-                    imageVector = Icons.Default.ArrowBack,
+                    imageVector = Icons.Default.ArrowBackIos,
                     contentDescription = "Back Arrow",
                     tint = MaterialTheme.colors.topAppBarContentColor
                 )

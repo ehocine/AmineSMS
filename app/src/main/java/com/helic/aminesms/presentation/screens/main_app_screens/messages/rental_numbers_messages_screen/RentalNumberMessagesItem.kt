@@ -168,7 +168,7 @@ fun Content(
                             contentDescription = ""
                         )
                     }
-                    //TODO: Removing expired numbers is not working
+                    //TODO: Removing expired numbers is not working: functionality seems to be working however this must be tested further.
                     else -> IconButton(onClick = {
 
                         //Since in the firebase the object (change in sms field) is not the same as the one in the server's response,

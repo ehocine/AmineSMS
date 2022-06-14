@@ -29,11 +29,13 @@ import androidx.navigation.NavController
 import com.helic.aminesms.R
 import com.helic.aminesms.data.viewmodels.MainViewModel
 import com.helic.aminesms.presentation.navigation.MainAppScreens
-import com.helic.aminesms.presentation.ui.theme.NoticeColor
-import com.helic.aminesms.presentation.ui.theme.Red
+import com.helic.aminesms.presentation.ui.theme.HOME_CARD_WIDTH
 import com.helic.aminesms.presentation.ui.theme.topAppBarBackgroundColor
+import com.helic.aminesms.utils.Constants.TIME_BETWEEN_AUTO_REFRESH
 import com.helic.aminesms.utils.WindowInfo
+import com.helic.aminesms.utils.hasInternetConnection
 import com.helic.aminesms.utils.rememberWindowInfo
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
@@ -49,11 +51,27 @@ fun Home(
     val scope = rememberCoroutineScope()
 
     LaunchedEffect(key1 = true) {
-        mainViewModel.getListOfTempNumbersFromFirebase(context = context, snackbar = snackbar)
-        mainViewModel.getListOfRentalNumbersFromFirebase(context = context, snackbar = snackbar)
-        mainViewModel.getLiveRentalNumbersList(snackbar = snackbar)
-        mainViewModel.getPendingRentalNumbersList(snackbar = snackbar)
+        mainViewModel.getListOfTempNumbersFromFirebase(
+            context = context,
+            snackbar = snackbar
+        ) // Size counter changes dynamically
+        mainViewModel.getListOfRentalNumbersFromFirebase(
+            context = context,
+            snackbar = snackbar
+        ) // Size counter changes dynamically
     }
+
+//This is implemented to auto-refresh the lists every TIME_BETWEEN_AUTO_REFRESH
+    if (hasInternetConnection(context = context)) {
+        var counter by remember { mutableStateOf(0) }
+        LaunchedEffect(key1 = counter) {
+            delay(timeMillis = TIME_BETWEEN_AUTO_REFRESH)
+            counter += 1
+            mainViewModel.getLiveRentalNumbersList(snackbar = snackbar)
+            mainViewModel.getPendingRentalNumbersList(snackbar = snackbar)
+        }
+    }
+
     Scaffold(
         scaffoldState = scaffoldState,
         topBar = {
@@ -63,9 +81,6 @@ fun Home(
                 }
             }
         },
-
-        drawerBackgroundColor = Red,
-//        drawerScrimColor = Color.Transparent,
         drawerContent = {
             Profile(
                 navController = navController,
@@ -120,9 +135,9 @@ fun ContentOnCompactScreen(navController: NavController, mainViewModel: MainView
     ) {
         Card(modifier = Modifier
             .border(
-                width = 1.dp,
+                width = HOME_CARD_WIDTH,
                 color = MaterialTheme.colors.primary,
-                shape = RoundedCornerShape(5.dp)
+                shape = RoundedCornerShape(15.dp)
             )
             .height(with(LocalDensity.current) { screenSize.height.toDp() / 2 - 5.dp })
             .fillMaxWidth()
@@ -140,20 +155,20 @@ fun ContentOnCompactScreen(navController: NavController, mainViewModel: MainView
                     .padding(15.dp)
             ) {
                 Text(
-                    text = "Temporary numbers",
+                    text = stringResource(R.string.temporary_numbers),
                     fontWeight = FontWeight.Medium,
-                    fontSize = MaterialTheme.typography.h5.fontSize
+                    fontSize = MaterialTheme.typography.h6.fontSize
                 )
                 Text(
                     text = "Purchased numbers: ${mainViewModel.orderedTempNumbersList.collectAsState().value.size}",
                     fontWeight = FontWeight.Medium,
-                    fontSize = MaterialTheme.typography.h6.fontSize
+                    fontSize = MaterialTheme.typography.subtitle1.fontSize
                 )
                 Card(
                     modifier = Modifier
                         .border(
                             width = 1.dp,
-                            color = MaterialTheme.colors.NoticeColor,
+                            color = MaterialTheme.colors.primary,
                             shape = RoundedCornerShape(5.dp)
                         )
                         .fillMaxWidth()
@@ -172,17 +187,17 @@ fun ContentOnCompactScreen(navController: NavController, mainViewModel: MainView
                             )
                         },
                         modifier = Modifier.padding(10.dp),
-                        color = MaterialTheme.colors.NoticeColor,
-                        fontSize = MaterialTheme.typography.subtitle1.fontSize
+                        color = MaterialTheme.colors.primary,
+                        fontSize = MaterialTheme.typography.subtitle2.fontSize
                     )
                 }
             }
         }
         Card(modifier = Modifier
             .border(
-                width = 1.dp,
+                width = HOME_CARD_WIDTH,
                 color = MaterialTheme.colors.primary,
-                shape = RoundedCornerShape(5.dp)
+                shape = RoundedCornerShape(15.dp)
             )
             .height(with(LocalDensity.current) { screenSize.height.toDp() / 2 - 5.dp })
             .fillMaxWidth()
@@ -200,30 +215,30 @@ fun ContentOnCompactScreen(navController: NavController, mainViewModel: MainView
                     .padding(15.dp)
             ) {
                 Text(
-                    text = "Rental numbers",
-                    fontWeight = FontWeight.Medium,
-                    fontSize = MaterialTheme.typography.h5.fontSize
-                )
-                Text(
-                    text = "Purchased numbers: ${mainViewModel.orderedRentalNumbers.collectAsState().value.size}",
+                    text = stringResource(R.string.rental_numbers),
                     fontWeight = FontWeight.Medium,
                     fontSize = MaterialTheme.typography.h6.fontSize
                 )
                 Text(
-                    text = "Live numbers: ${mainViewModel.listOfLiveRentalNumbers.value.size}",
+                    text = "Purchased numbers: ${mainViewModel.orderedRentalNumbers.collectAsState().value.size}",
                     fontWeight = FontWeight.Medium,
                     fontSize = MaterialTheme.typography.subtitle1.fontSize
                 )
                 Text(
+                    text = "Live numbers: ${mainViewModel.listOfLiveRentalNumbers.value.size}",
+                    fontWeight = FontWeight.Medium,
+                    fontSize = MaterialTheme.typography.subtitle2.fontSize
+                )
+                Text(
                     text = "Pending numbers: ${mainViewModel.listOfPendingRentalNumbers.value.size}",
                     fontWeight = FontWeight.Medium,
-                    fontSize = MaterialTheme.typography.subtitle1.fontSize
+                    fontSize = MaterialTheme.typography.subtitle2.fontSize
                 )
                 Card(
                     modifier = Modifier
                         .border(
                             width = 1.dp,
-                            color = MaterialTheme.colors.NoticeColor,
+                            color = MaterialTheme.colors.primary,
                             shape = RoundedCornerShape(5.dp)
                         )
                         .fillMaxWidth()
@@ -234,8 +249,8 @@ fun ContentOnCompactScreen(navController: NavController, mainViewModel: MainView
                                 "This request takes a few seconds. The full activation process can take up to 5 minutes. After activation, " +
                                 "we will deliver all of your messages, if you have any.",
                         modifier = Modifier.padding(10.dp),
-                        color = MaterialTheme.colors.NoticeColor,
-                        fontSize = MaterialTheme.typography.subtitle1.fontSize
+                        color = MaterialTheme.colors.primary,
+                        fontSize = MaterialTheme.typography.subtitle2.fontSize
                     )
                 }
             }
@@ -243,6 +258,8 @@ fun ContentOnCompactScreen(navController: NavController, mainViewModel: MainView
     }
 }
 
+
+//Basically used on large screens and landscape screen: Two section in row
 @Composable
 fun ContentOnLargeScreen(navController: NavController, mainViewModel: MainViewModel) {
     var screenSize by remember { mutableStateOf(Size.Zero) }
@@ -257,9 +274,9 @@ fun ContentOnLargeScreen(navController: NavController, mainViewModel: MainViewMo
     ) {
         Card(modifier = Modifier
             .border(
-                width = 1.dp,
+                width = HOME_CARD_WIDTH,
                 color = MaterialTheme.colors.primary,
-                shape = RoundedCornerShape(5.dp)
+                shape = RoundedCornerShape(15.dp)
             )
             .width(with(LocalDensity.current) { screenSize.width.toDp() / 2 - 5.dp })
             .fillMaxHeight()
@@ -279,18 +296,18 @@ fun ContentOnLargeScreen(navController: NavController, mainViewModel: MainViewMo
                 Text(
                     text = stringResource(R.string.temporary_numbers),
                     fontWeight = FontWeight.Medium,
-                    fontSize = MaterialTheme.typography.h5.fontSize
+                    fontSize = MaterialTheme.typography.h6.fontSize
                 )
                 Text(
                     text = "Purchased numbers: ${mainViewModel.orderedTempNumbersList.collectAsState().value.size}",
                     fontWeight = FontWeight.Medium,
-                    fontSize = MaterialTheme.typography.h6.fontSize
+                    fontSize = MaterialTheme.typography.subtitle1.fontSize
                 )
                 Card(
                     modifier = Modifier
                         .border(
                             width = 1.dp,
-                            color = MaterialTheme.colors.NoticeColor,
+                            color = MaterialTheme.colors.primary,
                             shape = RoundedCornerShape(5.dp)
                         )
                         .fillMaxWidth()
@@ -309,17 +326,17 @@ fun ContentOnLargeScreen(navController: NavController, mainViewModel: MainViewMo
                             )
                         },
                         modifier = Modifier.padding(10.dp),
-                        color = MaterialTheme.colors.NoticeColor,
-                        fontSize = MaterialTheme.typography.subtitle1.fontSize
+                        color = MaterialTheme.colors.primary,
+                        fontSize = MaterialTheme.typography.subtitle2.fontSize
                     )
                 }
             }
         }
         Card(modifier = Modifier
             .border(
-                width = 1.dp,
+                width = HOME_CARD_WIDTH,
                 color = MaterialTheme.colors.primary,
-                shape = RoundedCornerShape(5.dp)
+                shape = RoundedCornerShape(15.dp)
             )
             .width(with(LocalDensity.current) { screenSize.width.toDp() / 2 - 5.dp })
             .fillMaxHeight()
@@ -339,28 +356,28 @@ fun ContentOnLargeScreen(navController: NavController, mainViewModel: MainViewMo
                 Text(
                     text = stringResource(R.string.rental_numbers),
                     fontWeight = FontWeight.Medium,
-                    fontSize = MaterialTheme.typography.h5.fontSize
+                    fontSize = MaterialTheme.typography.h6.fontSize
                 )
                 Text(
                     text = "Purchased numbers: ${mainViewModel.orderedRentalNumbers.collectAsState().value.size}",
                     fontWeight = FontWeight.Medium,
-                    fontSize = MaterialTheme.typography.h6.fontSize
+                    fontSize = MaterialTheme.typography.subtitle1.fontSize
                 )
                 Text(
                     text = "Live numbers: ${mainViewModel.listOfLiveRentalNumbers.value.size}",
                     fontWeight = FontWeight.Medium,
-                    fontSize = MaterialTheme.typography.subtitle1.fontSize
+                    fontSize = MaterialTheme.typography.subtitle2.fontSize
                 )
                 Text(
                     text = "Pending numbers: ${mainViewModel.listOfPendingRentalNumbers.value.size}",
                     fontWeight = FontWeight.Medium,
-                    fontSize = MaterialTheme.typography.subtitle1.fontSize
+                    fontSize = MaterialTheme.typography.subtitle2.fontSize
                 )
                 Card(
                     modifier = Modifier
                         .border(
                             width = 1.dp,
-                            color = MaterialTheme.colors.NoticeColor,
+                            color = MaterialTheme.colors.primary,
                             shape = RoundedCornerShape(5.dp)
                         )
                         .fillMaxWidth()
@@ -371,8 +388,8 @@ fun ContentOnLargeScreen(navController: NavController, mainViewModel: MainViewMo
                                 "This request takes a few seconds. The full activation process can take up to 5 minutes. After activation, " +
                                 "we will deliver all of your messages, if you have any.",
                         modifier = Modifier.padding(10.dp),
-                        color = MaterialTheme.colors.NoticeColor,
-                        fontSize = MaterialTheme.typography.subtitle1.fontSize
+                        color = MaterialTheme.colors.primary,
+                        fontSize = MaterialTheme.typography.subtitle2.fontSize
                     )
                 }
             }

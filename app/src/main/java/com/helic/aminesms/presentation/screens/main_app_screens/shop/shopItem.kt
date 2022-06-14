@@ -24,10 +24,10 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
+import com.helic.aminesms.presentation.ui.theme.ShopItemColor
 import com.helic.aminesms.utils.dollarToCreditForPurchasingCurrency
 import kotlinx.coroutines.launch
 
@@ -37,7 +37,7 @@ fun ShopItem(
     selected: Int,
     title: Int,
     titleColor: Color =
-        if (selected == title) MaterialTheme.colors.primary
+        if (selected == title) MaterialTheme.colors.ShopItemColor
         else MaterialTheme.colors.onSurface.copy(alpha = 0.3f),
     priceColor: Color =
         if (selected == title) Color.Red
@@ -46,12 +46,12 @@ fun ShopItem(
     titleWeight: FontWeight = FontWeight.Normal,
     borderWidth: Dp = 1.dp,
     borderColor: Color =
-        if (selected == title) MaterialTheme.colors.primary
+        if (selected == title) MaterialTheme.colors.ShopItemColor
         else MaterialTheme.colors.onSurface.copy(alpha = 0.3f),
     borderShape: Shape = RoundedCornerShape(10.dp),
     icon: ImageVector = Icons.Default.CheckCircle,
     iconColor: Color =
-        if (selected == title) MaterialTheme.colors.primary
+        if (selected == title) MaterialTheme.colors.ShopItemColor
         else MaterialTheme.colors.onSurface.copy(alpha = 0.3f),
     onClick: () -> Unit
 ) {
@@ -170,19 +170,5 @@ fun ShopItem(
             }
 
         }
-    }
-}
-
-@Composable
-@Preview
-fun pre1() {
-    Column(
-        modifier = Modifier
-            .padding(10.dp)
-            .fillMaxSize(),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        ShopItem(selected = 1, title = 10, onClick = {})
     }
 }

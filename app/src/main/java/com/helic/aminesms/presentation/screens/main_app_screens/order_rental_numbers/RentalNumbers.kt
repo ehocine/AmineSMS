@@ -10,6 +10,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowBackIos
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.runtime.*
@@ -148,7 +149,7 @@ fun RentalNumberTopAppBar(
                 }
             }) {
                 Icon(
-                    imageVector = Icons.Default.ArrowBack,
+                    imageVector = Icons.Default.ArrowBackIos,
                     contentDescription = "Back Arrow",
                     tint = MaterialTheme.colors.topAppBarContentColor
                 )
@@ -342,7 +343,7 @@ fun Content(
             modifier = Modifier
                 .border(
                     width = 1.dp,
-                    color = MaterialTheme.colors.NoticeColor,
+                    color = MaterialTheme.colors.primary,
                     shape = RoundedCornerShape(5.dp)
                 )
                 .fillMaxWidth()
@@ -350,7 +351,7 @@ fun Content(
         ) {
             Text(
                 text = stringResource(R.string.rental_48_hours_notice),
-                color = MaterialTheme.colors.NoticeColor,
+                color = MaterialTheme.colors.primary,
                 fontSize = MaterialTheme.typography.subtitle1.fontSize,
                 fontWeight = FontWeight.Medium,
                 modifier = Modifier.padding(5.dp)

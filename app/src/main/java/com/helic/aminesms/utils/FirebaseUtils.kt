@@ -605,4 +605,3 @@ fun userLoggedIn(): Boolean {
     val user = Firebase.auth.currentUser
     return user != null && user.isEmailVerified
 }
-

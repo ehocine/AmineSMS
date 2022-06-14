@@ -62,4 +62,8 @@
     <string name="change_app_theme">Change the App\'s Theme</string>
     <string name="temporary_numbers">Temporary numbers</string>
     <string name="add_options_to_temp_number">Add options to your number</string>
+    <string name="area_code">Area code</string>
+    <string name="leave_blank_no_filter">Leave blank for no filter</string>
+    <string name="invalid_length">Invalid length</string>
+    <string name="number_can_be_reused_within">\"Number can be reused within \"</string>
 </resources>

@@ -14,25 +14,27 @@ val Myfont = FontFamily(
     Font(R.font.sf_pro_display_bold, weight = FontWeight.Bold),
     Font(R.font.sf_pro_displayr_regular, weight = FontWeight.Light)
 )
+val fancyFont = FontFamily(
+    Font(R.font.ruthie)
+)
 
 // Set of Material typography styles to start with
 val Typography = Typography(
 
     body1 = TextStyle(
-       // fontFamily = FontFamily.Default,
+        // fontFamily = FontFamily.Default,
         fontFamily = Myfont,
         fontWeight = FontWeight.Normal,
         fontSize = 16.sp,
         letterSpacing = 0.5.sp
-    )
-    ,
+    ),
     h1 = TextStyle(
         fontFamily = Myfont,
         fontWeight = FontWeight.Light,
         fontSize = 96.sp,
         letterSpacing = (-1.5).sp
     ),
-    h2 =  TextStyle(
+    h2 = TextStyle(
         fontFamily = Myfont,
         fontWeight = FontWeight.Light,
         fontSize = 60.sp,

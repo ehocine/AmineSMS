@@ -1,13 +1,15 @@
 package com.helic.aminesms.presentation.screens.main_app_screens.shop
 
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.content.Context
+import android.util.Log
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowBackIos
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -25,8 +27,17 @@ import com.helic.aminesms.presentation.navigation.MainAppScreens
 import com.helic.aminesms.presentation.ui.theme.ButtonColor
 import com.helic.aminesms.presentation.ui.theme.topAppBarBackgroundColor
 import com.helic.aminesms.presentation.ui.theme.topAppBarContentColor
+import com.helic.aminesms.utils.AddingBalanceState
 import com.helic.aminesms.utils.Constants.SHOP_LIST
+import com.helic.aminesms.utils.Constants.SKU_LIST
 import com.helic.aminesms.utils.LoadingState
+import com.helic.aminesms.utils.addBalance
+import com.helic.aminesms.utils.dollarToCreditForPurchasingCurrency
+import com.qonversion.android.sdk.Qonversion
+import com.qonversion.android.sdk.QonversionError
+import com.qonversion.android.sdk.QonversionPermissionsCallback
+import com.qonversion.android.sdk.dto.QPermission
+import com.qonversion.android.sdk.dto.products.QProduct
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter", "StateFlowValueCalledInComposition")
 @Composable
@@ -68,7 +79,7 @@ fun ShopTopAppBar(navController: NavController) {
                 }
             }) {
                 Icon(
-                    imageVector = Icons.Default.ArrowBack,
+                    imageVector = Icons.Default.ArrowBackIos,
                     contentDescription = "Back Arrow",
                     tint = MaterialTheme.colors.topAppBarContentColor
                 )
@@ -89,6 +100,7 @@ fun MainShopScreen(
     state: LoadingState
 ) {
     var selected by remember { mutableStateOf(0) }
+    var selectedOption by remember { mutableStateOf("") }
     val scrollState = rememberScrollState()
     Column(
         modifier = Modifier
@@ -107,6 +119,8 @@ fun MainShopScreen(
         SHOP_LIST.forEach { item ->
             ShopItem(selected = selected, title = item, onClick = {
                 selected = item
+                selectedOption = SKU_LIST.filter { it.value == selected }.keys.first()
+                Log.d("Product", "Selected element : $selectedOption")
             })
         }
         Spacer(modifier = Modifier.padding(10.dp))
@@ -115,13 +129,28 @@ fun MainShopScreen(
                 .fillMaxWidth(0.8f)
                 .height(50.dp),
             colors = ButtonDefaults.buttonColors(MaterialTheme.colors.ButtonColor),
-            enabled = selected != 0 && state != LoadingState.ERROR && state != LoadingState.LOADING,
+//            enabled = selected != 0 && state != LoadingState.ERROR && state != LoadingState.LOADING,
             onClick = {
+
+                Log.d(
+                    "Product",
+                    mainViewModel.products.first { it.storeID == selectedOption }.toString()
+                )
+                purchase(
+                    activity = context as Activity,
+                    product = mainViewModel.products.first { it.storeID == selectedOption },
+                    mainViewModel = mainViewModel,
+                    chosenOption = selected,
+                    showSnackbar = showSnackbar
+                )
+
                 if (superUserBalance > 0) { // If the superUser has balance we can let the users buy their own.
-                    mainViewModel.proceedToBuy(
-                        chosenOption = selected,
-                        showSnackbar = showSnackbar
-                    )
+//                    proceedToBuy(
+//                        context = context,
+//                        chosenOption = selected,
+//                        mainViewModel = mainViewModel,
+//                        showSnackbar = showSnackbar
+//                    )
                 } else {
                     showSnackbar(context.getString(R.string.cant_purchase), SnackbarDuration.Short)
                 }
@@ -135,6 +164,48 @@ fun MainShopScreen(
 
         }
     }
+}
+
+fun proceedToAddBalance(
+    context: Context,
+    chosenOption: Int,
+    mainViewModel: MainViewModel,
+    showSnackbar: (String, SnackbarDuration) -> Unit
+) {
+    val addBalanceAmount = dollarToCreditForPurchasingCurrency(chosenOption.toDouble())
+    Log.d("Tag", "You chose to buy $chosenOption option")
+    addBalance(
+        context = context,
+        snackbar = showSnackbar,
+        currentBalance = mainViewModel.userBalance.value,
+        amount = addBalanceAmount,
+        addingBalanceState = AddingBalanceState.ADD
+    )
+}
+
+private fun purchase(
+    activity: Activity,
+    product: QProduct,
+    mainViewModel: MainViewModel,
+    chosenOption: Int,
+    showSnackbar: (String, SnackbarDuration) -> Unit
+) {
+    Qonversion.purchase(activity, product, callback = object :
+        QonversionPermissionsCallback {
+        override fun onSuccess(permissions: Map<String, QPermission>) {
+            Log.d("Tag", "Purchase succeeded")
+            proceedToAddBalance(
+                context = activity,
+                chosenOption = chosenOption,
+                mainViewModel = mainViewModel,
+                showSnackbar = showSnackbar
+            )
+        }
+        override fun onError(error: QonversionError) {
+            Log.d("Tag", error.description)
+            showSnackbar(error.description, SnackbarDuration.Short)
+        }
+    })
 }
 
 

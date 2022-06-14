@@ -26,14 +26,16 @@ object Constants {
     const val EMAIL_VERIFIED = "emailVerified"
 
     val SHOP_LIST = listOf(1, 5, 10, 25)
-    val SKU_LIST = listOf("one", "five", "ten", "twenty_five")
+    val SKU_LIST: HashMap<String, Int> =
+        hashMapOf("one" to 1, "five" to 5, "ten" to 10, "twenty_five" to 25)
+
     const val REUSE_DISCOUNT_PERCENT = 50
 
     const val TIME_BETWEEN_AUTO_REFRESH = 1000L
 
     const val PROJECT_KEY_QONVERSION = "2F3kQuqIZg7Fd3fWhcAYNigWcSWjXPfp"
 
-//    const val BASE_URL = "https://www.smsredux.com/"
+    //    const val BASE_URL = "https://www.smsredux.com/"
 //    const val API_KEY = "live_wZw5tBuQLtRPaspTt4HAOQ61FK81Og3bctkfDjmZAHsw"
     const val BASE_URL = "https://staging.whitelabeled.win/"
     const val API_KEY = "test_dmvkYgxH6RaBHVWs51GCxgPWApyaYvYEO2oOnJDNjimA"

@@ -8,6 +8,7 @@ import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.ArrowBackIos
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -32,6 +33,7 @@ import com.helic.aminesms.utils.ErrorLoadingResults
 import com.helic.aminesms.utils.LoadingList
 import com.helic.aminesms.utils.LoadingState
 
+//TODO: check when the user cancel a number or delete it from the list that it has been properly updated or removed
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
 fun RentalNumbersMessages(
@@ -115,7 +117,7 @@ fun MessagesTopAppBar(navController: NavController) {
                 }
             }) {
                 Icon(
-                    imageVector = Icons.Default.ArrowBack,
+                    imageVector = Icons.Default.ArrowBackIos,
                     contentDescription = "Back Arrow",
                     tint = MaterialTheme.colors.topAppBarContentColor
                 )

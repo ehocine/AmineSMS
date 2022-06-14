@@ -74,9 +74,9 @@ dependencies {
     implementation 'androidx.navigation:navigation-compose:2.4.2'
 
     //Kotlin Coroutines
-    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.6.1-native-mt'
-    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.1-native-mt'
-    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.1-native-mt'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.6.1'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.1'
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.1'
     implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.4.1'
 
     //Retrofit
@@ -94,10 +94,6 @@ dependencies {
     //Swipe Refresh
     implementation 'com.google.accompanist:accompanist-swiperefresh:0.24.6-alpha'
 
-    //Google Billing
-    def billing_version = "5.0.0"
-    implementation "com.android.billingclient:billing:$billing_version"
-    implementation "com.android.billingclient:billing-ktx:$billing_version"
 
     // Qonversion
     implementation 'io.qonversion.android.sdk:sdk:3.2.3'

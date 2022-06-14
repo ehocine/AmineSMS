@@ -8,15 +8,13 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Redo
-import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -47,14 +45,17 @@ fun TempMessageDetails(
     val temporaryNumber = mainViewModel.selectedTempNumber.value
     val state by mainViewModel.checkingTempMessagesLoadingState.collectAsState()
 
+    val reuseTempNumberState by mainViewModel.reuseTemNumberLoadingState.collectAsState()
     val list = mutableListOf(sms)
 
     LaunchedEffect(key1 = true) {
         mainViewModel.getBalance(context = context, snackbar = showSnackbar)
     }
 
-    LaunchedEffect(key1 = temporaryNumber.state) { // We relaunch the function after state of the number changes so we recheck the reusable numbers list
+    LaunchedEffect(key1 = temporaryNumber.state) {
+        // We relaunch the function after state of the number changes so we recheck the reusable numbers list
         mainViewModel.getReusableNumbersList(snackbar = showSnackbar)
+
 //        val reusableNumber =
 //            mainViewModel.reusableNumbersList.value.find { it.reusableId == temporaryNumber.temporaryNumberId }
 //        if (reusableNumber != null) {
@@ -185,7 +186,6 @@ fun TempMessageDetails(
                             .align(Alignment.BottomCenter),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-//                        if (tempNumberState == NumberState.Completed.toString()) Text(text = "Hey")
                         when (temporaryNumber.state) {
                             NumberState.Completed.toString() -> {
                                 if (mainViewModel.reusableNumbersList.value.find
@@ -195,7 +195,7 @@ fun TempMessageDetails(
                                         remainingReuseTime > 0 -> {
                                             Row {
                                                 Text(
-                                                    text = "Number can be reused within ",
+                                                    text = stringResource(R.string.number_can_be_reused_within),
                                                     fontWeight = FontWeight.Medium,
                                                     color = MaterialTheme.colors.TextColor
                                                 )
@@ -210,13 +210,16 @@ fun TempMessageDetails(
                                                 mainViewModel = mainViewModel,
                                                 temporaryTempNumber = temporaryNumber,
                                                 showSnackbar = showSnackbar,
-                                                navController = navController
+                                                navController = navController,
+                                                loadingState = reuseTempNumberState
                                             )
                                         }
                                         else -> {
                                             CantBeReusedDisplay()
                                         }
                                     }
+                                } else {
+                                    CantBeReusedDisplay()
                                 }
                             }
                             else -> Unit
@@ -247,7 +250,7 @@ fun MessageDetailsTopAppBar(
 
             }) {
                 Icon(
-                    imageVector = Icons.Default.ArrowBack,
+                    imageVector = Icons.Default.ArrowBackIos,
                     contentDescription = "Back Arrow",
                     tint = MaterialTheme.colors.topAppBarContentColor
                 )
@@ -272,10 +275,11 @@ fun ReuseNumber(
     mainViewModel: MainViewModel,
     temporaryTempNumber: TempNumberData,
     showSnackbar: (String, SnackbarDuration) -> Unit,
-    navController: NavController
+    navController: NavController,
+    loadingState: LoadingState
 ) {
     var openDialog by remember { mutableStateOf(false) }
-    ReuseButton { openDialog = true }
+    ReuseButton(loadingState = loadingState) { openDialog = true }
 
     DisplayAlertDialog(
         title = "Reuse Number ${temporaryTempNumber.number}",
@@ -299,7 +303,7 @@ fun ReuseNumber(
 }
 
 @Composable
-fun ReuseButton(onClick: () -> Unit) {
+fun ReuseButton(loadingState: LoadingState, onClick: () -> Unit) {
     Card(
         modifier = Modifier
             .border(
@@ -318,17 +322,24 @@ fun ReuseButton(onClick: () -> Unit) {
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center
         ) {
-            Icon(
-                imageVector = Icons.Default.Redo,
-                contentDescription = "",
-                tint = MaterialTheme.colors.primary
-            )
-            Spacer(modifier = Modifier.padding(10.dp))
-            Text(
-                text = "Reuse number for a $REUSE_DISCOUNT_PERCENT% off",
-                color = MaterialTheme.colors.primary,
-                fontWeight = FontWeight.Bold
-            )
+            if (loadingState == LoadingState.LOADING) {
+                CircularProgressIndicator(
+                    modifier = Modifier.size(30.dp),
+                    color = MaterialTheme.colors.primary
+                )
+            } else {
+                Icon(
+                    imageVector = Icons.Default.Redo,
+                    contentDescription = "",
+                    tint = MaterialTheme.colors.primary
+                )
+                Spacer(modifier = Modifier.padding(10.dp))
+                Text(
+                    text = "Reuse number for a $REUSE_DISCOUNT_PERCENT% off",
+                    color = MaterialTheme.colors.primary,
+                    fontWeight = FontWeight.Bold
+                )
+            }
         }
     }
 }

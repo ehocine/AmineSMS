@@ -13,7 +13,6 @@ import com.helic.aminesms.presentation.screens.main_app_screens.messages.message
 import com.helic.aminesms.presentation.screens.main_app_screens.messages.message_details.temp_numbers_messages.TempMessageDetails
 import com.helic.aminesms.presentation.screens.main_app_screens.messages.rental_numbers_messages_screen.RentalNumbersMessages
 import com.helic.aminesms.presentation.screens.main_app_screens.messages.temp_numbers_messages_screen.TempNumbersMessages
-import com.helic.aminesms.presentation.screens.main_app_screens.order_rental_numbers.RentalNumberOptions
 import com.helic.aminesms.presentation.screens.main_app_screens.order_rental_numbers.RentalNumbers
 import com.helic.aminesms.presentation.screens.main_app_screens.order_temp_numbers.OrderNumberOptions
 import com.helic.aminesms.presentation.screens.main_app_screens.order_temp_numbers.OrderTempNumbers
@@ -107,13 +106,6 @@ fun NavGraphBuilder.mainScreenNavGraph(
                 navController = navController,
                 mainViewModel = mainViewModel,
                 snackbar = showSnackbar
-            )
-        }
-        composable(route = MainAppScreens.RentalNumbersOptions.route) {
-            RentalNumberOptions(
-                navController = navController,
-                mainViewModel = mainViewModel,
-                showSnackbar = showSnackbar
             )
         }
     }

@@ -35,6 +35,14 @@ object Constants {
 
     const val PROJECT_KEY_QONVERSION = "2F3kQuqIZg7Fd3fWhcAYNigWcSWjXPfp"
 
+    const val FIRESTORE_PARAMETERS_DATABASE = "parameters"
+    const val FIRESTORE_PARAMETERS_DOCUMENT = "parameters"
+
+    const val PURCHASING_CURRENCY = "purchasing_currency"
+    const val PURCHASING_NUMBERS_A = "purchasing_numbers_a"
+    const val PURCHASING_NUMBERS_B = "purchasing_numbers_b"
+
+
     //    const val BASE_URL = "https://www.smsredux.com/"
 //    const val API_KEY = "live_wZw5tBuQLtRPaspTt4HAOQ61FK81Og3bctkfDjmZAHsw"
     const val BASE_URL = "https://staging.whitelabeled.win/"

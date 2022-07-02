@@ -89,7 +89,7 @@ fun Content(
                 )
 //                Spacer(modifier = Modifier.padding(5.dp))
                 Text(
-                    text = "${dollarToCreditForPurchasingNumbers(serviceState.price)} credits",
+                    text = "${dollarToCreditForPurchasingNumbers(serviceState.price, mainViewModel)} credits",
                     color = MediumGray,
                     fontSize = MaterialTheme.typography.subtitle1.fontSize,
                     maxLines = 1

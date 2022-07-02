@@ -27,6 +27,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
+import com.helic.aminesms.data.viewmodels.MainViewModel
 import com.helic.aminesms.presentation.ui.theme.ShopItemColor
 import com.helic.aminesms.utils.dollarToCreditForPurchasingCurrency
 import kotlinx.coroutines.launch
@@ -34,6 +35,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun ShopItem(
     modifier: Modifier = Modifier,
+    mainViewModel: MainViewModel,
     selected: Int,
     title: Int,
     titleColor: Color =
@@ -125,7 +127,7 @@ fun ShopItem(
                         overflow = TextOverflow.Ellipsis
                     )
                     Text(
-                        text = "${dollarToCreditForPurchasingCurrency(title.toDouble())} ",
+                        text = "${dollarToCreditForPurchasingCurrency(title.toDouble(), mainViewModel = mainViewModel)} ",
                         style = TextStyle(
                             color = titleColor,
                             fontSize = titleSize,

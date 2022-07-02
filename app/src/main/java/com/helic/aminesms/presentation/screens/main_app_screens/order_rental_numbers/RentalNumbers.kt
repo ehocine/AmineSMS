@@ -115,7 +115,7 @@ fun RentalNumbers(
                         onRentalNumberOptionChosen = {
                             selectedOption = it
                         },
-                        priceInCredits = dollarToCreditForPurchasingNumbers(price),
+                        priceInCredits = dollarToCreditForPurchasingNumbers(price, mainViewModel),
                         superUserBalance = superUserBalance,
                         superUserCheckingBalanceState = superUserCheckingBalanceState,
                         userBalance = balance,
@@ -375,7 +375,7 @@ fun Content(
                         && superUserCheckingBalanceState != LoadingState.LOADING
                         && serviceDecisionText.isNotEmpty(),
                 onClick = {
-                    if (dollarToCreditForPurchasingNumbers(superUserBalance) > priceInCredits) { // If the superUser has balance we can let the users order.
+                    if (dollarToCreditForPurchasingNumbers(superUserBalance, mainViewModel) > priceInCredits) { // If the superUser has balance we can let the users order.
                         if (userBalance >= priceInCredits) { // If the user has enough balance to buy we proceed
                             proceedBuying() // function callback done in higher function because we need the serviceID and the duration
                         } else {

@@ -238,7 +238,8 @@ fun ExistingTaskAppBarActions(
             Text(
                 text = "Only 30 day rental numbers can be extended/renewed! \nRenew this number for ${
                     dollarToCreditForPurchasingNumbers(
-                        rentalNumber.price
+                        rentalNumber.price,
+                        mainViewModel = mainViewModel
                     )
                 } credits, continue?", fontSize = MaterialTheme.typography.subtitle1.fontSize
             )

@@ -121,7 +121,7 @@ fun MainShopScreen(
                 selected = item
                 selectedOption = SKU_LIST.filter { it.value == selected }.keys.first()
                 Log.d("Product", "Selected element : $selectedOption")
-            })
+            }, mainViewModel = mainViewModel)
         }
         Spacer(modifier = Modifier.padding(10.dp))
         Button(
@@ -129,22 +129,23 @@ fun MainShopScreen(
                 .fillMaxWidth(0.8f)
                 .height(50.dp),
             colors = ButtonDefaults.buttonColors(MaterialTheme.colors.ButtonColor),
-//            enabled = selected != 0 && state != LoadingState.ERROR && state != LoadingState.LOADING,
+            enabled = selected != 0 && state != LoadingState.ERROR && state != LoadingState.LOADING,
             onClick = {
 
                 Log.d(
                     "Product",
                     mainViewModel.products.first { it.storeID == selectedOption }.toString()
                 )
-                purchase(
-                    activity = context as Activity,
-                    product = mainViewModel.products.first { it.storeID == selectedOption },
-                    mainViewModel = mainViewModel,
-                    chosenOption = selected,
-                    showSnackbar = showSnackbar
-                )
-
                 if (superUserBalance > 0) { // If the superUser has balance we can let the users buy their own.
+
+                    purchase(
+                        activity = context as Activity,
+                        product = mainViewModel.products.first { it.storeID == selectedOption },
+                        mainViewModel = mainViewModel,
+                        chosenOption = selected,
+                        showSnackbar = showSnackbar
+                    )
+
 //                    proceedToBuy(
 //                        context = context,
 //                        chosenOption = selected,
@@ -172,7 +173,8 @@ fun proceedToAddBalance(
     mainViewModel: MainViewModel,
     showSnackbar: (String, SnackbarDuration) -> Unit
 ) {
-    val addBalanceAmount = dollarToCreditForPurchasingCurrency(chosenOption.toDouble())
+    val addBalanceAmount =
+        dollarToCreditForPurchasingCurrency(chosenOption.toDouble(), mainViewModel = mainViewModel)
     Log.d("Tag", "You chose to buy $chosenOption option")
     addBalance(
         context = context,
@@ -201,6 +203,7 @@ private fun purchase(
                 showSnackbar = showSnackbar
             )
         }
+
         override fun onError(error: QonversionError) {
             Log.d("Tag", error.description)
             showSnackbar(error.description, SnackbarDuration.Short)

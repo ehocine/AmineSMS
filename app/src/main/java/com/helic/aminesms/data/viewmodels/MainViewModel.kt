@@ -63,6 +63,7 @@ class MainViewModel @Inject constructor(
 
     init {
         loadProducts()
+        getCurrencyParameters(context = getApplication<Application>())
     }
 
     private fun loadProducts() {
@@ -70,7 +71,7 @@ class MainViewModel @Inject constructor(
             override fun onSuccess(products: Map<String, QProduct>) {
                 Log.d("Products", products.toString())
                 this@MainViewModel.products = products.values
-                this@MainViewModel.products.forEach{
+                this@MainViewModel.products.forEach {
                     Log.d("Product", it.qonversionID)
                 }
             }
@@ -110,6 +111,15 @@ class MainViewModel @Inject constructor(
 //        })
 //        return result
 //    }
+
+    private var _purchasingCurrency = MutableStateFlow(10.0)
+    var purchasingCurrency = _purchasingCurrency.asStateFlow()
+
+    private var _purchasingNumbersA = MutableStateFlow(10.0)
+    var purchasingNumbersA = _purchasingNumbersA.asStateFlow()
+
+    private var _purchasingNumbersB = MutableStateFlow(10.0)
+    var purchasingNumbersB = _purchasingNumbersB.asStateFlow()
 
     private var _addBalanceAmount = MutableStateFlow(0.0)
     private var addBalanceAmount = _addBalanceAmount.asStateFlow()
@@ -187,6 +197,39 @@ class MainViewModel @Inject constructor(
 //            addingBalanceState = AddingBalanceState.ADD
 //        )
 //    }
+
+    fun getCurrencyParameters(
+        context: Context,
+    ) {
+        val db = Firebase.firestore
+        val data = db.collection(Constants.FIRESTORE_PARAMETERS_DATABASE)
+            .document(Constants.FIRESTORE_PARAMETERS_DOCUMENT)
+        if (hasInternetConnection(context)) {
+            CoroutineScope(Dispatchers.IO).launch {
+                try {
+                    data.addSnapshotListener { value, error ->
+                        if (error != null) {
+                            return@addSnapshotListener
+                        }
+                        if (value != null && value.exists()) {
+                            _purchasingCurrency.value =
+                                value.getDouble(Constants.PURCHASING_CURRENCY)!!
+                            _purchasingNumbersA.value =
+                                value.getDouble(Constants.PURCHASING_NUMBERS_A)!!
+                            _purchasingNumbersB.value =
+                                value.getDouble(Constants.PURCHASING_NUMBERS_B)!!
+                        } else {
+                        }
+                    }
+                } catch (e: Exception) {
+                    withContext(Dispatchers.Main) {
+                    }
+                }
+            }
+        } else {
+        }
+    }
+
 
     fun getBalance(context: Context, snackbar: (String, SnackbarDuration) -> Unit) {
         val db = Firebase.firestore
@@ -414,7 +457,10 @@ class MainViewModel @Inject constructor(
                                 context = getApplication<Application>(),
                                 snackbar = snackbar,
                                 currentBalance = _userBalance.value,
-                                amount = dollarToCreditForPurchasingNumbers(tempNumberData.value.price)
+                                amount = dollarToCreditForPurchasingNumbers(
+                                    tempNumberData.value.price,
+                                    mainViewModel = this@MainViewModel
+                                )
                             )
                             addOrRemoveTempNumberFromFirebase(
                                 context = getApplication<Application>(),
@@ -621,7 +667,10 @@ class MainViewModel @Inject constructor(
                                     snackbar,
                                     NumberState.Canceled,
                                     userBalance.value,
-                                    dollarToCreditForPurchasingNumbers(orderedNumberInList.price)
+                                    dollarToCreditForPurchasingNumbers(
+                                        orderedNumberInList.price,
+                                        mainViewModel = this@MainViewModel
+                                    )
                                 )
                             }
                             navController.navigate(MainAppScreens.TempNumbersMessages.route) {
@@ -759,7 +808,10 @@ class MainViewModel @Inject constructor(
                                 context = getApplication<Application>(),
                                 snackbar = snackbar,
                                 currentBalance = _userBalance.value,
-                                amount = dollarToCreditForPurchasingNumbers(reuseTempNumberResponse.value.price)
+                                amount = dollarToCreditForPurchasingNumbers(
+                                    reuseTempNumberResponse.value.price,
+                                    mainViewModel = this@MainViewModel
+                                )
                             )
                             addOrRemoveTempNumberFromFirebase(
                                 context = getApplication<Application>(),
@@ -997,7 +1049,10 @@ class MainViewModel @Inject constructor(
                                 context = getApplication<Application>(),
                                 snackbar = snackbar,
                                 currentBalance = _userBalance.value,
-                                amount = dollarToCreditForPurchasingNumbers(rentalNumberData.value.price)
+                                amount = dollarToCreditForPurchasingNumbers(
+                                    rentalNumberData.value.price,
+                                    mainViewModel = this@MainViewModel
+                                )
                             )
                             addOrRemoveRentalNumberFromFirebase(
                                 context = getApplication<Application>(),
@@ -1320,7 +1375,10 @@ class MainViewModel @Inject constructor(
                                 context = getApplication<Application>(),
                                 snackbar = snackbar,
                                 currentBalance = userBalance.value,
-                                amount = dollarToCreditForPurchasingNumbers(rentalNumberData.price),
+                                amount = dollarToCreditForPurchasingNumbers(
+                                    rentalNumberData.price,
+                                    mainViewModel = this@MainViewModel
+                                ),
                                 addingBalanceState = AddingBalanceState.REFUND
                             )
                             // this variable is used to get reference from firebase of the same id since it's not the same object in the server
@@ -1398,7 +1456,10 @@ class MainViewModel @Inject constructor(
                                 context = getApplication<Application>(),
                                 snackbar = snackbar,
                                 currentBalance = _userBalance.value,
-                                amount = dollarToCreditForPurchasingNumbers(rentalNumberData.price)
+                                amount = dollarToCreditForPurchasingNumbers(
+                                    rentalNumberData.price,
+                                    mainViewModel = this@MainViewModel
+                                )
                             )
                             navController.navigate(MainAppScreens.RentalNumbersMessages.route) {
                                 popUpTo(navController.graph.findStartDestination().id) {

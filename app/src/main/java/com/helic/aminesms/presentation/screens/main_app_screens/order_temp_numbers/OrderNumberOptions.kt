@@ -7,7 +7,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowBackIos
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -145,7 +144,8 @@ fun DisplayOptions(
                     onClick = {
                         if (superUserBalance > mainViewModel.selectedServiceState.value.price) {
                             if (userBalance >= dollarToCreditForPurchasingNumbers(
-                                    mainViewModel.selectedServiceState.value.price
+                                    mainViewModel.selectedServiceState.value.price,
+                                    mainViewModel
                                 )
                             ) {
                                 if (!invalidAreaCode) {
@@ -181,7 +181,8 @@ fun DisplayOptions(
                         Text(
                             text = "Order number for ${
                                 dollarToCreditForPurchasingNumbers(
-                                    mainViewModel.selectedServiceState.value.price
+                                    mainViewModel.selectedServiceState.value.price,
+                                    mainViewModel
                                 )
                             } credits",
                             fontSize = 16.sp,

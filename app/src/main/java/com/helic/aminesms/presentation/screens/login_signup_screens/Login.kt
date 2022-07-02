@@ -31,11 +31,8 @@ import com.helic.aminesms.presentation.navigation.AuthenticationScreens
 import com.helic.aminesms.presentation.ui.theme.ButtonColor
 import com.helic.aminesms.presentation.ui.theme.ProgressIndicatorColor
 import com.helic.aminesms.presentation.ui.theme.primaryColor
-import com.helic.aminesms.utils.Constants
+import com.helic.aminesms.utils.*
 import com.helic.aminesms.utils.Constants.loadingState
-import com.helic.aminesms.utils.LoadingState
-import com.helic.aminesms.utils.resendVerificationEmail
-import com.helic.aminesms.utils.signInUser
 import kotlinx.coroutines.flow.MutableStateFlow
 
 @Composable
@@ -69,7 +66,7 @@ fun LoginPage(
                 verticalArrangement = Arrangement.Center,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .fillMaxHeight(0.80f)
+                    .fillMaxHeight()
                     .clip(RoundedCornerShape(topStart = 30.dp, topEnd = 30.dp))
                     .padding(10.dp)
             ) {
@@ -82,7 +79,12 @@ fun LoginPage(
                         fontWeight = FontWeight.Bold,
                         fontSize = MaterialTheme.typography.h4.fontSize
                     )
-                    Spacer(modifier = Modifier.padding(20.dp))
+                    Spacer(modifier = Modifier.padding(10.dp))
+
+                    LottieAnimation(modifier = Modifier.size(200.dp), lottie = R.raw.login)
+
+                    Spacer(modifier = Modifier.padding(10.dp))
+
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
 
                         OutlinedTextField(
@@ -162,12 +164,12 @@ fun LoginPage(
                         Row {
                             Text(
                                 text = stringResource(R.string.dont_have_an_account),
-                                fontSize = MaterialTheme.typography.subtitle2.fontSize
+                                fontSize = MaterialTheme.typography.subtitle1.fontSize
                             )
                             Spacer(modifier = Modifier.padding(end = 2.dp))
                             Text(
                                 text = stringResource(R.string.register_an_account),
-                                fontSize = MaterialTheme.typography.subtitle2.fontSize,
+                                fontSize = MaterialTheme.typography.subtitle1.fontSize,
                                 fontWeight = FontWeight.Bold,
                                 modifier = Modifier.clickable {
                                     navController.navigate(route = AuthenticationScreens.Register.route) {

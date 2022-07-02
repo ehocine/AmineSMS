@@ -1,10 +1,20 @@
 package com.helic.aminesms.presentation.ui.theme
 
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
-val LARGEST_PADDING = 24.dp
-val LARGE_PADDING = 12.dp
-val MEDIUM_PADDING = 8.dp
+val paddingNone: Dp = 0.dp
+val paddingSmall: Dp = 4.dp
+val paddingMedium: Dp = 8.dp
+val paddingLarge: Dp = 12.dp
+val paddingXL: Dp = 16.dp
+val paddingXXL: Dp = 24.dp
+val paddingXXXL: Dp = 36.dp
+
+val shapeSmall: Dp = 4.dp
+val shapeMedium: Dp = 8.dp
+val shapeLarge: Dp = 12.dp
+val shapeXL: Dp = 24.dp
 
 val HOME_CARD_WIDTH = 3.dp
 

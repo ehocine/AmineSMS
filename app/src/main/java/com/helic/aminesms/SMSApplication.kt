@@ -9,6 +9,7 @@ import dagger.hilt.android.HiltAndroidApp
 class SMSApplication : Application() {
     override fun onCreate() {
         super.onCreate()
+        Qonversion.setDebugMode()
         Qonversion.launch(this, PROJECT_KEY_QONVERSION, false)
     }
 }

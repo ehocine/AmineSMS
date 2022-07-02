@@ -22,6 +22,7 @@ import com.helic.aminesms.presentation.ui.theme.ButtonColor
 import com.helic.aminesms.presentation.ui.theme.ProgressIndicatorColor
 import com.helic.aminesms.utils.Constants.loadingState
 import com.helic.aminesms.utils.LoadingState
+import com.helic.aminesms.utils.LottieAnimation
 import com.helic.aminesms.utils.resetUserPassword
 import kotlinx.coroutines.flow.MutableStateFlow
 
@@ -45,7 +46,7 @@ fun ForgetPassword(navController: NavController, showSnackbar: (String, Snackbar
                 verticalArrangement = Arrangement.Center,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .fillMaxHeight(0.60f)
+                    .fillMaxHeight()
                     .clip(RoundedCornerShape(topStart = 30.dp, topEnd = 30.dp))
                     .padding(10.dp)
             ) {
@@ -57,7 +58,16 @@ fun ForgetPassword(navController: NavController, showSnackbar: (String, Snackbar
                         fontWeight = FontWeight.Bold,
                         fontSize = MaterialTheme.typography.h5.fontSize
                     )
-                    Spacer(modifier = Modifier.padding(20.dp))
+
+                    Spacer(modifier = Modifier.padding(10.dp))
+
+                    LottieAnimation(
+                        modifier = Modifier.size(200.dp),
+                        lottie = R.raw.forgot_password
+                    )
+
+                    Spacer(modifier = Modifier.padding(10.dp))
+
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
 
                         OutlinedTextField(

@@ -35,12 +35,12 @@ import com.helic.aminesms.data.models.User
 import com.helic.aminesms.data.viewmodels.MainViewModel
 import com.helic.aminesms.presentation.navigation.MainAppScreens
 import com.helic.aminesms.presentation.ui.theme.backgroundColor
-import com.helic.aminesms.presentation.ui.theme.fancyFont
 import com.helic.aminesms.utils.Constants.AUTHENTICATION_ROUTE
 import com.helic.aminesms.utils.Constants.DARK_THEME
 import com.helic.aminesms.utils.Constants.auth
 import com.helic.aminesms.utils.CustomDivider
 import com.helic.aminesms.utils.DisplayAlertDialog
+import com.helic.aminesms.utils.LottieAnimation
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
@@ -105,18 +105,13 @@ fun ProfileDetails(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 20.dp)
+//                .padding(top = 20.dp)
         ) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth(), horizontalArrangement = Arrangement.Center
             ) {
-                Text(
-                    text = stringResource(R.string.welcome),
-                    fontWeight = FontWeight.Bold,
-                    fontFamily = fancyFont,
-                    fontSize = 60.sp
-                )
+                LottieAnimation(modifier = Modifier.size(150.dp), lottie = R.raw.profile)
             }
             Text(
                 text = user.userName,

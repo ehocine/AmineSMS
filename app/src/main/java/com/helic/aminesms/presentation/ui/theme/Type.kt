@@ -14,9 +14,7 @@ val Myfont = FontFamily(
     Font(R.font.sf_pro_display_bold, weight = FontWeight.Bold),
     Font(R.font.sf_pro_displayr_regular, weight = FontWeight.Light)
 )
-val fancyFont = FontFamily(
-    Font(R.font.ruthie)
-)
+
 
 // Set of Material typography styles to start with
 val Typography = Typography(

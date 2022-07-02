@@ -31,6 +31,7 @@ import com.helic.aminesms.presentation.ui.theme.ProgressIndicatorColor
 import com.helic.aminesms.presentation.ui.theme.primaryColor
 import com.helic.aminesms.utils.Constants.loadingState
 import com.helic.aminesms.utils.LoadingState
+import com.helic.aminesms.utils.LottieAnimation
 import com.helic.aminesms.utils.registerNewUser
 import kotlinx.coroutines.flow.MutableStateFlow
 
@@ -59,7 +60,7 @@ fun RegisterPage(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .fillMaxHeight(0.80f)
+                    .fillMaxHeight()
                     .clip(RoundedCornerShape(topStart = 30.dp, topEnd = 30.dp))
                     .padding(10.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -77,7 +78,13 @@ fun RegisterPage(
                         fontWeight = FontWeight.Bold,
                         fontSize = MaterialTheme.typography.h4.fontSize
                     )
-                    Spacer(modifier = Modifier.padding(20.dp))
+
+                    Spacer(modifier = Modifier.padding(10.dp))
+
+                    LottieAnimation(modifier = Modifier.size(200.dp), lottie = R.raw.register)
+
+                    Spacer(modifier = Modifier.padding(10.dp))
+
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         OutlinedTextField(
                             value = nameValue,

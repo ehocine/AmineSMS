@@ -1,12 +1,9 @@
 package com.helic.aminesms.presentation.screens.main_app_screens
 
 import android.annotation.SuppressLint
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
+import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
@@ -30,6 +27,7 @@ import androidx.compose.ui.unit.toSize
 import androidx.navigation.NavController
 import com.helic.aminesms.R
 import com.helic.aminesms.data.viewmodels.MainViewModel
+import com.helic.aminesms.presentation.navigation.MainAppScreens
 import com.helic.aminesms.presentation.ui.theme.*
 import com.helic.aminesms.utils.Constants.TIME_BETWEEN_AUTO_REFRESH
 import com.helic.aminesms.utils.WindowInfo
@@ -139,6 +137,11 @@ fun ContentOnCompactScreen(navController: NavController, mainViewModel: MainView
                 .height(with(LocalDensity.current) { screenSize.height.toDp() / 2 })
                 .fillMaxWidth(),
             color = MaterialTheme.colors.primary.copy(alpha = 0.5f),
+            onClick = {
+                navController.navigate(MainAppScreens.TempNumbersMessages.route) {
+                    launchSingleTop = true
+                }
+            },
             content = {
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
@@ -190,71 +193,16 @@ fun ContentOnCompactScreen(navController: NavController, mainViewModel: MainView
                 }
             })
         Spacer(modifier = Modifier.padding(paddingMedium))
-//        Card(modifier = Modifier
-//            .border(
-//                width = HOME_CARD_WIDTH,
-//                color = MaterialTheme.colors.primary,
-//                shape = RoundedCornerShape(15.dp)
-//            )
-//            .height(with(LocalDensity.current) { screenSize.height.toDp() / 2 - 5.dp })
-//            .fillMaxWidth()
-//            .clip(RoundedCornerShape(5.dp))
-//            .clickable {
-//                navController.navigate(MainAppScreens.TempNumbersMessages.route) {
-//                    launchSingleTop = true
-//                }
-//            }) {
-//            Column(
-//                horizontalAlignment = Alignment.CenterHorizontally,
-//                verticalArrangement = Arrangement.SpaceEvenly,
-//                modifier = Modifier
-//                    .verticalScroll(rememberScrollState())
-//                    .padding(15.dp)
-//            ) {
-//                Text(
-//                    text = stringResource(R.string.temporary_numbers),
-//                    fontWeight = FontWeight.Medium,
-//                    fontSize = MaterialTheme.typography.h6.fontSize
-//                )
-//                Text(
-//                    text = "Purchased numbers: ${mainViewModel.orderedTempNumbersList.collectAsState().value.size}",
-//                    fontWeight = FontWeight.Medium,
-//                    fontSize = MaterialTheme.typography.subtitle1.fontSize
-//                )
-//                Card(
-//                    modifier = Modifier
-//                        .border(
-//                            width = 1.dp,
-//                            color = MaterialTheme.colors.primary,
-//                            shape = RoundedCornerShape(5.dp)
-//                        )
-//                        .fillMaxWidth()
-//                        .clip(RoundedCornerShape(5.dp))
-//                ) {
-//                    Text(
-//                        buildAnnotatedString {
-//                            append("You can reuse temporary numbers for a ")
-//                            withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-//                                append("FEW MINUTES")
-//                            }
-//                            append(
-//                                " after receiving a code.\n" +
-//                                        "This system cannot return a number if it is not shown here as reusable.\n" +
-//                                        "If you need guaranteed reuse, buy a rental number."
-//                            )
-//                        },
-//                        modifier = Modifier.padding(10.dp),
-//                        color = MaterialTheme.colors.primary,
-//                        fontSize = MaterialTheme.typography.subtitle2.fontSize
-//                    )
-//                }
-//            }
-//        }
         DashboardCardItem(
             modifier = Modifier
                 .height(with(LocalDensity.current) { screenSize.height.toDp() / 2 })
                 .fillMaxWidth(),
             color = MaterialTheme.colors.primary.copy(alpha = 0.5f),
+            onClick = {
+                navController.navigate(MainAppScreens.RentalNumbersMessages.route) {
+                    launchSingleTop = true
+                }
+            },
             content = {
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
@@ -312,7 +260,6 @@ fun ContentOnCompactScreen(navController: NavController, mainViewModel: MainView
     }
 }
 
-
 //Basically used on large screens and landscape screen: Two section in row
 @Composable
 fun ContentOnLargeScreen(navController: NavController, mainViewModel: MainViewModel) {
@@ -331,6 +278,11 @@ fun ContentOnLargeScreen(navController: NavController, mainViewModel: MainViewMo
                 .width(with(LocalDensity.current) { screenSize.width.toDp() / 2 - 5.dp })
                 .fillMaxHeight(),
             color = MaterialTheme.colors.primary.copy(alpha = 0.5f),
+            onClick = {
+                navController.navigate(MainAppScreens.TempNumbersMessages.route) {
+                    launchSingleTop = true
+                }
+            },
             content = {
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
@@ -382,71 +334,16 @@ fun ContentOnLargeScreen(navController: NavController, mainViewModel: MainViewMo
                 }
             })
         Spacer(modifier = Modifier.padding(paddingMedium))
-//        Card(modifier = Modifier
-//            .border(
-//                width = HOME_CARD_WIDTH,
-//                color = MaterialTheme.colors.primary,
-//                shape = RoundedCornerShape(15.dp)
-//            )
-//            .width(with(LocalDensity.current) { screenSize.width.toDp() / 2 - 5.dp })
-//            .fillMaxHeight()
-//            .clip(RoundedCornerShape(5.dp))
-//            .clickable {
-//                navController.navigate(MainAppScreens.TempNumbersMessages.route) {
-//                    launchSingleTop = true
-//                }
-//            }) {
-//            Column(
-//                horizontalAlignment = Alignment.CenterHorizontally,
-//                verticalArrangement = Arrangement.SpaceEvenly,
-//                modifier = Modifier
-//                    .verticalScroll(rememberScrollState())
-//                    .padding(15.dp)
-//            ) {
-//                Text(
-//                    text = stringResource(R.string.temporary_numbers),
-//                    fontWeight = FontWeight.Medium,
-//                    fontSize = MaterialTheme.typography.h6.fontSize
-//                )
-//                Text(
-//                    text = "Purchased numbers: ${mainViewModel.orderedTempNumbersList.collectAsState().value.size}",
-//                    fontWeight = FontWeight.Medium,
-//                    fontSize = MaterialTheme.typography.subtitle1.fontSize
-//                )
-//                Card(
-//                    modifier = Modifier
-//                        .border(
-//                            width = 1.dp,
-//                            color = MaterialTheme.colors.primary,
-//                            shape = RoundedCornerShape(5.dp)
-//                        )
-//                        .fillMaxWidth()
-//                        .clip(RoundedCornerShape(5.dp))
-//                ) {
-//                    Text(
-//                        buildAnnotatedString {
-//                            append("You can reuse temporary numbers for a ")
-//                            withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-//                                append("FEW MINUTES")
-//                            }
-//                            append(
-//                                " after receiving a code.\n" +
-//                                        "This system cannot return a number if it is not shown here as reusable.\n" +
-//                                        "If you need guaranteed reuse, buy a rental number."
-//                            )
-//                        },
-//                        modifier = Modifier.padding(10.dp),
-//                        color = MaterialTheme.colors.primary,
-//                        fontSize = MaterialTheme.typography.subtitle2.fontSize
-//                    )
-//                }
-//            }
-//        }
         DashboardCardItem(
             modifier = Modifier
                 .width(with(LocalDensity.current) { screenSize.width.toDp() / 2 - 5.dp })
                 .fillMaxHeight(),
             color = MaterialTheme.colors.primary,
+            onClick = {
+                navController.navigate(MainAppScreens.RentalNumbersMessages.route) {
+                    launchSingleTop = true
+                }
+            },
             content = {
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
@@ -502,68 +399,6 @@ fun ContentOnLargeScreen(navController: NavController, mainViewModel: MainViewMo
                 }
             }
         )
-//        Card(modifier = Modifier
-//            .border(
-//                width = HOME_CARD_WIDTH,
-//                color = MaterialTheme.colors.primary,
-//                shape = RoundedCornerShape(15.dp)
-//            )
-//            .width(with(LocalDensity.current) { screenSize.width.toDp() / 2 - 5.dp })
-//            .fillMaxHeight()
-//            .clip(RoundedCornerShape(5.dp))
-//            .clickable {
-//                navController.navigate(MainAppScreens.RentalNumbersMessages.route) {
-//                    launchSingleTop = true
-//                }
-//            }) {
-//            Column(
-//                horizontalAlignment = Alignment.CenterHorizontally,
-//                verticalArrangement = Arrangement.SpaceEvenly,
-//                modifier = Modifier
-//                    .verticalScroll(rememberScrollState())
-//                    .padding(15.dp)
-//            ) {
-//                Text(
-//                    text = stringResource(R.string.rental_numbers),
-//                    fontWeight = FontWeight.Medium,
-//                    fontSize = MaterialTheme.typography.h6.fontSize
-//                )
-//                Text(
-//                    text = "Purchased numbers: ${mainViewModel.orderedRentalNumbers.collectAsState().value.size}",
-//                    fontWeight = FontWeight.Medium,
-//                    fontSize = MaterialTheme.typography.subtitle1.fontSize
-//                )
-//                Text(
-//                    text = "Live numbers: ${mainViewModel.listOfLiveRentalNumbers.value.size}",
-//                    fontWeight = FontWeight.Medium,
-//                    fontSize = MaterialTheme.typography.subtitle2.fontSize
-//                )
-//                Text(
-//                    text = "Pending numbers: ${mainViewModel.listOfPendingRentalNumbers.value.size}",
-//                    fontWeight = FontWeight.Medium,
-//                    fontSize = MaterialTheme.typography.subtitle2.fontSize
-//                )
-//                Card(
-//                    modifier = Modifier
-//                        .border(
-//                            width = 1.dp,
-//                            color = MaterialTheme.colors.primary,
-//                            shape = RoundedCornerShape(5.dp)
-//                        )
-//                        .fillMaxWidth()
-//                        .clip(RoundedCornerShape(5.dp))
-//                ) {
-//                    Text(
-//                        text = "You must activate your rental before it can be used, every time. " +
-//                                "This request takes a few seconds. The full activation process can take up to 5 minutes. After activation, " +
-//                                "we will deliver all of your messages, if you have any.",
-//                        modifier = Modifier.padding(10.dp),
-//                        color = MaterialTheme.colors.primary,
-//                        fontSize = MaterialTheme.typography.subtitle2.fontSize
-//                    )
-//                }
-//            }
-//        }
     }
 }
 
@@ -571,7 +406,8 @@ fun ContentOnLargeScreen(navController: NavController, mainViewModel: MainViewMo
 fun DashboardCardItem(
     modifier: Modifier = Modifier,
     content: @Composable (() -> Unit),
-    color: Color
+    color: Color,
+    onClick: () -> Unit
 ) {
     val gradientBrush = Brush.verticalGradient(listOf(color.copy(.8F), color), startY = 10F)
 
@@ -588,7 +424,10 @@ fun DashboardCardItem(
                 offsetY = paddingSmall
             )
             .clip(RoundedCornerShape(shapeXL))
-            .background(brush = gradientBrush),
+            .background(brush = gradientBrush)
+            .clickable {
+                onClick()
+            },
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceAround
     ) {

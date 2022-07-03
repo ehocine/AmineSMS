@@ -80,37 +80,7 @@ class MainViewModel @Inject constructor(
                 Log.d("Products Error", error.description)
             }
         })
-//        Qonversion.offerings(object : QonversionOfferingsCallback {
-//            override fun onError(error: QonversionError) {
-//                Log.d("Offering Error", error.description)
-//            }
-//
-//            override fun onSuccess(offerings: QOfferings) {
-//                this@MainViewModel.offerings = offerings.availableOfferings
-//                Log.d("Offering", offerings.availableOfferings.toString())
-//        offerings.main?.products?.forEach {
-//            Log.d("Products", it.offeringID.toString())
-//        }
-//            }
-//        })
     }
-
-//    private fun purchase(product: QProduct): Boolean {
-//        var result = false
-//        Qonversion.purchase(, product, callback = object :
-//            QonversionPermissionsCallback {
-//            override fun onSuccess(permissions: Map<String, QPermission>) {
-//                Log.d("Tag", "Purchase succeeded")
-//                result = true
-//            }
-//
-//            override fun onError(error: QonversionError) {
-//                Log.d("Tag", error.description)
-//                result =  false
-//            }
-//        })
-//        return result
-//    }
 
     private var _purchasingCurrency = MutableStateFlow(10.0)
     var purchasingCurrency = _purchasingCurrency.asStateFlow()
@@ -118,7 +88,7 @@ class MainViewModel @Inject constructor(
     private var _purchasingNumbersA = MutableStateFlow(10.0)
     var purchasingNumbersA = _purchasingNumbersA.asStateFlow()
 
-    private var _purchasingNumbersB = MutableStateFlow(10.0)
+    private var _purchasingNumbersB = MutableStateFlow(0.75)
     var purchasingNumbersB = _purchasingNumbersB.asStateFlow()
 
     private var _addBalanceAmount = MutableStateFlow(0.0)

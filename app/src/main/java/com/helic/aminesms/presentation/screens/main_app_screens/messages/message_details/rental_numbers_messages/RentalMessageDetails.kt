@@ -1,15 +1,14 @@
 package com.helic.aminesms.presentation.screens.main_app_screens.messages.message_details.rental_numbers_messages
 
 import android.annotation.SuppressLint
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowBackIos
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -24,10 +23,7 @@ import com.helic.aminesms.R
 import com.helic.aminesms.data.models.number_data.RentalNumberData
 import com.helic.aminesms.data.viewmodels.MainViewModel
 import com.helic.aminesms.presentation.navigation.MainAppScreens
-import com.helic.aminesms.presentation.ui.theme.ButtonColor
-import com.helic.aminesms.presentation.ui.theme.backgroundColor
-import com.helic.aminesms.presentation.ui.theme.topAppBarBackgroundColor
-import com.helic.aminesms.presentation.ui.theme.topAppBarContentColor
+import com.helic.aminesms.presentation.ui.theme.*
 import com.helic.aminesms.utils.*
 import kotlinx.coroutines.delay
 
@@ -132,6 +128,7 @@ fun RentalMessageDetailsTopAppBar(
     showSnackbar: (String, SnackbarDuration) -> Unit,
 ) {
     TopAppBar(
+        modifier = Modifier.height(TOP_APP_BAR_HEIGHT),
         navigationIcon = {
             IconButton(onClick = {
                 navController.navigate(MainAppScreens.RentalNumbersMessages.route) {
@@ -147,7 +144,14 @@ fun RentalMessageDetailsTopAppBar(
                 )
             }
         },
-        title = { mainViewModel.selectedRentalNumber.value.number?.let { Text(text = it) } },
+        title = {
+            mainViewModel.selectedRentalNumber.value.number?.let {
+                Text(
+                    text = it,
+                    color = MaterialTheme.colors.topAppBarContentColor
+                )
+            }
+        },
         actions = {
             ExistingTaskAppBarActions(
                 navController = navController,
@@ -156,6 +160,7 @@ fun RentalMessageDetailsTopAppBar(
                 showSnackbar = showSnackbar
             )
         },
+        elevation = 0.dp,
         backgroundColor = MaterialTheme.colors.topAppBarBackgroundColor
     )
 }
@@ -184,7 +189,7 @@ fun ActivateButton(state: LoadingState, onClick: () -> Unit) {
                 Text(
                     text = "Activate",
                     fontSize = 20.sp,
-                    color = Color.White
+                    color = MaterialTheme.colors.ButtonTextColor
                 )
             }
         }
@@ -265,7 +270,11 @@ fun DropMenu(onRenewClicked: () -> Unit, onCancelClicked: () -> Unit) {
             contentDescription = "Menu",
             tint = MaterialTheme.colors.topAppBarContentColor
         )
-        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false },
+            modifier = Modifier.background(MaterialTheme.colors.CardColor)
+        ) {
             DropdownMenuItem(onClick = {
                 expanded = false
                 onRenewClicked()

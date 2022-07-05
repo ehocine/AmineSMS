@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.util.Log
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -24,9 +25,7 @@ import androidx.navigation.NavGraph.Companion.findStartDestination
 import com.helic.aminesms.R
 import com.helic.aminesms.data.viewmodels.MainViewModel
 import com.helic.aminesms.presentation.navigation.MainAppScreens
-import com.helic.aminesms.presentation.ui.theme.ButtonColor
-import com.helic.aminesms.presentation.ui.theme.topAppBarBackgroundColor
-import com.helic.aminesms.presentation.ui.theme.topAppBarContentColor
+import com.helic.aminesms.presentation.ui.theme.*
 import com.helic.aminesms.utils.AddingBalanceState
 import com.helic.aminesms.utils.Constants.SHOP_LIST
 import com.helic.aminesms.utils.Constants.SKU_LIST
@@ -71,6 +70,7 @@ fun Shop(
 @Composable
 fun ShopTopAppBar(navController: NavController) {
     TopAppBar(
+        modifier = Modifier.height(TOP_APP_BAR_HEIGHT),
         navigationIcon = {
             IconButton(onClick = {
                 navController.navigate(MainAppScreens.Home.route) {
@@ -86,8 +86,10 @@ fun ShopTopAppBar(navController: NavController) {
             }
         },
         title = {
-            Text(text = stringResource(R.string.buy_balance))
-        }, backgroundColor = MaterialTheme.colors.topAppBarBackgroundColor
+            Text(text = stringResource(R.string.buy_balance), color = MaterialTheme.colors.topAppBarContentColor)
+        },
+        elevation = 0.dp,
+        backgroundColor = MaterialTheme.colors.topAppBarBackgroundColor
     )
 }
 
@@ -104,9 +106,10 @@ fun MainShopScreen(
     val scrollState = rememberScrollState()
     Column(
         modifier = Modifier
-            .padding(10.dp)
+//            .padding(10.dp)
             .fillMaxSize()
-            .verticalScroll(state = scrollState),
+            .verticalScroll(state = scrollState)
+            .background(MaterialTheme.colors.backgroundColor),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -132,12 +135,14 @@ fun MainShopScreen(
             enabled = selected != 0 && state != LoadingState.ERROR && state != LoadingState.LOADING,
             onClick = {
 
+                mainViewModel.products.forEach {
+                    Log.d("Product", it.storeID.toString())
+                }
                 Log.d(
                     "Product",
                     mainViewModel.products.first { it.storeID == selectedOption }.toString()
                 )
                 if (superUserBalance > 0) { // If the superUser has balance we can let the users buy their own.
-
                     purchase(
                         activity = context as Activity,
                         product = mainViewModel.products.first { it.storeID == selectedOption },
@@ -160,7 +165,7 @@ fun MainShopScreen(
             Text(
                 text = stringResource(R.string.proceed),
                 fontSize = 20.sp,
-                color = Color.White
+                color = MaterialTheme.colors.ButtonTextColor
             )
 
         }

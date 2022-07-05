@@ -2,6 +2,7 @@ package com.helic.aminesms.presentation.screens.main_app_screens.order_temp_numb
 
 import android.annotation.SuppressLint
 import android.content.Context
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -11,7 +12,6 @@ import androidx.compose.material.icons.filled.ArrowBackIos
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -91,114 +91,116 @@ fun DisplayOptions(
 ) {
     var areaCodeValue by remember { mutableStateOf("") }
     var invalidAreaCode by remember { mutableStateOf(false) }
-    Box(
-        modifier = Modifier
-            .padding(vertical = 50.dp)
-            .fillMaxSize(),
-        contentAlignment = Alignment.TopCenter
-    ) {
-        Column(
-            modifier = Modifier.verticalScroll(rememberScrollState()),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+    Column(Modifier.background(MaterialTheme.colors.backgroundColor)) {
+        Box(
+            modifier = Modifier
+                .padding(vertical = 50.dp)
+                .fillMaxSize(),
+            contentAlignment = Alignment.TopCenter
         ) {
-            Text(
-                text = stringResource(R.string.add_options_to_temp_number),
-                fontWeight = FontWeight.Bold,
-                fontSize = MaterialTheme.typography.h5.fontSize
-            )
-            Spacer(modifier = Modifier.padding(20.dp))
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                OutlinedTextField(
-                    value = areaCodeValue,
-                    onValueChange = {
-                        areaCodeValue = it
-                        mainViewModel.selectedAreaCode.value = it
-                    },
-                    label = { Text(text = stringResource(R.string.area_code)) },
-                    placeholder = { Text(text = stringResource(R.string.area_code)) },
-                    singleLine = true,
-                    modifier = Modifier.fillMaxWidth(0.8f)
-                )
-                invalidAreaCode = when {
-                    areaCodeValue.isEmpty() -> {
-                        false
-                    }
-                    else -> {
-                        areaCodeValue.length < 3
-                    }
-                }
-                Spacer(modifier = Modifier.padding(5.dp))
+            Column(
+                modifier = Modifier.verticalScroll(rememberScrollState()),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
                 Text(
-                    text = when (invalidAreaCode) {
-                        false -> stringResource(R.string.leave_blank_no_filter)
-                        else -> stringResource(R.string.invalid_length)
-                    },
-                    color = when (invalidAreaCode) {
-                        false -> MediumGray
-                        else -> Red
-                    }
+                    text = stringResource(R.string.add_options_to_temp_number),
+                    fontWeight = FontWeight.Bold,
+                    fontSize = MaterialTheme.typography.h5.fontSize
                 )
-                Spacer(modifier = Modifier.padding(15.dp))
-                Button(
-                    onClick = {
-                        if (superUserBalance > mainViewModel.selectedServiceState.value.price) {
-                            if (userBalance >= dollarToCreditForPurchasingNumbers(
-                                    mainViewModel.selectedServiceState.value.price,
-                                    mainViewModel
-                                )
-                            ) {
-                                if (!invalidAreaCode) {
-                                    mainViewModel.orderNumber(
-                                        navController = navController,
-                                        serviceID = mainViewModel.selectedServiceState.value.serviceId,
-                                        areaCode = mainViewModel.selectedAreaCode.value,
-                                        snackbar = snackbar
+                Spacer(modifier = Modifier.padding(20.dp))
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    OutlinedTextField(
+                        value = areaCodeValue,
+                        onValueChange = {
+                            areaCodeValue = it
+                            mainViewModel.selectedAreaCode.value = it
+                        },
+                        label = { Text(text = stringResource(R.string.area_code)) },
+                        placeholder = { Text(text = stringResource(R.string.area_code)) },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth(0.8f)
+                    )
+                    invalidAreaCode = when {
+                        areaCodeValue.isEmpty() -> {
+                            false
+                        }
+                        else -> {
+                            areaCodeValue.length < 3
+                        }
+                    }
+                    Spacer(modifier = Modifier.padding(5.dp))
+                    Text(
+                        text = when (invalidAreaCode) {
+                            false -> stringResource(R.string.leave_blank_no_filter)
+                            else -> stringResource(R.string.invalid_length)
+                        },
+                        color = when (invalidAreaCode) {
+                            false -> MaterialTheme.colors.TextColor
+                            else -> Red
+                        }
+                    )
+                    Spacer(modifier = Modifier.padding(15.dp))
+                    Button(
+                        onClick = {
+                            if (superUserBalance > mainViewModel.selectedServiceState.value.price) {
+                                if (userBalance >= dollarToCreditForPurchasingNumbers(
+                                        mainViewModel.selectedServiceState.value.price,
+                                        mainViewModel
+                                    )
+                                ) {
+                                    if (!invalidAreaCode) {
+                                        mainViewModel.orderNumber(
+                                            navController = navController,
+                                            serviceID = mainViewModel.selectedServiceState.value.serviceId,
+                                            areaCode = mainViewModel.selectedAreaCode.value,
+                                            snackbar = snackbar
+                                        )
+                                    }
+                                } else {
+                                    snackbar(
+                                        context.getString(R.string.not_enough_balance),
+                                        SnackbarDuration.Short
                                     )
                                 }
                             } else {
                                 snackbar(
-                                    context.getString(R.string.not_enough_balance),
+                                    context.getString(R.string.cant_purchase),
                                     SnackbarDuration.Short
                                 )
                             }
+                        },
+                        enabled = buyingState != LoadingState.LOADING && superUserState != LoadingState.ERROR && superUserState != LoadingState.LOADING,
+                        modifier = Modifier
+                            .fillMaxWidth(0.8f)
+                            .height(50.dp),
+                        colors = ButtonDefaults.buttonColors(MaterialTheme.colors.ButtonColor)
+                    ) {
+                        if (buyingState == LoadingState.LOADING) {
+                            CircularProgressIndicator(color = MaterialTheme.colors.ProgressIndicatorColor)
                         } else {
-                            snackbar(
-                                context.getString(R.string.cant_purchase),
-                                SnackbarDuration.Short
+                            Text(
+                                text = "Order number for ${
+                                    dollarToCreditForPurchasingNumbers(
+                                        mainViewModel.selectedServiceState.value.price,
+                                        mainViewModel
+                                    )
+                                } credits",
+                                fontSize = 16.sp,
+                                color = MaterialTheme.colors.ButtonTextColor
                             )
                         }
-                    },
-                    enabled = buyingState != LoadingState.LOADING && superUserState != LoadingState.ERROR && superUserState != LoadingState.LOADING,
-                    modifier = Modifier
-                        .fillMaxWidth(0.8f)
-                        .height(50.dp),
-                    colors = ButtonDefaults.buttonColors(MaterialTheme.colors.ButtonColor)
-                ) {
-                    if (buyingState == LoadingState.LOADING) {
-                        CircularProgressIndicator(color = MaterialTheme.colors.ProgressIndicatorColor)
-                    } else {
-                        Text(
-                            text = "Order number for ${
-                                dollarToCreditForPurchasingNumbers(
-                                    mainViewModel.selectedServiceState.value.price,
-                                    mainViewModel
-                                )
-                            } credits",
-                            fontSize = 16.sp,
-                            color = Color.White
-                        )
                     }
                 }
             }
         }
     }
-
 }
 
 @Composable
 fun OrderNumberOptionsTopAppBar(navController: NavController, serviceStateName: String?) {
     TopAppBar(
+        modifier = Modifier.height(TOP_APP_BAR_HEIGHT),
         navigationIcon = {
             IconButton(onClick = {
                 navController.navigate(MainAppScreens.OrderNumbers.route) {
@@ -216,9 +218,10 @@ fun OrderNumberOptionsTopAppBar(navController: NavController, serviceStateName: 
         },
         title = {
             if (serviceStateName != null) {
-                Text(text = serviceStateName)
+                Text(text = serviceStateName, color = MaterialTheme.colors.topAppBarContentColor)
             }
-        }, backgroundColor = MaterialTheme.colors.topAppBarBackgroundColor
+        },
+        elevation = 0.dp, backgroundColor = MaterialTheme.colors.topAppBarBackgroundColor
     )
 }
 

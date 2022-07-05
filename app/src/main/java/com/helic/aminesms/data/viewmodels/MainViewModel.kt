@@ -63,12 +63,13 @@ class MainViewModel @Inject constructor(
 
     init {
         loadProducts()
-        getCurrencyParameters(context = getApplication<Application>())
+//        getCurrencyParameters(context = getApplication<Application>())
     }
 
     private fun loadProducts() {
         Qonversion.products(callback = object : QonversionProductsCallback {
             override fun onSuccess(products: Map<String, QProduct>) {
+                Log.d("Products", "Start")
                 Log.d("Products", products.toString())
                 this@MainViewModel.products = products.values
                 this@MainViewModel.products.forEach {

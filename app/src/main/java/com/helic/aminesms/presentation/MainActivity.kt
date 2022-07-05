@@ -19,6 +19,8 @@ import com.helic.aminesms.data.viewmodels.MainViewModel
 import com.helic.aminesms.presentation.navigation.nav_graph.RootNavGraph
 import com.helic.aminesms.presentation.ui.theme.AmineSMSTheme
 import com.helic.aminesms.presentation.ui.theme.Purple700
+import com.helic.aminesms.presentation.ui.theme.darkBackgroundColor
+import com.helic.aminesms.presentation.ui.theme.lightBackgroundColor
 import com.helic.aminesms.utils.Constants.DARK_THEME
 import com.helic.aminesms.utils.Msnackbar
 import com.helic.aminesms.utils.rememberSnackbarState
@@ -50,7 +52,7 @@ class MainActivity : ComponentActivity() {
                 }
                 SideEffect {
                     systemUiController.setStatusBarColor(
-                        color = if(DARK_THEME.value) Color.Black else Purple700
+                        color = if(DARK_THEME.value) darkBackgroundColor else lightBackgroundColor
                     )
                 }
                 Scaffold(

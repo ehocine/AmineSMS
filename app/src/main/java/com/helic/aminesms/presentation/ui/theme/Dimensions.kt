@@ -19,6 +19,6 @@ val shapeXL: Dp = 24.dp
 val HOME_CARD_WIDTH = 3.dp
 
 val DROP_DOWN_HEIGHT = 60.dp
-val TOP_APP_BAR_HEIGHT = 56.dp
+val TOP_APP_BAR_HEIGHT = 75.dp
 
 val LOGO_HEIGHT = 100.dp

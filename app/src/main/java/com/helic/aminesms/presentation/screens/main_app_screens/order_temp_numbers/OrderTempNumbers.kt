@@ -1,11 +1,12 @@
 package com.helic.aminesms.presentation.screens.main_app_screens.order_temp_numbers
 
 import android.annotation.SuppressLint
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowBackIos
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
@@ -18,6 +19,7 @@ import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import com.google.accompanist.swiperefresh.SwipeRefresh
@@ -25,9 +27,7 @@ import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.helic.aminesms.R
 import com.helic.aminesms.data.viewmodels.MainViewModel
 import com.helic.aminesms.presentation.navigation.MainAppScreens
-import com.helic.aminesms.presentation.ui.theme.TOP_APP_BAR_HEIGHT
-import com.helic.aminesms.presentation.ui.theme.topAppBarBackgroundColor
-import com.helic.aminesms.presentation.ui.theme.topAppBarContentColor
+import com.helic.aminesms.presentation.ui.theme.*
 import com.helic.aminesms.utils.ErrorLoadingResults
 import com.helic.aminesms.utils.LoadingList
 import com.helic.aminesms.utils.LoadingState
@@ -84,12 +84,18 @@ fun OrderTempNumbers(
                 LoadingState.LOADING -> LoadingList()
                 LoadingState.ERROR -> ErrorLoadingResults()
                 else -> {
-                    DisplayServiceStateList(
-                        navController = navController,
-                        listOfServiceState = serviceStateListResponse,
-                        mainViewModel = mainViewModel,
-                        snackbar = snackbar
-                    )
+                    Surface(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(MaterialTheme.colors.backgroundColor)
+                    ) {
+                        DisplayServiceStateList(
+                            navController = navController,
+                            listOfServiceState = serviceStateListResponse,
+                            mainViewModel = mainViewModel,
+                            snackbar = snackbar
+                        )
+                    }
                 }
             }
         }
@@ -102,6 +108,7 @@ fun OrderNumberTopAppBar(
     onSearchClicked: () -> Unit
 ) {
     TopAppBar(
+        modifier = Modifier.height(TOP_APP_BAR_HEIGHT),
         navigationIcon = {
             IconButton(onClick = {
                 navController.navigate(MainAppScreens.TempNumbersMessages.route) {
@@ -117,7 +124,10 @@ fun OrderNumberTopAppBar(
             }
         },
         title = {
-            Text(text = "Order a temporary number")
+            Text(
+                text = stringResource(R.string.order_temp_number),
+                color = MaterialTheme.colors.topAppBarContentColor
+            )
         },
         actions = {
             IconButton(onClick = { onSearchClicked() }) {
@@ -127,6 +137,7 @@ fun OrderNumberTopAppBar(
                 )
             }
         },
+        elevation = 0.dp,
         backgroundColor = MaterialTheme.colors.topAppBarBackgroundColor
     )
 }
@@ -141,7 +152,7 @@ fun SearchAppBar(
         modifier = Modifier
             .fillMaxWidth()
             .height(TOP_APP_BAR_HEIGHT),
-        elevation = AppBarDefaults.TopAppBarElevation,
+        elevation = 0.dp,
         color = MaterialTheme.colors.topAppBarBackgroundColor
     ) {
         TextField(
@@ -156,7 +167,7 @@ fun SearchAppBar(
                     modifier = Modifier
                         .alpha(ContentAlpha.medium),
                     text = stringResource(R.string.search),
-                    color = Color.White
+                    color = MaterialTheme.colors.TextColor
                 )
             },
             textStyle = TextStyle(

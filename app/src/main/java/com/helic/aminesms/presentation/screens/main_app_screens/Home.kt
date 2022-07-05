@@ -1,7 +1,8 @@
 package com.helic.aminesms.presentation.screens.main_app_screens
 
 import android.annotation.SuppressLint
-import androidx.compose.foundation.*
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
@@ -18,10 +19,7 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.toSize
 import androidx.navigation.NavController
@@ -106,16 +104,22 @@ fun Home(
 @Composable
 fun HomeTopAppBar(openDrawer: () -> Unit) {
     TopAppBar(
+        modifier = Modifier.height(TOP_APP_BAR_HEIGHT),
         navigationIcon = {
             IconButton(onClick = { openDrawer() }) {
                 Icon(
                     imageVector = Icons.Default.Menu,
-                    contentDescription = "Navigation Drawer Icon"
+                    contentDescription = "Navigation Drawer Icon",
+                    tint = MaterialTheme.colors.topAppBarContentColor
                 )
             }
         }, title = {
-            Text(text = stringResource(R.string.home))
+            Text(
+                text = stringResource(R.string.home),
+                color = MaterialTheme.colors.topAppBarContentColor
+            )
         },
+        elevation = 0.dp,
         backgroundColor = MaterialTheme.colors.topAppBarBackgroundColor
     )
 }
@@ -126,137 +130,46 @@ fun ContentOnCompactScreen(navController: NavController, mainViewModel: MainView
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(paddingMedium)
+//            .padding(paddingMedium)
             .onGloballyPositioned { coordinates ->
                 screenSize = coordinates.size.toSize()
-            },
-        verticalArrangement = Arrangement.SpaceBetween
-    ) {
-        DashboardCardItem(
-            modifier = Modifier
-                .height(with(LocalDensity.current) { screenSize.height.toDp() / 2 })
-                .fillMaxWidth(),
-            color = MaterialTheme.colors.primary.copy(alpha = 0.5f),
-            onClick = {
-                navController.navigate(MainAppScreens.TempNumbersMessages.route) {
-                    launchSingleTop = true
-                }
-            },
-            content = {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.SpaceEvenly,
-                    modifier = Modifier
-                        .verticalScroll(rememberScrollState())
-                        .padding(15.dp)
-                ) {
-                    Text(
-                        text = stringResource(R.string.temporary_numbers),
-                        fontWeight = FontWeight.Medium,
-                        color = Color.White,
-                        fontSize = MaterialTheme.typography.h6.fontSize
-                    )
-                    Text(
-                        text = "Purchased numbers: ${mainViewModel.orderedTempNumbersList.collectAsState().value.size}",
-                        fontWeight = FontWeight.Medium,
-                        color = Color.White,
-                        fontSize = MaterialTheme.typography.subtitle1.fontSize
-                    )
-                    Card(
-                        modifier = Modifier
-                            .border(
-                                width = 1.dp,
-                                color = MaterialTheme.colors.primary,
-                                shape = RoundedCornerShape(5.dp)
-                            )
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(5.dp)),
-                        backgroundColor = MaterialTheme.colors.primary
-                    ) {
-                        Text(
-                            buildAnnotatedString {
-                                append("You can reuse temporary numbers for a ")
-                                withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                                    append("FEW MINUTES")
-                                }
-                                append(
-                                    " after receiving a code.\n" +
-                                            "This system cannot return a number if it is not shown here as reusable.\n" +
-                                            "If you need guaranteed reuse, buy a rental number."
-                                )
-                            },
-                            modifier = Modifier.padding(10.dp),
-                            color = Color.White,
-                            fontSize = MaterialTheme.typography.subtitle2.fontSize
-                        )
-                    }
-                }
-            })
-        Spacer(modifier = Modifier.padding(paddingMedium))
-        DashboardCardItem(
-            modifier = Modifier
-                .height(with(LocalDensity.current) { screenSize.height.toDp() / 2 })
-                .fillMaxWidth(),
-            color = MaterialTheme.colors.primary.copy(alpha = 0.5f),
-            onClick = {
-                navController.navigate(MainAppScreens.RentalNumbersMessages.route) {
-                    launchSingleTop = true
-                }
-            },
-            content = {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.SpaceEvenly,
-                    modifier = Modifier
-                        .verticalScroll(rememberScrollState())
-                        .padding(15.dp)
-                ) {
-                    Text(
-                        text = stringResource(R.string.rental_numbers),
-                        fontWeight = FontWeight.Medium,
-                        fontSize = MaterialTheme.typography.h6.fontSize,
-                        color = Color.White
-                    )
-                    Text(
-                        text = "Purchased numbers: ${mainViewModel.orderedRentalNumbers.collectAsState().value.size}",
-                        fontWeight = FontWeight.Medium,
-                        fontSize = MaterialTheme.typography.subtitle1.fontSize,
-                        color = Color.White
-                    )
-                    Text(
-                        text = "Live numbers: ${mainViewModel.listOfLiveRentalNumbers.value.size}",
-                        fontWeight = FontWeight.Medium,
-                        fontSize = MaterialTheme.typography.subtitle2.fontSize,
-                        color = Color.White
-                    )
-                    Text(
-                        text = "Pending numbers: ${mainViewModel.listOfPendingRentalNumbers.value.size}",
-                        fontWeight = FontWeight.Medium,
-                        fontSize = MaterialTheme.typography.subtitle2.fontSize, color = Color.White
-                    )
-                    Card(
-                        modifier = Modifier
-                            .border(
-                                width = 1.dp,
-                                color = MaterialTheme.colors.primary,
-                                shape = RoundedCornerShape(5.dp)
-                            )
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(5.dp)),
-                        backgroundColor = MaterialTheme.colors.primary
-                    ) {
-                        Text(
-                            text = "You must activate your rental before it can be used, every time. " +
-                                    "This request takes a few seconds. The full activation process can take up to 5 minutes. After activation, " +
-                                    "we will deliver all of your messages, if you have any.",
-                            modifier = Modifier.padding(10.dp),
-                            color = Color.White,
-                            fontSize = MaterialTheme.typography.subtitle2.fontSize
-                        )
-                    }
-                }
             }
-        )
+            .background(MaterialTheme.colors.backgroundColor)
+    ) {
+        Column(
+            Modifier.padding(paddingSmall),
+            verticalArrangement = Arrangement.SpaceBetween
+        ) {
+            DashboardCardItem(
+                modifier = Modifier
+                    .height(with(LocalDensity.current) { screenSize.height.toDp() / 4 })
+                    .fillMaxWidth(),
+                color = MaterialTheme.colors.HomeCard.copy(alpha = 0.5f),
+                onClick = {
+                    navController.navigate(MainAppScreens.TempNumbersMessages.route) {
+                        launchSingleTop = true
+                    }
+                },
+                title = stringResource(R.string.temporary_numbers),
+                description = "Purchased numbers:",
+                count = "${mainViewModel.orderedTempNumbersList.collectAsState().value.size}",
+            )
+            Spacer(modifier = Modifier.padding(paddingMedium))
+            DashboardCardItem(
+                modifier = Modifier
+                    .height(with(LocalDensity.current) { screenSize.height.toDp() / 4 })
+                    .fillMaxWidth(),
+                color = MaterialTheme.colors.HomeCard.copy(alpha = 0.5f),
+                onClick = {
+                    navController.navigate(MainAppScreens.RentalNumbersMessages.route) {
+                        launchSingleTop = true
+                    }
+                },
+                title = stringResource(R.string.rental_numbers),
+                description = "Purchased numbers:",
+                count = "${mainViewModel.orderedRentalNumbers.collectAsState().value.size}",
+            )
+        }
     }
 }
 
@@ -267,145 +180,56 @@ fun ContentOnLargeScreen(navController: NavController, mainViewModel: MainViewMo
     Row(
         modifier = Modifier
             .fillMaxSize()
-            .padding(paddingMedium)
             .onGloballyPositioned { coordinates ->
                 screenSize = coordinates.size.toSize()
-            },
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        DashboardCardItem(
-            modifier = Modifier
-                .width(with(LocalDensity.current) { screenSize.width.toDp() / 2 - 5.dp })
-                .fillMaxHeight(),
-            color = MaterialTheme.colors.primary.copy(alpha = 0.5f),
-            onClick = {
-                navController.navigate(MainAppScreens.TempNumbersMessages.route) {
-                    launchSingleTop = true
-                }
-            },
-            content = {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.SpaceEvenly,
-                    modifier = Modifier
-                        .verticalScroll(rememberScrollState())
-                        .padding(15.dp)
-                ) {
-                    Text(
-                        text = stringResource(R.string.temporary_numbers),
-                        fontWeight = FontWeight.Medium,
-                        color = Color.White,
-                        fontSize = MaterialTheme.typography.h6.fontSize
-                    )
-                    Text(
-                        text = "Purchased numbers: ${mainViewModel.orderedTempNumbersList.collectAsState().value.size}",
-                        fontWeight = FontWeight.Medium,
-                        color = Color.White,
-                        fontSize = MaterialTheme.typography.subtitle1.fontSize
-                    )
-                    Card(
-                        modifier = Modifier
-                            .border(
-                                width = 1.dp,
-                                color = MaterialTheme.colors.primary,
-                                shape = RoundedCornerShape(5.dp)
-                            )
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(5.dp)),
-                        backgroundColor = MaterialTheme.colors.primary
-                    ) {
-                        Text(
-                            buildAnnotatedString {
-                                append("You can reuse temporary numbers for a ")
-                                withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                                    append("FEW MINUTES")
-                                }
-                                append(
-                                    " after receiving a code.\n" +
-                                            "This system cannot return a number if it is not shown here as reusable.\n" +
-                                            "If you need guaranteed reuse, buy a rental number."
-                                )
-                            },
-                            modifier = Modifier.padding(10.dp),
-                            color = Color.White,
-                            fontSize = MaterialTheme.typography.subtitle2.fontSize
-                        )
-                    }
-                }
-            })
-        Spacer(modifier = Modifier.padding(paddingMedium))
-        DashboardCardItem(
-            modifier = Modifier
-                .width(with(LocalDensity.current) { screenSize.width.toDp() / 2 - 5.dp })
-                .fillMaxHeight(),
-            color = MaterialTheme.colors.primary,
-            onClick = {
-                navController.navigate(MainAppScreens.RentalNumbersMessages.route) {
-                    launchSingleTop = true
-                }
-            },
-            content = {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.SpaceEvenly,
-                    modifier = Modifier
-                        .verticalScroll(rememberScrollState())
-                        .padding(15.dp)
-                ) {
-                    Text(
-                        text = stringResource(R.string.rental_numbers),
-                        fontWeight = FontWeight.Medium,
-                        color = Color.White,
-                        fontSize = MaterialTheme.typography.h6.fontSize
-                    )
-                    Text(
-                        text = "Purchased numbers: ${mainViewModel.orderedRentalNumbers.collectAsState().value.size}",
-                        fontWeight = FontWeight.Medium,
-                        color = Color.White,
-                        fontSize = MaterialTheme.typography.subtitle1.fontSize
-                    )
-                    Text(
-                        text = "Live numbers: ${mainViewModel.listOfLiveRentalNumbers.value.size}",
-                        fontWeight = FontWeight.Medium,
-                        color = Color.White,
-                        fontSize = MaterialTheme.typography.subtitle2.fontSize
-                    )
-                    Text(
-                        text = "Pending numbers: ${mainViewModel.listOfPendingRentalNumbers.value.size}",
-                        fontWeight = FontWeight.Medium,
-                        color = Color.White,
-                        fontSize = MaterialTheme.typography.subtitle2.fontSize
-                    )
-                    Card(
-                        modifier = Modifier
-                            .border(
-                                width = 1.dp,
-                                color = MaterialTheme.colors.primary,
-                                shape = RoundedCornerShape(5.dp)
-                            )
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(5.dp)),
-                        backgroundColor = MaterialTheme.colors.primary
-                    ) {
-                        Text(
-                            text = "You must activate your rental before it can be used, every time. " +
-                                    "This request takes a few seconds. The full activation process can take up to 5 minutes. After activation, " +
-                                    "we will deliver all of your messages, if you have any.",
-                            modifier = Modifier.padding(10.dp),
-                            color = Color.White,
-                            fontSize = MaterialTheme.typography.subtitle2.fontSize
-                        )
-                    }
-                }
             }
-        )
+            .background(MaterialTheme.colors.backgroundColor)
+    ) {
+        Row(
+            Modifier
+                .padding(paddingMedium)
+                .fillMaxSize(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+        ) {
+            DashboardCardItem(
+                modifier = Modifier
+                    .width(with(LocalDensity.current) { screenSize.width.toDp() / 2 })
+                    .fillMaxHeight(),
+                color = MaterialTheme.colors.HomeCard.copy(alpha = 0.5f),
+                onClick = {
+                    navController.navigate(MainAppScreens.TempNumbersMessages.route) {
+                        launchSingleTop = true
+                    }
+                },
+                title = stringResource(R.string.temporary_numbers),
+                description = "Purchased numbers:",
+                count = "${mainViewModel.orderedTempNumbersList.collectAsState().value.size}",
+            )
+            Spacer(modifier = Modifier.padding(paddingMedium))
+            DashboardCardItem(
+                modifier = Modifier
+                    .width(with(LocalDensity.current) { screenSize.width.toDp() / 2 })
+                    .fillMaxHeight(),
+                color = MaterialTheme.colors.HomeCard.copy(alpha = 0.5f),
+                onClick = {
+                    navController.navigate(MainAppScreens.RentalNumbersMessages.route) {
+                        launchSingleTop = true
+                    }
+                },
+                title = stringResource(R.string.rental_numbers),
+                description = "Purchased numbers:",
+                count = "${mainViewModel.orderedRentalNumbers.collectAsState().value.size}",
+            )
+        }
     }
 }
 
 @Composable
 fun DashboardCardItem(
     modifier: Modifier = Modifier,
-    content: @Composable (() -> Unit),
+    title: String,
+    description: String,
+    count: String,
     color: Color,
     onClick: () -> Unit
 ) {
@@ -414,7 +238,7 @@ fun DashboardCardItem(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .padding(start = paddingXL, end = paddingXL)
+            .padding(start = paddingSmall, end = paddingSmall)
             .coloredShadow(
                 color,
                 alpha = 0.4F,
@@ -427,20 +251,38 @@ fun DashboardCardItem(
             .background(brush = gradientBrush)
             .clickable {
                 onClick()
-            },
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceAround
+            }
     ) {
-        Column(
-            modifier = Modifier
-                .wrapContentWidth()
-                .padding(
-                    top = paddingXL,
-                    bottom = paddingXL
-                )
-                .align(Alignment.CenterVertically)
+        Row(
+            Modifier
+                .padding(start = paddingXL, end = paddingXL)
+                .fillMaxSize(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            content()
+            Column(
+                modifier = Modifier
+                    .wrapContentWidth()
+                    .padding(
+                        top = paddingSmall,
+                        bottom = paddingSmall
+                    )
+                    .align(Alignment.CenterVertically)
+            ) {
+                Text(text = title, style = MaterialTheme.typography.h6, color = Color.White)
+//                Spacer(modifier = modifier.padding(1.dp))
+                Text(
+                    text = description,
+                    style = MaterialTheme.typography.subtitle1,
+                    color = Color.White
+                )
+            }
+            Text(
+                text = count,
+                style = MaterialTheme.typography.h4,
+                color = Color.White,
+                fontWeight = FontWeight.Bold
+            )
         }
     }
 }

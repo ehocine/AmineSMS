@@ -66,4 +66,7 @@
     <string name="leave_blank_no_filter">Leave blank for no filter</string>
     <string name="invalid_length">Invalid length</string>
     <string name="number_can_be_reused_within">\"Number can be reused within \"</string>
+    <string name="rent_a_number">Rent a number</string>
+    <string name="order_temp_number">Order a temporary number</string>
+    <string name="ok">Ok</string>
 </resources>

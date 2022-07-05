@@ -1,5 +1,6 @@
 package com.helic.aminesms.presentation.screens.login_signup_screens
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -8,7 +9,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.stringResource
@@ -18,8 +18,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.helic.aminesms.R
 import com.helic.aminesms.presentation.navigation.AuthenticationScreens
-import com.helic.aminesms.presentation.ui.theme.ButtonColor
-import com.helic.aminesms.presentation.ui.theme.ProgressIndicatorColor
+import com.helic.aminesms.presentation.ui.theme.*
 import com.helic.aminesms.utils.Constants.loadingState
 import com.helic.aminesms.utils.LoadingState
 import com.helic.aminesms.utils.LottieAnimation
@@ -35,7 +34,9 @@ fun ForgetPassword(navController: NavController, showSnackbar: (String, Snackbar
     loadingState = MutableStateFlow(LoadingState.IDLE)
     val state by loadingState.collectAsState()
 
-    Surface(modifier = Modifier.clickable { focusManager.clearFocus() }) {
+    Surface(modifier = Modifier
+        .clickable { focusManager.clearFocus() }
+        .background(MaterialTheme.colors.backgroundColor)) {
         Box(
             modifier = Modifier
                 .fillMaxSize(),
@@ -76,7 +77,12 @@ fun ForgetPassword(navController: NavController, showSnackbar: (String, Snackbar
                             label = { Text(text = stringResource(R.string.email_address)) },
                             placeholder = { Text(text = stringResource(R.string.email_address)) },
                             singleLine = true,
-                            modifier = Modifier.fillMaxWidth(0.8f)
+                            maxLines = 1,
+                            modifier = Modifier.fillMaxWidth(0.8f),
+                            colors = TextFieldDefaults.outlinedTextFieldColors(
+                                focusedBorderColor = MaterialTheme.colors.PasswordEyeColor,
+                                focusedLabelColor = MaterialTheme.colors.PasswordEyeColor
+                            )
                         )
                         Spacer(modifier = Modifier.padding(10.dp))
                         Button(
@@ -95,7 +101,7 @@ fun ForgetPassword(navController: NavController, showSnackbar: (String, Snackbar
                                 Text(
                                     text = stringResource(R.string.submit),
                                     fontSize = 20.sp,
-                                    color = Color.White
+                                    color = MaterialTheme.colors.ButtonTextColor
                                 )
                             }
                         }

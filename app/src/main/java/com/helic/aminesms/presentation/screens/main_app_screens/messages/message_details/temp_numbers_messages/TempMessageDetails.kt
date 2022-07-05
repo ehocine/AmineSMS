@@ -8,7 +8,10 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.filled.ArrowBackIos
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Redo
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -241,6 +244,7 @@ fun MessageDetailsTopAppBar(
     showSnackbar: (String, SnackbarDuration) -> Unit,
 ) {
     TopAppBar(
+        modifier = Modifier.height(TOP_APP_BAR_HEIGHT),
         navigationIcon = {
             IconButton(onClick = {
                 navController.navigate(MainAppScreens.TempNumbersMessages.route) {
@@ -256,7 +260,12 @@ fun MessageDetailsTopAppBar(
                 )
             }
         },
-        title = { Text(text = mainViewModel.selectedTempNumber.value.number) },
+        title = {
+            Text(
+                text = mainViewModel.selectedTempNumber.value.number,
+                color = MaterialTheme.colors.topAppBarContentColor
+            )
+        },
         actions = {
             ExistingTaskAppBarActions(
                 context = context,
@@ -266,6 +275,7 @@ fun MessageDetailsTopAppBar(
                 showSnackbar = showSnackbar
             )
         },
+        elevation = 0.dp,
         backgroundColor = MaterialTheme.colors.topAppBarBackgroundColor
     )
 }
@@ -315,7 +325,8 @@ fun ReuseButton(loadingState: LoadingState, onClick: () -> Unit) {
             .clip(RoundedCornerShape(5.dp))
             .clickable {
                 onClick()
-            }
+            },
+        backgroundColor = MaterialTheme.colors.backgroundColor
     ) {
         Row(
             modifier = Modifier.padding(start = 5.dp, top = 10.dp, bottom = 10.dp),
@@ -354,7 +365,8 @@ fun CantBeReusedDisplay() {
                 shape = RoundedCornerShape(5.dp)
             )
             .fillMaxWidth()
-            .clip(RoundedCornerShape(5.dp))
+            .clip(RoundedCornerShape(5.dp)),
+        backgroundColor = MaterialTheme.colors.backgroundColor
     ) {
         Row(
             modifier = Modifier.padding(start = 5.dp, top = 10.dp, bottom = 10.dp),

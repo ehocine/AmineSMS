@@ -3,13 +3,13 @@ package com.helic.aminesms.presentation.screens.main_app_screens.order_rental_nu
 
 import android.annotation.SuppressLint
 import android.content.Context
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowBackIos
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
@@ -115,7 +115,10 @@ fun RentalNumbers(
                         onRentalNumberOptionChosen = {
                             selectedOption = it
                         },
-                        priceInCredits = dollarToCreditForPurchasingNumbers(price, mainViewModel),
+                        priceInCredits = dollarToCreditForPurchasingNumbers(
+                            price,
+                            mainViewModel
+                        ),
                         superUserBalance = superUserBalance,
                         superUserCheckingBalanceState = superUserCheckingBalanceState,
                         userBalance = balance,
@@ -141,6 +144,7 @@ fun RentalNumberTopAppBar(
     navController: NavController
 ) {
     TopAppBar(
+        modifier = Modifier.height(TOP_APP_BAR_HEIGHT),
         navigationIcon = {
             IconButton(onClick = {
                 navController.navigate(MainAppScreens.RentalNumbersMessages.route) {
@@ -156,8 +160,12 @@ fun RentalNumberTopAppBar(
             }
         },
         title = {
-            Text(text = "Rent a number")
+            Text(
+                text = stringResource(R.string.rent_a_number),
+                color = MaterialTheme.colors.topAppBarContentColor
+            )
         },
+        elevation = 0.dp,
         backgroundColor = MaterialTheme.colors.topAppBarBackgroundColor
     )
 }
@@ -184,219 +192,229 @@ fun Content(
     var serviceDecisionText by remember { mutableStateOf("") }
 
     val loadingPrice by mainViewModel.rentalServicePriceLoadingState.collectAsState()
-
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(20.dp)
-    ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically
+    Column(Modifier.background(MaterialTheme.colors.backgroundColor)) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(20.dp)
         ) {
-            RadioButton(
-                selected = selectedOption == RentalNumberOption.WHOLE_LINE,
-                onClick = {
-                    selectedOption = RentalNumberOption.WHOLE_LINE
-                    onRentalNumberOptionChosen(selectedOption)
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                RadioButton(
+                    selected = selectedOption == RentalNumberOption.WHOLE_LINE,
+                    onClick = {
+                        selectedOption = RentalNumberOption.WHOLE_LINE
+                        onRentalNumberOptionChosen(selectedOption)
 
-                    // To re-initialize the values on switching
-                    mainViewModel.gotRentalPrice.value = false
-                    mainViewModel.rentalPrice.value = 0.0
-                },
-                colors = RadioButtonDefaults.colors(Purple500)
-            )
-            Text(text = "Whole Line", fontWeight = FontWeight.Medium)
-            Spacer(modifier = Modifier.padding(25.dp))
-            RadioButton(
-                selected = selectedOption == RentalNumberOption.SINGLE_SERVICE,
-                onClick = {
-                    selectedOption = RentalNumberOption.SINGLE_SERVICE
-                    onRentalNumberOptionChosen(selectedOption)
+                        // To re-initialize the values on switching
+                        mainViewModel.gotRentalPrice.value = false
+                        mainViewModel.rentalPrice.value = 0.0
+                    },
+                    colors = RadioButtonDefaults.colors(Purple500)
+                )
+                Text(text = "Whole Line", fontWeight = FontWeight.Medium)
+                Spacer(modifier = Modifier.padding(25.dp))
+                RadioButton(
+                    selected = selectedOption == RentalNumberOption.SINGLE_SERVICE,
+                    onClick = {
+                        selectedOption = RentalNumberOption.SINGLE_SERVICE
+                        onRentalNumberOptionChosen(selectedOption)
 
-                    // To re-initialize the values on switching
-                    mainViewModel.gotRentalPrice.value = false
-                    userSelectedOption = false
-                    mainViewModel.searchTextState.value = ""
-                    mainViewModel.selectedRentalService.value = RentalNumberServiceState()
-                    mainViewModel.rentalPrice.value = 0.0
-                },
-                colors = RadioButtonDefaults.colors(Purple500)
-            )
-            Text(text = "Single Service", fontWeight = FontWeight.Medium)
-        }
+                        // To re-initialize the values on switching
+                        mainViewModel.gotRentalPrice.value = false
+                        userSelectedOption = false
+                        mainViewModel.searchTextState.value = ""
+                        mainViewModel.selectedRentalService.value = RentalNumberServiceState()
+                        mainViewModel.rentalPrice.value = 0.0
+                    },
+                    colors = RadioButtonDefaults.colors(Purple500)
+                )
+                Text(text = "Single Service", fontWeight = FontWeight.Medium)
+            }
 
-        Spacer(modifier = Modifier.padding(20.dp))
+            Spacer(modifier = Modifier.padding(20.dp))
 
-        if (selectedOption == RentalNumberOption.SINGLE_SERVICE) {
-            RentalServicesDropDownMenu(
-                label = "Search Service State",
-                optionsList = serviceStateList,
-                onTextChange = {
-                    serviceText = it
-                    serviceDecisionText = it
-                },
-                onOptionSelected = {
-                    // We did it here because we need to check if a service was selected
-                    mainViewModel.selectedRentalService.value = it
-                    userSelectedOption = true
-                    serviceText = it.name
-                    serviceDecisionText = it.name
+            if (selectedOption == RentalNumberOption.SINGLE_SERVICE) {
+                RentalServicesDropDownMenu(
+                    label = "Search Service State",
+                    optionsList = serviceStateList,
+                    onTextChange = {
+                        serviceText = it
+                        serviceDecisionText = it
+                    },
+                    onOptionSelected = {
+                        // We did it here because we need to check if a service was selected
+                        mainViewModel.selectedRentalService.value = it
+                        userSelectedOption = true
+                        serviceText = it.name
+                        serviceDecisionText = it.name
+                    }
+                )
+                if (userSelectedOption) { // if the user didn't select a service we won't show the period options
+                    Spacer(modifier = Modifier.padding(10.dp))
+                    RentalOptionsDropDownMenu(
+                        label = stringResource(R.string.select_period),
+                        optionsList = optionsList.filter { it.rentalType == "SingleService" },
+                        onRentalOptionSelected = onRentalOptionSelected
+                    )
                 }
-            )
-            if (userSelectedOption) { // if the user didn't select a service we won't show the period options
-                Spacer(modifier = Modifier.padding(10.dp))
+            } else {
                 RentalOptionsDropDownMenu(
                     label = stringResource(R.string.select_period),
-                    optionsList = optionsList.filter { it.rentalType == "SingleService" },
+                    optionsList = optionsList.filter { it.rentalType != "SingleService" },
                     onRentalOptionSelected = onRentalOptionSelected
                 )
             }
-        } else {
-            RentalOptionsDropDownMenu(
-                label = stringResource(R.string.select_period),
-                optionsList = optionsList.filter { it.rentalType != "SingleService" },
-                onRentalOptionSelected = onRentalOptionSelected
+            Spacer(modifier = Modifier.padding(20.dp))
+            Text(
+                text = stringResource(R.string.cost),
+                fontSize = MaterialTheme.typography.subtitle1.fontSize,
+                fontWeight = FontWeight.Medium
             )
-        }
-        Spacer(modifier = Modifier.padding(20.dp))
-        Text(
-            text = stringResource(R.string.cost),
-            fontSize = MaterialTheme.typography.subtitle1.fontSize,
-            fontWeight = FontWeight.Medium
-        )
-        Spacer(modifier = Modifier.padding(10.dp))
-        Row(
-            modifier = Modifier
-                .fillMaxWidth(),
+            Spacer(modifier = Modifier.padding(10.dp))
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth(),
 //                .padding(20.dp),
-            horizontalArrangement = Arrangement.Center
-        ) {
-            val borderColor: Color
-            val priceText: String
-            val textColor: Color
+                horizontalArrangement = Arrangement.Center
+            ) {
+                val borderColor: Color
+                val priceText: String
+                val textColor: Color
 
-            when (selectedOption) {
-                RentalNumberOption.SINGLE_SERVICE -> {
-                    if (userSelectedOption && serviceText.isNotEmpty()) {
+                when (selectedOption) {
+                    RentalNumberOption.SINGLE_SERVICE -> {
+                        if (userSelectedOption && serviceText.isNotEmpty()) {
+                            borderColor = MaterialTheme.colors.primary
+                            priceText = "$priceInCredits credits"
+                            textColor = MaterialTheme.colors.TextColor
+                        } else {
+                            borderColor = Red
+                            priceText = "Please select a service"
+                            textColor = Red
+                        }
+                    }
+                    else -> {
                         borderColor = MaterialTheme.colors.primary
                         priceText = "$priceInCredits credits"
                         textColor = MaterialTheme.colors.TextColor
-                    } else {
-                        borderColor = Red
-                        priceText = "Please select a service"
-                        textColor = Red
                     }
                 }
-                else -> {
-                    borderColor = MaterialTheme.colors.primary
-                    priceText = "$priceInCredits credits"
-                    textColor = MaterialTheme.colors.TextColor
+
+                Card(
+                    modifier = Modifier
+                        .border(
+                            width = 1.dp,
+                            color = borderColor,
+                            shape = RoundedCornerShape(5.dp)
+                        )
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(5.dp)),
+                    backgroundColor = MaterialTheme.colors.backgroundColor
+                )
+                {
+                    Row(
+                        modifier = Modifier.padding(top = 10.dp, bottom = 10.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        when (loadingPrice) {
+                            LoadingState.LOADING -> {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(40.dp),
+                                    color = MaterialTheme.colors.ButtonColor,
+                                    strokeWidth = 3.dp
+                                )
+                            }
+                            LoadingState.ERROR -> {
+                                Text(
+                                    text = stringResource(R.string.error_loading_price),
+                                    fontWeight = FontWeight.Medium,
+                                    fontSize = MaterialTheme.typography.h6.fontSize,
+                                    color = Red
+                                )
+                            }
+                            else -> {
+                                Text(
+                                    text = priceText,
+                                    fontWeight = FontWeight.Medium,
+                                    fontSize = MaterialTheme.typography.h6.fontSize,
+                                    color = textColor
+                                )
+                            }
+                        }
+                    }
                 }
             }
-
+            Spacer(modifier = Modifier.padding(20.dp))
             Card(
                 modifier = Modifier
                     .border(
                         width = 1.dp,
-                        color = borderColor,
+                        color = MaterialTheme.colors.primary,
                         shape = RoundedCornerShape(5.dp)
                     )
                     .fillMaxWidth()
-                    .clip(RoundedCornerShape(5.dp))
-            )
-            {
-                Row(
-                    modifier = Modifier.padding(top = 10.dp, bottom = 10.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Center
-                ) {
-                    when (loadingPrice) {
-                        LoadingState.LOADING -> {
-                            CircularProgressIndicator(
-                                modifier = Modifier.size(40.dp),
-                                color = MaterialTheme.colors.ButtonColor,
-                                strokeWidth = 3.dp
-                            )
-                        }
-                        LoadingState.ERROR -> {
-                            Text(
-                                text = stringResource(R.string.error_loading_price),
-                                fontWeight = FontWeight.Medium,
-                                fontSize = MaterialTheme.typography.h6.fontSize,
-                                color = Red
-                            )
-                        }
-                        else -> {
-                            Text(
-                                text = priceText,
-                                fontWeight = FontWeight.Medium,
-                                fontSize = MaterialTheme.typography.h6.fontSize,
-                                color = textColor
-                            )
-                        }
-                    }
-                }
-            }
-        }
-        Spacer(modifier = Modifier.padding(20.dp))
-        Card(
-            modifier = Modifier
-                .border(
-                    width = 1.dp,
+                    .clip(RoundedCornerShape(5.dp)),
+                backgroundColor = MaterialTheme.colors.backgroundColor
+            ) {
+                Text(
+                    text = stringResource(R.string.rental_48_hours_notice),
                     color = MaterialTheme.colors.primary,
-                    shape = RoundedCornerShape(5.dp)
+                    fontSize = MaterialTheme.typography.subtitle1.fontSize,
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.padding(5.dp)
                 )
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(5.dp))
-        ) {
-            Text(
-                text = stringResource(R.string.rental_48_hours_notice),
-                color = MaterialTheme.colors.primary,
-                fontSize = MaterialTheme.typography.subtitle1.fontSize,
-                fontWeight = FontWeight.Medium,
-                modifier = Modifier.padding(5.dp)
-            )
-        }
-        Spacer(modifier = Modifier.padding(20.dp))
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-//                .padding(20.dp),
-            , horizontalArrangement = Arrangement.Center
-        ) {
-            Button(
+            }
+            Spacer(modifier = Modifier.padding(20.dp))
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(50.dp),
-                colors = ButtonDefaults.buttonColors(MaterialTheme.colors.ButtonColor),
-                enabled = orderRentalNumberState != LoadingState.LOADING
-                        && mainViewModel.gotRentalPrice.value
-                        && superUserCheckingBalanceState != LoadingState.ERROR
-                        && superUserCheckingBalanceState != LoadingState.LOADING
-                        && serviceDecisionText.isNotEmpty(),
-                onClick = {
-                    if (dollarToCreditForPurchasingNumbers(superUserBalance, mainViewModel) > priceInCredits) { // If the superUser has balance we can let the users order.
-                        if (userBalance >= priceInCredits) { // If the user has enough balance to buy we proceed
-                            proceedBuying() // function callback done in higher function because we need the serviceID and the duration
+//                .padding(20.dp),
+                , horizontalArrangement = Arrangement.Center
+            ) {
+                Button(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(50.dp),
+                    colors = ButtonDefaults.buttonColors(MaterialTheme.colors.ButtonColor),
+                    enabled = orderRentalNumberState != LoadingState.LOADING
+                            && mainViewModel.gotRentalPrice.value
+                            && superUserCheckingBalanceState != LoadingState.ERROR
+                            && superUserCheckingBalanceState != LoadingState.LOADING
+                            && serviceDecisionText.isNotEmpty(),
+                    onClick = {
+                        if (dollarToCreditForPurchasingNumbers(
+                                superUserBalance,
+                                mainViewModel
+                            ) > priceInCredits
+                        ) { // If the superUser has balance we can let the users order.
+                            if (userBalance >= priceInCredits) { // If the user has enough balance to buy we proceed
+                                proceedBuying() // function callback done in higher function because we need the serviceID and the duration
+                            } else {
+                                snackbar(
+                                    context.getString(R.string.not_enough_balance),
+                                    SnackbarDuration.Short
+                                )
+                            }
                         } else {
                             snackbar(
-                                context.getString(R.string.not_enough_balance),
+                                context.getString(R.string.cant_purchase),
                                 SnackbarDuration.Short
                             )
                         }
-                    } else {
-                        snackbar(context.getString(R.string.cant_purchase), SnackbarDuration.Short)
                     }
-                }
-            ) {
-                if (orderRentalNumberState == LoadingState.LOADING) {
-                    CircularProgressIndicator(color = MaterialTheme.colors.ProgressIndicatorColor)
-                } else {
-                    Text(
-                        text = stringResource(R.string.proceed),
-                        fontSize = 20.sp,
-                        color = Color.White
-                    )
+                ) {
+                    if (orderRentalNumberState == LoadingState.LOADING) {
+                        CircularProgressIndicator(color = MaterialTheme.colors.ProgressIndicatorColor)
+                    } else {
+                        Text(
+                            text = stringResource(R.string.proceed),
+                            fontSize = 20.sp,
+                            color = Color.White
+                        )
+                    }
                 }
             }
         }
@@ -451,6 +469,7 @@ fun RentalServicesDropDownMenu(
                 onDismissRequest = {
                     expanded = false
                 },
+                modifier = Modifier.background(MaterialTheme.colors.CardColor)
 //                modifier = Modifier
 //                    .width(with(LocalDensity.current) { textFieldSize.width.toDp() })
 //                    .requiredSizeIn(maxHeight = 500.dp)
@@ -523,6 +542,7 @@ fun RentalOptionsDropDownMenu(
             modifier = Modifier
                 .width(with(LocalDensity.current) { textFieldSize.width.toDp() })
                 .requiredSizeIn(maxHeight = 500.dp)
+                .background(MaterialTheme.colors.CardColor)
         ) {
             optionsList.forEach { item ->
                 DropdownMenuItem(onClick = {

@@ -2,6 +2,7 @@ package com.helic.aminesms.presentation.screens.main_app_screens.messages.temp_n
 
 import android.content.Context
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -19,10 +20,7 @@ import androidx.navigation.NavController
 import com.helic.aminesms.data.models.number_data.TempNumberData
 import com.helic.aminesms.data.viewmodels.MainViewModel
 import com.helic.aminesms.presentation.navigation.MainAppScreens
-import com.helic.aminesms.presentation.ui.theme.Green
-import com.helic.aminesms.presentation.ui.theme.MediumGray
-import com.helic.aminesms.presentation.ui.theme.Red
-import com.helic.aminesms.presentation.ui.theme.TextColor
+import com.helic.aminesms.presentation.ui.theme.*
 import com.helic.aminesms.utils.AddOrRemoveNumberAction
 import com.helic.aminesms.utils.NumberState
 import com.helic.aminesms.utils.addOrRemoveTempNumberFromFirebase
@@ -38,13 +36,19 @@ fun TempNumberMessageItem(
     if (listOfPhoneTempNumbers.isEmpty()) {
         NoNumbersFound()
     } else {
-        DisplayNumbers(
-            context = context,
-            navController = navController,
-            mainViewModel = mainViewModel,
-            listOfPhoneNumbersData = listOfPhoneTempNumbers,
-            showSnackbar = showSnackbar
-        )
+        Surface(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(MaterialTheme.colors.backgroundColor)
+        ) {
+            DisplayNumbers(
+                context = context,
+                navController = navController,
+                mainViewModel = mainViewModel,
+                listOfPhoneNumbersData = listOfPhoneTempNumbers,
+                showSnackbar = showSnackbar
+            )
+        }
     }
 }
 
@@ -56,7 +60,11 @@ fun DisplayNumbers(
     listOfPhoneNumbersData: List<TempNumberData>,
     showSnackbar: (String, SnackbarDuration) -> Unit
 ) {
-    LazyColumn(modifier = Modifier.fillMaxWidth()) {
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(MaterialTheme.colors.backgroundColor)
+    ) {
         items(listOfPhoneNumbersData) { phoneNumber ->
             Content(
                 context = context,
@@ -97,6 +105,7 @@ fun Content(
                 }
 
             },
+        backgroundColor = MaterialTheme.colors.CardColor,
         elevation = 4.dp
     ) {
         Row(

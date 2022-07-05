@@ -18,13 +18,14 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.helic.aminesms.R
 import com.helic.aminesms.presentation.ui.theme.MediumGray
+import com.helic.aminesms.presentation.ui.theme.backgroundColor
 
 @Composable
 fun NoNumbersFound() {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(MaterialTheme.colors.background),
+            .background(MaterialTheme.colors.backgroundColor),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -40,10 +41,4 @@ fun NoNumbersFound() {
             fontWeight = FontWeight.Bold
         )
     }
-}
-
-@Preview
-@Composable
-fun preview() {
-    NoNumbersFound()
 }

@@ -15,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.helic.aminesms.data.models.messages.Sms
+import com.helic.aminesms.presentation.ui.theme.CardColor
 import com.helic.aminesms.presentation.ui.theme.MediumGray
 import com.helic.aminesms.presentation.ui.theme.TextColor
 import com.helic.aminesms.utils.convertTimeStampToDate
@@ -47,6 +48,7 @@ fun MessageContent(sms: Sms?) {
             .fillMaxWidth()
             .padding(top = 5.dp, end = 10.dp, start = 10.dp, bottom = 5.dp),
         shape = RoundedCornerShape(10.dp),
+        backgroundColor = MaterialTheme.colors.CardColor,
         elevation = 4.dp
     ) {
         Column(modifier = Modifier.padding(10.dp)) {

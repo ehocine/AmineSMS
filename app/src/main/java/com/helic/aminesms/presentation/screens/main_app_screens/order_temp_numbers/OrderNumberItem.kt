@@ -1,5 +1,6 @@
 package com.helic.aminesms.presentation.screens.main_app_screens.order_temp_numbers
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -18,9 +19,7 @@ import androidx.navigation.NavController
 import com.helic.aminesms.data.models.temp_number.service_state.ServiceState
 import com.helic.aminesms.data.viewmodels.MainViewModel
 import com.helic.aminesms.presentation.navigation.MainAppScreens
-import com.helic.aminesms.presentation.ui.theme.Green
-import com.helic.aminesms.presentation.ui.theme.MediumGray
-import com.helic.aminesms.presentation.ui.theme.TextColor
+import com.helic.aminesms.presentation.ui.theme.*
 import com.helic.aminesms.utils.dollarToCreditForPurchasingNumbers
 
 @Composable
@@ -38,7 +37,11 @@ fun DisplayServiceStateList(
             serviceState.name.contains(searchText, ignoreCase = true)
         }
     }
-    LazyColumn(modifier = Modifier.fillMaxWidth()) {
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(MaterialTheme.colors.backgroundColor)
+    ) {
         items(filteredList) { serviceState ->
             Content(
                 navController = navController,
@@ -71,6 +74,7 @@ fun Content(
                     snackbar("Service is not available", SnackbarDuration.Short)
                 }
             },
+        backgroundColor = MaterialTheme.colors.CardColor,
         elevation = 4.dp
     ) {
         Row(
@@ -89,7 +93,12 @@ fun Content(
                 )
 //                Spacer(modifier = Modifier.padding(5.dp))
                 Text(
-                    text = "${dollarToCreditForPurchasingNumbers(serviceState.price, mainViewModel)} credits",
+                    text = "${
+                        dollarToCreditForPurchasingNumbers(
+                            serviceState.price,
+                            mainViewModel
+                        )
+                    } credits",
                     color = MediumGray,
                     fontSize = MaterialTheme.typography.subtitle1.fontSize,
                     maxLines = 1

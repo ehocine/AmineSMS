@@ -19,6 +19,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import com.helic.aminesms.presentation.ui.theme.DROP_DOWN_HEIGHT
+import com.helic.aminesms.presentation.ui.theme.backgroundColor
 
 @Composable
 fun DropDownOptions(
@@ -39,7 +40,7 @@ fun DropDownOptions(
             .onGloballyPositioned {
                 parentSize = it.size
             }
-            .background(MaterialTheme.colors.background)
+            .background(MaterialTheme.colors.backgroundColor)
             .height(DROP_DOWN_HEIGHT)
             .clickable { expanded = true }
             .border(

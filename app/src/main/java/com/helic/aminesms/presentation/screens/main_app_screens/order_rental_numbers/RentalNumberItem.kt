@@ -18,6 +18,7 @@ import androidx.navigation.NavController
 import com.helic.aminesms.data.models.rental_numbers.RentalNumberServiceState
 import com.helic.aminesms.data.viewmodels.MainViewModel
 import com.helic.aminesms.presentation.navigation.MainAppScreens
+import com.helic.aminesms.presentation.ui.theme.CardColor
 import com.helic.aminesms.presentation.ui.theme.Green
 import com.helic.aminesms.presentation.ui.theme.TextColor
 
@@ -69,6 +70,7 @@ fun Content(
                     snackbar("Service is not available", SnackbarDuration.Short)
                 }
             },
+        backgroundColor = MaterialTheme.colors.CardColor,
         elevation = 4.dp
     ) {
         Row(
@@ -87,7 +89,6 @@ fun Content(
                 )
             }
             Row(verticalAlignment = Alignment.CenterVertically) {
-
                 Icon(
                     imageVector = Icons.Default.CheckCircle,
                     contentDescription = "Availability option",

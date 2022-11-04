@@ -2,7 +2,6 @@ package com.helic.aminesms.presentation
 
 import android.annotation.SuppressLint
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -10,22 +9,18 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material.Scaffold
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
-import androidx.compose.ui.graphics.Color
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.helic.aminesms.data.viewmodels.MainViewModel
 import com.helic.aminesms.presentation.navigation.nav_graph.RootNavGraph
 import com.helic.aminesms.presentation.ui.theme.AmineSMSTheme
-import com.helic.aminesms.presentation.ui.theme.Purple700
 import com.helic.aminesms.presentation.ui.theme.darkBackgroundColor
 import com.helic.aminesms.presentation.ui.theme.lightBackgroundColor
 import com.helic.aminesms.utils.Constants.DARK_THEME
 import com.helic.aminesms.utils.Msnackbar
 import com.helic.aminesms.utils.rememberSnackbarState
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -45,14 +40,14 @@ class MainActivity : ComponentActivity() {
                 val appState: Msnackbar = rememberSnackbarState()
 
                 // we check the user choice of theme from data store otherwise we put the device's default theme
-                LaunchedEffect(key1 = true ) {
+                LaunchedEffect(key1 = true) {
                     mainViewModel.themeValue.collect {
                         DARK_THEME.value = it ?: defaultTheme
                     }
                 }
                 SideEffect {
                     systemUiController.setStatusBarColor(
-                        color = if(DARK_THEME.value) darkBackgroundColor else lightBackgroundColor
+                        color = if (DARK_THEME.value) darkBackgroundColor else lightBackgroundColor
                     )
                 }
                 Scaffold(

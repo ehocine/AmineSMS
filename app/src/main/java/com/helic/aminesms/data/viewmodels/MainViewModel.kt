@@ -62,6 +62,7 @@ class MainViewModel @Inject constructor(
         private set
 
     init {
+        getCurrencyParameters(getApplication())
         loadProducts()
 //        getCurrencyParameters(context = getApplication<Application>())
     }
@@ -169,7 +170,7 @@ class MainViewModel @Inject constructor(
 //        )
 //    }
 
-    fun getCurrencyParameters(
+    private fun getCurrencyParameters(
         context: Context,
     ) {
         val db = Firebase.firestore
@@ -213,7 +214,7 @@ class MainViewModel @Inject constructor(
                         loadingStateOfViewModel.emit(LoadingState.LOADING)
                         registration = data?.addSnapshotListener { value, error ->
                             if (error != null) {
-                                snackbar("Error occurred: $error", SnackbarDuration.Short)
+//                                snackbar("Error occurred: $error", SnackbarDuration.Short)
                                 return@addSnapshotListener
                             }
                             if (value != null && value.exists()) {
@@ -266,7 +267,7 @@ class MainViewModel @Inject constructor(
                         gettingListOfTempNumbersLoadingState.emit(LoadingState.LOADING)
                         registration = data?.addSnapshotListener { value, error ->
                             if (error != null) {
-                                snackbar("Error occurred: $error", SnackbarDuration.Short)
+//                                snackbar("Error occurred: $error", SnackbarDuration.Short)
                                 return@addSnapshotListener
                             }
                             if (value != null && value.exists()) {
@@ -316,7 +317,7 @@ class MainViewModel @Inject constructor(
                         gettingListOfRentalNumbersLoadingState.emit(LoadingState.LOADING)
                         registration = data?.addSnapshotListener { value, error ->
                             if (error != null) {
-                                snackbar("Error occurred: $error", SnackbarDuration.Short)
+//                                snackbar("Error occurred: $error", SnackbarDuration.Short)
                                 return@addSnapshotListener
                             }
                             if (value != null && value.exists()) {

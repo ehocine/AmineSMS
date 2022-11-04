@@ -29,7 +29,7 @@ import com.helic.aminesms.presentation.navigation.AuthenticationScreens
 import com.helic.aminesms.presentation.ui.theme.*
 import com.helic.aminesms.utils.Constants.loadingState
 import com.helic.aminesms.utils.LoadingState
-import com.helic.aminesms.utils.LottieAnimation
+import com.helic.aminesms.utils.MyLottieAnimation
 import com.helic.aminesms.utils.registerNewUser
 import kotlinx.coroutines.flow.MutableStateFlow
 
@@ -81,7 +81,7 @@ fun RegisterPage(
 
                     Spacer(modifier = Modifier.padding(10.dp))
 
-                    LottieAnimation(modifier = Modifier.size(200.dp), lottie = R.raw.register)
+                    MyLottieAnimation(modifier = Modifier.size(200.dp), lottie = R.raw.register)
 
                     Spacer(modifier = Modifier.padding(10.dp))
 

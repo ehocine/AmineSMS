@@ -37,7 +37,7 @@ import com.helic.aminesms.utils.Constants.DARK_THEME
 import com.helic.aminesms.utils.Constants.auth
 import com.helic.aminesms.utils.CustomDivider
 import com.helic.aminesms.utils.DisplayAlertDialog
-import com.helic.aminesms.utils.LottieAnimation
+import com.helic.aminesms.utils.MyLottieAnimation
 
 @SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
@@ -108,7 +108,7 @@ fun ProfileDetails(
                 modifier = Modifier
                     .fillMaxWidth(), horizontalArrangement = Arrangement.Center
             ) {
-                LottieAnimation(modifier = Modifier.size(150.dp), lottie = R.raw.profile)
+                MyLottieAnimation(modifier = Modifier.size(150.dp), lottie = R.raw.profile)
             }
             Text(
                 text = user.userName,

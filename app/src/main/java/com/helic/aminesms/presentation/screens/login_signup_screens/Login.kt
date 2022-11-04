@@ -81,7 +81,7 @@ fun LoginPage(
                     )
                     Spacer(modifier = Modifier.padding(10.dp))
 
-                    LottieAnimation(modifier = Modifier.size(200.dp), lottie = R.raw.login)
+                    MyLottieAnimation(modifier = Modifier.size(200.dp), lottie = R.raw.login)
 
                     Spacer(modifier = Modifier.padding(10.dp))
 

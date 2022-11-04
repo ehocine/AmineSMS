@@ -21,7 +21,7 @@ import com.helic.aminesms.presentation.navigation.AuthenticationScreens
 import com.helic.aminesms.presentation.ui.theme.*
 import com.helic.aminesms.utils.Constants.loadingState
 import com.helic.aminesms.utils.LoadingState
-import com.helic.aminesms.utils.LottieAnimation
+import com.helic.aminesms.utils.MyLottieAnimation
 import com.helic.aminesms.utils.resetUserPassword
 import kotlinx.coroutines.flow.MutableStateFlow
 
@@ -62,7 +62,7 @@ fun ForgetPassword(navController: NavController, showSnackbar: (String, Snackbar
 
                     Spacer(modifier = Modifier.padding(10.dp))
 
-                    LottieAnimation(
+                    MyLottieAnimation(
                         modifier = Modifier.size(200.dp),
                         lottie = R.raw.forgot_password
                     )
